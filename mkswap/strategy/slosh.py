@@ -27,14 +27,13 @@ class Slosh(Base):
 
 	def buysell(self, buysym, sellsym, size=10):
 		hz = self.histories
-		bcur = hz[buysym]["current"]
-		scur = hz[sellsym]["current"]
-#		sellsize = size * scur / bcur
+		bcur = hz[buysym]["low"]
+		scur = hz[sellsym]["high"]
 		self.recommender({
 			"action": "SELL",
 			"symbol": sellsym,
 			"price": scur,
-			"size": size#sellsize
+			"size": size
 		})
 		self.recommender({
 			"action": "BUY",
@@ -83,10 +82,10 @@ class Slosh(Base):
 		if abs(volatility) > 0.5:
 			self.swap(volatility * 10)
 
-	def tick(self, history=None): # calc ratios (ignore history...)
+	def tick(self, history=None):
 		history = self.histories
 		if not self.shouldUpdate:
-			return# print(".", end=" ", flush=True)
+			return
 		self.shouldUpdate = False
 		if self.top not in history or self.bottom not in history:
 			return self.log("skipping tick (waiting for history)")
@@ -112,4 +111,6 @@ class Slosh(Base):
 		symhis["current"] = price
 		symhis["all"].append(price)
 		symhis["average"] = self.ave(collection=symhis["all"])
-		# TODO: high/low
+		inner = symhis["all"][-INNER:]
+		symhis["high"] = max(inner)
+		symhis["low"] = min(inner)
