@@ -22,7 +22,11 @@ class Agent(Worker):
 		listen("apiCreds", self.apiCreds)
 		listen("credHead", self.credHead)
 		listen("signature", self.signature)
+		listen("fills", self.fills)
 		emit("clientReady")
+
+	def fills(self, market):
+		return self.client.private.get_fills(market).data["fills"]
 
 	def id(self):
 		return self.account["id"]# + "/" + self.account["accountNumber"]
