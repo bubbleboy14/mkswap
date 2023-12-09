@@ -5,8 +5,8 @@ from .base import Feeder
 
 defbals = {
 	"USD": 100,
-	"ETH": 0.1,
-	"BTC": 0.005
+	"ETH": 0.05,
+	"BTC": 0.0025
 }
 
 class Accountant(Feeder):
