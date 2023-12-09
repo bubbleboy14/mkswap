@@ -1,6 +1,6 @@
 from datetime import datetime
 from dydx3.helpers.request_helpers import generate_now_iso
-from .backend import listen
+from .backend import rel, ask, listen
 from .base import Feeder
 
 defbals = {
@@ -11,12 +11,23 @@ defbals = {
 
 class Accountant(Feeder):
 	def __init__(self, balances=defbals):
+		self.counts = {
+			"filled": 0,
+			"approved": 0
+		}
+		self.syms = []
 		self._obals = {}
 		self._balances = balances
 		self._obals.update(balances)
 		self.starttime = datetime.now()
-		listen("clientReady", self.load)
 		listen("affordable", self.affordable)
+		rel.timeout(10, self.checkFilled)
+
+	def checkFilled(self):
+		self.counts["filled"] = 0
+		for sym in self.syms:
+			self.counts["filled"] += len(ask("fills", sym))
+		return True
 
 	def balances(self, pricer):
 		total = 0
@@ -40,6 +51,8 @@ class Accountant(Feeder):
 		v = s / prop["price"]
 		bz = self._balances
 		sym = prop["symbol"].split("-")[0]
+		if prop["symbol"] not in self.syms:
+			self.syms.append(prop["symbol"])
 		self.log("balances", bz)
 		if prop["action"] == "BUY":
 			if s > bz["USD"]:
@@ -53,8 +66,6 @@ class Accountant(Feeder):
 				return False
 			bz["USD"] += s
 			bz[sym] -= v
+		self.counts["approved"] += 1
 		self.log("trade approved!")
 		return True
-
-	def load(self):
-		self.feed("dacc", generate_now_iso())
