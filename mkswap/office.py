@@ -1,5 +1,5 @@
 from pprint import pformat
-from backend import rel, start, presets
+from backend import rel, start, getconf
 from strategist import strategies
 from accountant import Accountant
 from manager import Manager
@@ -29,6 +29,9 @@ class Office(Worker):
 
 	def price(self, symbol):
 		return self.managers[symbol].latest["price"]
+
+	def status(self):
+		pass # TODO
 
 	def assess(self, trade, curprice=None):
 		action = trade["action"]
@@ -94,5 +97,5 @@ class Office(Worker):
 		return True
 
 if __name__ == "__main__":
-	Office(**presets())
+	Office(**getconf())
 	start()
