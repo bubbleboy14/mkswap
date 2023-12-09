@@ -171,7 +171,7 @@ def feed(platname, streamname, **cbs): # {on_message,on_error,on_open,on_close}
 		cbs["header"] = ask("credHead", plat["credHead"])
 	ws = websocket.WebSocketApp(feed, **cbs)
 	ws.jsend = jsend(ws)
-	ws.run_forever(dispatcher=rel)
+	ws.run_forever(dispatcher=rel, reconnect=1)
 	return ws
 
 def echofeed(platform="gemini", streamname="ETHBTC"):
