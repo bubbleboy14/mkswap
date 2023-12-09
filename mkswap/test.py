@@ -1,7 +1,7 @@
 from dydx3 import constants
-from accountant import Accountant
-from agent import Agent
-from backend import start, spew
+from .accountant import Accountant
+from .agent import Agent
+from .backend import start, spew
 
 def get(path, ag=None):
 	from dez.http import fetch

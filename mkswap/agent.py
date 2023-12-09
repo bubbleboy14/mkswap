@@ -2,8 +2,8 @@ import time
 from web3 import Web3
 from dydx3 import Client, constants, epoch_seconds_to_iso
 from dydx3.helpers.request_helpers import generate_now_iso
-from backend import remember, recall, memget, listen, emit
-from base import Worker
+from .backend import remember, recall, memget, listen, emit
+from .base import Worker
 
 LIVE = False
 PRODEF = "http://localhost:8545"

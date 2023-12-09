@@ -1,6 +1,6 @@
-from backend import ask
-from agent import Agent
-from base import Worker
+from .backend import ask
+from .agent import Agent
+from .base import Worker
 
 class Trader(Worker):
 	def __init__(self, live=True):

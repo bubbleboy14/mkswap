@@ -1,10 +1,10 @@
 from pprint import pformat
-from backend import rel, start, getconf
-from strategist import strategies
-from accountant import Accountant
-from manager import Manager
-from trader import Trader
-from base import Worker
+from .backend import rel, start, getconf
+from .strategist import strategies
+from .accountant import Accountant
+from .manager import Manager
+from .trader import Trader
+from .base import Worker
 
 VERBOSE = False
 

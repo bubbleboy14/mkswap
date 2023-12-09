@@ -1,5 +1,5 @@
 from pprint import pprint
-from backend import log, stop, feed
+from .backend import log, stop, feed
 
 UNSPAMMED = True
 

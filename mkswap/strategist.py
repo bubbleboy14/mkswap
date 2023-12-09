@@ -1,4 +1,4 @@
-from strategy import RSI, Slosh
+from .strategy import RSI, Slosh
 
 strategies = {
 	"rsi": RSI,

@@ -1,6 +1,6 @@
 from dydx3.helpers.request_helpers import generate_now_iso
-from backend import listen
-from base import Feeder
+from .backend import listen
+from .base import Feeder
 
 defbals = {
 	"USD": 100,

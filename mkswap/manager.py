@@ -1,7 +1,7 @@
-from strategist import strategies
-from observer import Observer
-from trader import Trader
-from base import Worker
+from .strategist import strategies
+from .observer import Observer
+from .trader import Trader
+from .base import Worker
 
 class Manager(Worker):
 	def __init__(self, platform, symbol, reviewer, strategist="rsi", trader=None):
