@@ -71,7 +71,7 @@ _predefs = {
 	"strategy": "rsi",
 	"platform": "dydx"
 }
-_presets = [{
+presets = [{
 	"strategy": "slosh",
 	"globalTrade": True,
 	"globalStrategy": True,
@@ -85,10 +85,10 @@ _presets = [{
 	"symbols": ["BTCUSD", "ETHUSD", "ETHBTC"]
 }]
 
-def presets():
+def getconf():
 	from cantools.util.io import selnum
 	print("noting Office defaults (%s), please select a configuration from the following presets.\n"%(_predefs,))
-	return selnum(_presets)
+	return selnum(presets)
 
 def crsub(streamname):
 	return {
