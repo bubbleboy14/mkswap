@@ -19,6 +19,12 @@ class Slosh(Base):
 		self.shouldUpdate = False
 		Base.__init__(self, symbol, recommender)
 
+	def status(self):
+		return {
+			"ratios": self.ratios,
+			"averages": self.averages
+		}
+
 	def ave(self, limit=None, collection=None):
 		rats = collection or self.allratios
 		if limit:

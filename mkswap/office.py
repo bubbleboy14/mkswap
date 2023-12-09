@@ -31,7 +31,9 @@ class Office(Worker):
 		return self.managers[symbol].latest["price"]
 
 	def status(self):
-		pass # TODO
+		if not self.strategist: # TODO: handle other case...
+			return self.log("non-global strategy status() unimplemented!")
+		return self.strategist.status()
 
 	def assess(self, trade, curprice=None):
 		action = trade["action"]
