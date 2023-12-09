@@ -41,9 +41,11 @@ class Office(Worker):
 		return ds
 
 	def status(self):
+		acc = self.accountant
 		return {
+			"counts": acc.counts,
 			"strategists": self.stratuses(),
-			"balances": self.accountant.balances(self.price)
+			"balances": acc.balances(self.price)
 		}
 
 	def assess(self, trade, curprice=None):
