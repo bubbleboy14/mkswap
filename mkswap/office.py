@@ -16,6 +16,7 @@ class Office(Worker):
 		self.trader = globalTrade and Trader()
 		trec = self.trader and self.trader.recommend
 		strat = strategies[strategy]
+		self.stratname = strategy
 		self.strategist = globalStrategy and strat(symbols, trec)
 		self.managers = {}
 		for symbol in symbols:
@@ -30,10 +31,20 @@ class Office(Worker):
 	def price(self, symbol):
 		return self.managers[symbol].latest["price"]
 
+	def stratuses(self):
+		ds = {}
+		if self.strategist:
+			ds[self.stratname] = self.strategist.status()
+		else:
+			for sym in self.managers:
+				ds[sym] = self.managers[sym].strategist.status()
+		return ds
+
 	def status(self):
-		if not self.strategist: # TODO: handle other case...
-			return self.log("non-global strategy status() unimplemented!")
-		return self.strategist.status()
+		return {
+			"strategists": self.stratuses(),
+			"balances": self.accountant.balances(self.price)
+		}
 
 	def assess(self, trade, curprice=None):
 		action = trade["action"]
