@@ -3,6 +3,11 @@ from .base import Base, INNER, OUTER
 RSI_PERIOD = 14
 
 class RSI(Base):
+	def __init__(self, symbol, recommender=None):
+		self.latest = None
+		self.lastrec = None
+		Base.__init__(self, symbol, recommender)
+
 	def weighted_average(self, _history):
 		price_remaining = 0
 		remaining_total = 0
@@ -11,15 +16,22 @@ class RSI(Base):
 			remaining_total += hist['remaining']
 		return remaining_total and price_remaining / remaining_total or 0 # TODO: actual fix
 
+	def status(self):
+		return {
+			"latest": self.latest,
+			"lastrec": self.lastrec
+		}
+
 	def compare(self, symbol, side, price, eobj, history):
 		remaining = float("remaining" in eobj and eobj["remaining"] or eobj["size"])
 		self.log("compare", side, price, remaining)
 		hs = history[side]
 		hwa = history["w_average"]
-		hs.append({
+		self.latest = {
 			"price": price,
 			"remaining": remaining
-		})
+		}
+		hs.append(self.latest)
 		hwa.append(self.weighted_average(hs))
 		self.log(side, "weighted average (full):", hwa[-1])
 		if len(hs) >= OUTER:
@@ -38,12 +50,14 @@ class RSI(Base):
 				if side in ["bid", "BUY", "SELL"] and price > w_near:
 					self.log("bid price > average -> SELL!!!!")
 					rec = "SELL"
-			rec and self.recommender({
-				"side": side,
-				"action": rec,
-				"price": price,
-				"symbol": symbol
-			})
+			if rec:
+				self.lastrec = {
+					"side": side,
+					"action": rec,
+					"price": price,
+					"symbol": symbol
+				}
+				self.recommender(self.lastrec)
 
 	def tick(self, history):
 		_was = history['w_average']
