@@ -1,11 +1,12 @@
+from datetime import datetime
 from dydx3.helpers.request_helpers import generate_now_iso
 from .backend import listen
 from .base import Feeder
 
 defbals = {
 	"USD": 100,
-	"ETH": 0.2,
-	"BTC": 0.01
+	"ETH": 0.05,
+	"BTC": 0.0025
 }
 
 class Accountant(Feeder):
@@ -13,6 +14,7 @@ class Accountant(Feeder):
 		self._obals = {}
 		self._balances = balances
 		self._obals.update(balances)
+		self.starttime = datetime.now()
 		listen("clientReady", self.load)
 		listen("affordable", self.affordable)
 
@@ -30,6 +32,7 @@ class Accountant(Feeder):
 				vz[sym] = "%s ($%s)"%(v, v * price)
 			total += amount
 		vz["diff"] = total
+		vz["dph"] = total * 60 * 60 / (datetime.now() - self.starttime).seconds
 		return vz
 
 	def affordable(self, prop):
