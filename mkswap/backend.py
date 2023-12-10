@@ -67,27 +67,34 @@ def setoffice(office):
 	global OFFICE
 	OFFICE = office
 
-_predefs = {
+predefs = {
 	"strategy": "rsi",
-	"platform": "dydx"
+	"platform": "gemini",
+	"balances": {
+		"USD": 100,
+		"ETH": 0.05,
+		"BTC": 0.0025
+	}
 }
 presets = [{
+	"symbols": ["BTCUSD", "ETHUSD", "ETHBTC"]
+}, {
+	"platform": "dydx",
 	"strategy": "slosh",
 	"globalTrade": True,
 	"globalStrategy": True,
 	"symbols": ["BTC-USD", "ETH-USD"]
 }, {
+	"platform": "dydx",
 	"symbols": ["ETH-USD"]
 }, {
+	"platform": "dydx",
 	"symbols": ["BTC-USD"]
-}, {
-	"platform": "gemini",
-	"symbols": ["BTCUSD", "ETHUSD", "ETHBTC"]
 }]
 
 def getconf():
 	from cantools.util.io import selnum
-	print("noting Office defaults (%s), please select a configuration from the following presets.\n"%(_predefs,))
+	print("noting Office defaults (%s), please select a configuration from the following presets.\n"%(predefs,))
 	return selnum(presets)
 
 def crsub(streamname):
