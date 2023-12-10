@@ -2,9 +2,10 @@ from .strategist import strategies
 from .observer import Observer
 from .trader import Trader
 from .base import Worker
+from .backend import predefs
 
 class Manager(Worker):
-	def __init__(self, platform, symbol, reviewer, strategist="rsi", trader=None):
+	def __init__(self, platform, symbol, reviewer, strategist=predefs["strategy"], trader=None):
 		self.latest = {
 			"price": None
 		}
