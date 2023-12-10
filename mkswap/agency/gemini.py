@@ -17,17 +17,19 @@ class Gemini(Worker):
 			"Content-Type": "text/plain",
 			"X-GEMINI-APIKEY": self.apiKey,
 			"X-GEMINI-PAYLOAD": payload.decode(),
-			"X-GEMINI-SIGNATURE": self.sig(payload)
+			"X-GEMINI-SIGNATURE": self.signature(payload)
 		}
 
 	def payload(self, path):
-		return base64.b64encode(json.dumps({
+		pl = json.dumps({
 			"request": path,
 			"nonce": time.time(),
 			"account": self.account
-		}).encode())
+		}).encode()
+		self.log("payload(%s)"%(path,), pl)
+		return base64.b64encode(pl)
 
-	def sig(self, payload):
+	def signature(self, payload):
 		return hmac.new(self.secret, payload, hashlib.sha384).hexdigest()
 
 	def trade(self, trade):
