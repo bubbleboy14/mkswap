@@ -1,7 +1,10 @@
 import time
 from web3 import Web3
-from dydx3 import Client, constants, epoch_seconds_to_iso
-from dydx3.helpers.request_helpers import generate_now_iso
+try:
+	from dydx3 import Client, constants, epoch_seconds_to_iso
+	from dydx3.helpers.request_helpers import generate_now_iso
+except:
+	print("dydx not installed!")
 from ..backend import remember, recall, memget, listen, emit
 from ..base import Worker
 
