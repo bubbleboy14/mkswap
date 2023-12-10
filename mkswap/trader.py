@@ -1,13 +1,13 @@
-from .backend import ask
-from .agent import Agent
+from .backend import ask, predefs
+from .agent import agencies
 from .base import Worker
 
 class Trader(Worker):
-	def __init__(self, live=True):
+	def __init__(self, platform=predefs["platform"], live=True):
 		self.recommendations = []
 		self.live = live
 		self.trades = []
-		self.agent = Agent()
+		self.agent = agencies[platform]()
 
 	def note(self, recommendation):
 		# TODO: wrap in timestamped object...?

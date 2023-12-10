@@ -13,7 +13,7 @@ class Office(Worker):
 		self.platform = platform
 		self.symbols = symbols
 		self.accountant = Accountant(platform)
-		self.trader = globalTrade and Trader()
+		self.trader = globalTrade and Trader(platform)
 		trec = self.trader and self.trader.recommend
 		strat = strategies[strategy]
 		self.stratname = strategy

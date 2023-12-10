@@ -12,7 +12,7 @@ class Manager(Worker):
 		self.platform = platform
 		self.symbol = symbol
 		self.reviewer = reviewer
-		self.trader = trader or Trader()
+		self.trader = trader or Trader(platform)
 		setrec = not trader
 		self.observer = Observer(platform, symbol, self.observe)
 		if type(strategist) == str:
