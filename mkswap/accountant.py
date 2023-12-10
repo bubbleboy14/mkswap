@@ -62,7 +62,8 @@ class Accountant(Feeder):
 				vz[sym] = "%s ($%s)"%(v, v * price)
 			total += amount
 		vz["diff"] = total
-		vz["dph"] = total * 60 * 60 / (datetime.now() - self.starttime).seconds
+		secs = (datetime.now() - self.starttime).seconds
+		vz["dph"] = secs and (total * 60 * 60 / secs)
 		return vz
 
 	def affordable(self, prop):
