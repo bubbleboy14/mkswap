@@ -156,8 +156,10 @@ def jsend(ws):
 
 STAGING = True
 DFP = "wss://api.dydx.exchange/v3/ws"
+GEMDOM = "api.gemini.com"
 if STAGING:
 	DFP = DFP.replace("api.", "api.stage.")
+	GEMDOM = GEMDOM.replace("api.", "api.sandbox.")
 platforms = {
 	"dacc": {
 		"feed": DFP,
@@ -237,6 +239,8 @@ def events(message, use_initial=False):
 			return []
 
 def spew(event):
+	if hasattr(event, "decode"):
+		event = event.decode()
 	log(json.dumps(event))
 
 def start():
