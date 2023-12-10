@@ -1,5 +1,5 @@
 from pprint import pformat
-from .backend import rel, start, getconf
+from .backend import rel, start, getconf, predefs
 from .strategist import strategies
 from .accountant import Accountant
 from .manager import Manager
@@ -9,10 +9,10 @@ from .base import Worker
 VERBOSE = False
 
 class Office(Worker):
-	def __init__(self, platform="dydx", symbols=[], strategy="rsi", globalStrategy=False, globalTrade=False):
+	def __init__(self, platform=predefs["platform"], symbols=[], strategy=predefs["strategy"], globalStrategy=False, globalTrade=False):
 		self.platform = platform
 		self.symbols = symbols
-		self.accountant = Accountant()
+		self.accountant = Accountant(platform)
 		self.trader = globalTrade and Trader()
 		trec = self.trader and self.trader.recommend
 		strat = strategies[strategy]
