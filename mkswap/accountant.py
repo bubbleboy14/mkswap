@@ -1,5 +1,5 @@
 from datetime import datetime
-from .backend import rel, ask, listen, predefs
+from .backend import rel, ask, listen, predefs, gemget
 from .base import Feeder
 
 class Accountant(Feeder):
@@ -18,7 +18,22 @@ class Accountant(Feeder):
 		if platform == "dydx":
 			rel.timeout(10, self.checkFilled)
 			self._usd = "-USD"
+		else: # gemini
+			listen("clientReady", self.getBalances)
 		listen("affordable", self.affordable)
+
+	def getBalances(self):
+		self.log("getBalances!!!")
+		gemget("/v1/balances", self.setBalances)
+
+	def setBalances(self, bals):
+		self.log("setBalances", bals)
+		for bal in bals:
+			sym = bal["currency"]
+			if sym in self._balances:
+				self._balances[sym] = float(bal["available"])
+		self._obals.update(self._balances)
+		self.log("setBalances", self._balances)
 
 	def pair(self, syms):
 		if self.platform == "dydx":
