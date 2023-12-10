@@ -57,6 +57,11 @@ def listen(channel, cb):
 		listeners[channel] = []
 	listeners[channel].append(cb)
 
+def gemget(path, cb):
+	from dez.http import post
+	post(GEMDOM, path, port=443, secure=True, headers=ask("credHead", path),
+		cb=cb, timeout=10, json=True)
+
 OFFICE = None # not currently in use ... kinda gnarly
 def getoffice(sub=None):
 	if sub:
