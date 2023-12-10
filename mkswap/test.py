@@ -23,7 +23,7 @@ def get(path, ag=None):
 	print("fetching:", host, path)
 	getter(host, path, port=443, secure=True, headers=hz, cb=spew, dispatch=True, silent=SILENT_REQUEST)
 
-def accountant(): # doesn't work - "Invalid id"
+def accountant():
 	acc = Accountant()
 	ag = Agent()
 	start()
@@ -31,25 +31,33 @@ def accountant(): # doesn't work - "Invalid id"
 #
 # dydx tests
 #
-def accountById(): # works!
+def daccountById(): # works!
 	ag = Agent()
 	get("/v3/accounts/" + ag.id() + "?ethereumAddress=" + ag.client.default_address, ag)
 
-def accounts(): # works!
+def daccounts(): # works!
 	get("/v3/accounts")
 
-def reg(): # works!
+def dreg(): # works!
 	get("/v3/registration")
 
 #
 # gemini tests
 #
-def notionalVolume():
+def gemNotionalVolume():
 	get("/v1/notionalvolume")
 
+def gemAccount():
+	get("/v1/account")
+
+def getBalances():
+	get("/v1/balances")
+
 if __name__ == "__main__":
-	notionalVolume()
+	getBalances()
+	#gemAccount()
+	#gemNotionalVolume()
 	#accountant()
-	#accountById()
-	#accounts()
-	#reg()
+	#daccountById()
+	#daccounts()
+	#dreg()
