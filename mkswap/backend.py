@@ -77,6 +77,15 @@ predefs = {
 	}
 }
 presets = [{
+	"strategy": "slosh",
+	"globalTrade": True,
+	"globalStrategy": True,
+	"symbols": ["BTCUSD", "ETHUSD"]
+}, {
+	"symbols": ["ETHUSD"]
+}, {
+	"symbols": ["BTCUSD"]
+}, {
 	"symbols": ["BTCUSD", "ETHUSD", "ETHBTC"]
 }, {
 	"platform": "dydx",
