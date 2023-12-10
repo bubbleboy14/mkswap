@@ -1,5 +1,4 @@
 from datetime import datetime
-from dydx3.helpers.request_helpers import generate_now_iso
 from .backend import rel, ask, listen
 from .base import Feeder
 
