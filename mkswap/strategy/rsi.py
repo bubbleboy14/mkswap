@@ -1,5 +1,6 @@
 from .base import Base, INNER, OUTER
 
+TRADE_SIZE = 10
 RSI_PERIOD = 14
 
 class RSI(Base):
@@ -55,7 +56,8 @@ class RSI(Base):
 					"side": side,
 					"action": rec,
 					"price": price,
-					"symbol": symbol
+					"symbol": symbol,
+					"size": TRADE_SIZE
 				}
 				self.recommender(self.lastrec)
 
