@@ -1,6 +1,6 @@
 import base64, json, time, hmac, hashlib
 from ..base import Worker
-from ..backend import listen, memget
+from ..backend import emit, listen, memget
 
 class Gemini(Worker):
 	def __init__(self):
@@ -8,6 +8,7 @@ class Gemini(Worker):
 		self.account = memget("gemini account")
 		self.secret = memget("gemini secret").encode()
 		listen("credHead", self.credHead)
+		emit("clientReady")
 
 	def credHead(self, path):
 		payload = self.payload(path)
