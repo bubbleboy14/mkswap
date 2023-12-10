@@ -9,7 +9,7 @@ setup(
     description='crypto bits',
     long_description='office and workers',
     packages=[
-        'ctab'
+        'mkswap'
     ],
     zip_safe = False,
     install_requires = [
