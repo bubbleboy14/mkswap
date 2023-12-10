@@ -1,7 +1,7 @@
 from .backend import feed, presets
 from .observer import Observer
 from .trader import Trader
-from .agent import Agent
+from .agent import agencies
 from .strategist import strategies
 from .manager import Manager
 from .office import Office
