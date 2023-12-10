@@ -2,8 +2,10 @@ from datetime import datetime
 from .backend import rel, ask, listen, predefs, gemget
 from .base import Feeder
 
+CAP_BALANCES = True
+
 class Accountant(Feeder):
-	def __init__(self, platform=predefs["platform"], balances=predefs["balances"]):
+	def __init__(self, platform=predefs["platform"], balances=predefs["balances"], balcaps=CAP_BALANCES):
 		self.counts = {
 			"filled": 0,
 			"approved": 0
@@ -18,7 +20,7 @@ class Accountant(Feeder):
 		if platform == "dydx":
 			rel.timeout(10, self.checkFilled)
 			self._usd = "-USD"
-		else: # gemini
+		elif not balcaps:
 			listen("clientReady", self.getBalances)
 		listen("affordable", self.affordable)
 
