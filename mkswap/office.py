@@ -49,21 +49,21 @@ class Office(Worker):
 		}
 
 	def assess(self, trade, curprice=None):
-		action = trade["action"]
+		action = trade["side"]
 		price = trade["price"]
 		symbol = trade["symbol"]
 		curprice = curprice or self.price(symbol)
 		diff = curprice - price
 		if not curprice: # can this even happen?
 			return self.log("skipping assessment (waiting for %s price)"%(symbol,))
-		if action == "BUY":
+		if action == "buy":
 			isgood = diff > 0
-		else: # SELL
+		else: # sell
 			isgood = diff < 0
 		VERBOSE and self.log("%s %s at %s - %s trade!"%(action,
 			symbol, price, isgood and "GOOD" or "BAD"))
 		direction = isgood and 1 or -1
-		return direction, abs(diff) * trade["size"] * direction
+		return direction, abs(diff) * trade["amount"] * direction
 
 	def review(self, symbol=None, trader=None, curprice=None):
 		mans = self.managers

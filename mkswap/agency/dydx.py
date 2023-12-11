@@ -96,21 +96,21 @@ class DYDX(Worker):
 		self.log("building client with clargs:", clargs)
 		return Client(**clargs)
 
-	#{'side': 'BUY', 'action': 'BUY', 'price': 26296.0, 'symbol': 'BTC-USD'}
+	#{'side': 'buy', 'price': 26296.0, 'symbol': 'BTC-USD'}
 	def trade(self, trade):
-		if "size" not in trade:
-			trade["size"] = 10
+		if "amount" not in trade:
+			trade["amount"] = 10
 		self.log("TRADE!", trade)
 		if not LIVE: return
 		trargs = {
-			"size": str(trade["size"]),
+			"size": str(trade["amount"]),
 			"post_only": True,
 			"limit_fee": '0.0015',
 			"price": str(trade['price']),
 			"order_type": constants.ORDER_TYPE_LIMIT,
 			"position_id": self.account['positionId'],
 			"expiration_epoch_seconds": epoch_seconds_to_iso(time.time() + 61),
-			"side": getattr(constants, "ORDER_SIDE_%s"%(trade["action"],)),
+			"side": getattr(constants, "ORDER_SIDE_%s"%(trade["side"].upper(),)),
 			"market": getattr(constants, "MARKET_%s_%s"%tuple(trade["symbol"].split("-")))
 		}
 		self.log("creating order:", trargs)

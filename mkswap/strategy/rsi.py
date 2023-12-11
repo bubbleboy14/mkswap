@@ -45,19 +45,18 @@ class RSI(Base):
 				self.log("near average > far average -> upswing!")
 				if side in ["ask", "BUY", "SELL"] and price < w_near:
 					self.log("ask price < average -> BUY!!!!")
-					rec = "BUY"
+					rec = "buy"
 			else:
 				self.log("near average < far average -> downswing!")
 				if side in ["bid", "BUY", "SELL"] and price > w_near:
 					self.log("bid price > average -> SELL!!!!")
-					rec = "SELL"
+					rec = "sell"
 			if rec:
 				self.lastrec = {
-					"side": side,
-					"action": rec,
+					"side": rec,
 					"price": price,
 					"symbol": symbol,
-					"size": TRADE_SIZE
+					"amount": TRADE_SIZE
 				}
 				self.recommender(self.lastrec)
 

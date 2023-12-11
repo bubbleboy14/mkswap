@@ -33,19 +33,17 @@ class Slosh(Base):
 
 	def buysell(self, buysym, sellsym, size=10):
 		hz = self.histories
-		bcur = hz[buysym]["low"]
-		scur = hz[sellsym]["high"]
 		self.recommender({
-			"action": "SELL",
+			"side": "sell",
+			"amount": size,
 			"symbol": sellsym,
-			"price": scur,
-			"size": size
+			"price": hz[sellsym]["high"]
 		})
 		self.recommender({
-			"action": "BUY",
+			"side": "buy",
+			"amount": size,
 			"symbol": buysym,
-			"price": bcur,
-			"size": size
+			"price": hz[buysym]["low"]
 		})
 
 	def swap(self, size=10):
