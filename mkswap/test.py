@@ -1,6 +1,6 @@
 from .accountant import Accountant
 from .agent import agencies
-from .backend import start, spew, predefs, GEMDOM
+from .backend import start, spew, predefs, GEMDOM, echofeed
 
 plat = predefs["platform"]
 Agent = agencies[plat]
@@ -50,11 +50,17 @@ def gemNotionalVolume():
 def gemAccount():
 	get("/v1/account")
 
-def getBalances():
+def gemBalances():
 	get("/v1/balances")
 
+def gemOrders():
+	Agent()
+	echofeed("gemorders")
+	start()
+
 if __name__ == "__main__":
-	getBalances()
+	gemOrders()
+	#gemBalances()
 	#gemAccount()
 	#gemNotionalVolume()
 	#accountant()
