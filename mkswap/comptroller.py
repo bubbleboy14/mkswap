@@ -57,7 +57,7 @@ class Comptroller(Feeder):
 			self.score(trade)
 			if trade["score"] < 0:
 				cancels.push(tnum)
-		for cancels in cancel:
+		for tnum in cancels:
 			self.cancel(tnum)
 
 	def cancel(self, tnum):
