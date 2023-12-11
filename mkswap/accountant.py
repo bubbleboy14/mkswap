@@ -8,7 +8,8 @@ class Accountant(Feeder):
 	def __init__(self, platform=predefs["platform"], balances=predefs["balances"], balcaps=CAP_BALANCES):
 		self.counts = {
 			"filled": 0,
-			"approved": 0
+			"approved": 0,
+			"cancelled": 0
 		}
 		self.syms = []
 		self._obals = {}
@@ -25,6 +26,7 @@ class Accountant(Feeder):
 		elif not balcaps:
 			listen("clientReady", self.getBalances)
 		listen("tradeComplete", self.tradeComplete)
+		listen("tradeCancelled", self.tradeCancelled)
 		listen("affordable", self.affordable)
 
 	def getBalances(self):
@@ -76,31 +78,41 @@ class Accountant(Feeder):
 		vz["dph"] = secs and (total * 60 * 60 / secs)
 		return vz
 
+	def tradeCancelled(self, trade):
+		if self.updateBalances(trade, revert=True):
+			self.counts["cancelled"] += 1
+			self.log("trade cancelled!")
+		else:
+			self.log("balances out of sync!")
+
 	def tradeComplete(self, trade):
 		if self.updateBalances(trade, self._balances):
-			this.counts["filled"] += 1
+			self.counts["filled"] += 1
 			self.log("trade complete!")
 		else:
 			self.log("balances out of sync!")
 
-	def updateBalances(self, prop, bz=None):
+	def updateBalances(self, prop, bz=None, revert=False):
 		bz = bz or self._theoretical
-		s = prop.get("amount", 10)
-		v = s / prop["price"]
+		s = rs = prop.get("amount", 10)
+		v = rv = s / prop["price"]
+		if revert:
+			rs *= -1
+			rv *= -1
 		sym1, sym2 = self.pair(prop["symbol"])
 		self.log("balances", bz)
 		if prop["side"] == "buy":
 			if s > bz[sym2]:
 				self.log("not enough %s!"%(sym2,))
 				return False
-			bz[sym2] -= s
-			bz[sym1] += v
+			bz[sym2] -= rs
+			bz[sym1] += rv
 		else:
 			if v > bz[sym1]:
 				self.log("not enough %s!"%(sym1,))
 				return False
-			bz[sym2] += s
-			bz[sym1] -= v
+			bz[sym2] += rs
+			bz[sym1] -= rv
 		return True
 
 	def affordable(self, prop):
