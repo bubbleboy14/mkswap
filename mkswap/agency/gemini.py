@@ -9,6 +9,8 @@ class Gemini(Worker):
 		self.apiKey = memget("gemini key")
 		self.account = memget("gemini account")
 		self.secret = memget("gemini secret").encode()
+		self.actives = []
+		self.backlog = []
 		listen("credHead", self.credHead)
 		emit("clientReady")
 
@@ -36,11 +38,19 @@ class Gemini(Worker):
 	def signature(self, payload):
 		return hmac.new(self.secret, payload, hashlib.sha384).hexdigest()
 
+	def submit(self, trade):
+		self.actives.append(trade)
+		gemget("/v1/order/new", self.log, trade)
+
+	def enqueue(self, trade):
+		self.backlog.append(trade)
+		while self.backlog and len(self.actives) < 10:
+			self.submit(self.backlog.pop(0))
+
 	def trade(self, trade):
 		self.log("TRADE:", trade)
 		if not LIVE: return
-		params = { "type": "exchange limit" }
-		params.update(trade)
+		trade["type"] = "exchange limit"
 		for item in ["price", "amount"]:
-			params[item] = str(params[item])
-		gemget("/v1/order/new", self.log, params)
+			trade[item] = str(trade[item])
+		self.enqueue(trade)
