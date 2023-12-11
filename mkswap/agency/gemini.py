@@ -1,6 +1,8 @@
 import base64, json, time, hmac, hashlib
 from ..base import Worker
-from ..backend import emit, listen, memget
+from ..backend import emit, listen, memget, gemget
+
+LIVE = False
 
 class Gemini(Worker):
 	def __init__(self):
@@ -10,8 +12,8 @@ class Gemini(Worker):
 		listen("credHead", self.credHead)
 		emit("clientReady")
 
-	def credHead(self, path):
-		payload = self.payload(path)
+	def credHead(self, path, params={}):
+		payload = self.payload(path, params)
 		return {
 			"Content-Length": "0",
 			"Cache-Control": "no-cache",
@@ -21,12 +23,13 @@ class Gemini(Worker):
 			"X-GEMINI-SIGNATURE": self.signature(payload)
 		}
 
-	def payload(self, path):
-		pl = json.dumps({
+	def payload(self, path, params={}):
+		params.update({
 			"request": path,
 			"nonce": time.time(),
 			"account": self.account
-		}).encode()
+		})
+		pl = json.dumps(params).encode()
 		self.log("payload(%s)"%(path,), pl)
 		return base64.b64encode(pl)
 
@@ -35,3 +38,7 @@ class Gemini(Worker):
 
 	def trade(self, trade):
 		self.log("TRADE:", trade)
+		if not LIVE: return
+		params = { "type": "exchange limit" }
+		params.update(trade)
+		gemget("/v1/order/new", self.log, params)
