@@ -36,9 +36,9 @@ presets = [{
 	"symbols": ["BTC-USD"]
 }]
 
-def gemget(path, cb):
+def gemget(path, cb, params={}):
 	from dez.http import post
-	post(GEMDOM, path, port=443, secure=True, headers=ask("credHead", path),
+	post(GEMDOM, path, port=443, secure=True, headers=ask("credHead", path, params),
 		cb=cb, timeout=10, json=True)
 
 def getconf():
