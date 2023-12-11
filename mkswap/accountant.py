@@ -67,14 +67,14 @@ class Accountant(Feeder):
 		return vz
 
 	def affordable(self, prop):
-		s = prop.get("size", 10)
+		s = prop.get("amount", 10)
 		v = s / prop["price"]
 		bz = self._balances
 		sym1, sym2 = self.pair(prop["symbol"])
 		if prop["symbol"] not in self.syms:
 			self.syms.append(prop["symbol"])
 		self.log("balances", bz)
-		if prop["action"] == "BUY":
+		if prop["side"] == "buy":
 			if s > bz[sym2]:
 				self.log("not enough %s!"%(sym2,))
 				return False
