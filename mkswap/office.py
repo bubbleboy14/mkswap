@@ -13,7 +13,6 @@ class Office(Worker):
 	def __init__(self, platform=predefs["platform"], symbols=[], strategy=predefs["strategy"], globalStrategy=False, globalTrade=False):
 		self.platform = platform
 		self.symbols = symbols
-		self.comptroller = Comptroller()
 		self.accountant = Accountant(platform)
 		self.trader = globalTrade and Trader(platform)
 		trec = self.trader and self.trader.recommend
@@ -25,6 +24,7 @@ class Office(Worker):
 			self.managers[symbol] = Manager(platform, symbol, self.review,
 				self.strategist or strat(symbol, trec), self.trader)
 		self.log("initialized %s managers"%(len(symbols),))
+		self.comptroller = Comptroller()
 		rel.timeout(1, self.tick)
 
 	def sig(self):

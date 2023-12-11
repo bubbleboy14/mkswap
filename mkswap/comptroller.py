@@ -1,4 +1,5 @@
-from .backend import listen, gemget
+import json
+from .backend import listen, emit, gemget
 from .base import Feeder
 
 orderNumber = 0
@@ -19,12 +20,16 @@ class Comptroller(Feeder):
 		etype = msg["type"]
 		if etype == "closed":
 			self.log("proc(): trade closed", order)
+			emit("tradeComplete", order)
 			del self.actives[coi]
 		else:
 			self.log("proc(): %s"%(etype,))
 
 	def on_message(self, ws, msgs):
+		msgs = json.loads(msgs)
 		self.log("message:", msgs)
+		if type(msgs) is not list:
+			return self.log("skipping non-list")
 		for msg in msgs:
 			self.proc(msg)
 		self.refill()

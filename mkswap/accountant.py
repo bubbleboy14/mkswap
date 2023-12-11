@@ -12,8 +12,10 @@ class Accountant(Feeder):
 		}
 		self.syms = []
 		self._obals = {}
+		self._theoretical = {}
 		self._balances = balances
 		self._obals.update(balances)
+		self._theoretical.update(balances)
 		self.starttime = datetime.now()
 		self.platform = platform
 		self._usd = "USD"
@@ -22,6 +24,7 @@ class Accountant(Feeder):
 			self._usd = "-USD"
 		elif not balcaps:
 			listen("clientReady", self.getBalances)
+		listen("tradeComplete", self.tradeComplete)
 		listen("affordable", self.affordable)
 
 	def getBalances(self):
@@ -35,6 +38,7 @@ class Accountant(Feeder):
 			if sym in self._balances:
 				self._balances[sym] = float(bal["available"])
 		self._obals.update(self._balances)
+		self._theoretical.update(self._balances)
 		self.log("setBalances", self._balances)
 
 	def pair(self, syms):
@@ -48,9 +52,15 @@ class Accountant(Feeder):
 			self.counts["filled"] += len(ask("fills", sym))
 		return True
 
-	def balances(self, pricer):
+	def balanceses(self, pricer):
+		return {
+			"actual": self.balances(pricer, self._balances),
+			"theoretical": self.balances(pricer)
+		}
+
+	def balances(self, pricer, bz=None):
 		total = 0
-		bz = self._balances
+		bz = bz or self._theoretical
 		obz = self._obals
 		vz = {}
 		for sym in bz:
@@ -66,13 +76,18 @@ class Accountant(Feeder):
 		vz["dph"] = secs and (total * 60 * 60 / secs)
 		return vz
 
-	def affordable(self, prop):
+	def tradeComplete(self, trade):
+		if self.updateBalances(trade, self._balances):
+			this.counts["filled"] += 1
+			self.log("trade complete!")
+		else:
+			self.log("balances out of sync!")
+
+	def updateBalances(self, prop, bz=None):
+		bz = bz or self._theoretical
 		s = prop.get("amount", 10)
 		v = s / prop["price"]
-		bz = self._balances
 		sym1, sym2 = self.pair(prop["symbol"])
-		if prop["symbol"] not in self.syms:
-			self.syms.append(prop["symbol"])
 		self.log("balances", bz)
 		if prop["side"] == "buy":
 			if s > bz[sym2]:
@@ -86,6 +101,14 @@ class Accountant(Feeder):
 				return False
 			bz[sym2] += s
 			bz[sym1] -= v
-		self.counts["approved"] += 1
-		self.log("trade approved!")
 		return True
+
+	def affordable(self, prop):
+		if prop["symbol"] not in self.syms:
+			self.syms.append(prop["symbol"])
+		if self.updateBalances(prop):
+			self.counts["approved"] += 1
+			self.log("trade approved!")
+			return True
+		else:
+			self.log("balances not updated!")
