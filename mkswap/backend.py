@@ -2,21 +2,6 @@ import rel, json, websocket
 from rel import start, stop
 from rel.util import log, read, write, remember, recall, memget, emit, ask, listen
 
-def gemget(path, cb):
-	from dez.http import post
-	post(GEMDOM, path, port=443, secure=True, headers=ask("credHead", path),
-		cb=cb, timeout=10, json=True)
-
-OFFICE = None # not currently in use ... kinda gnarly
-def getoffice(sub=None):
-	if sub:
-		return getattr(OFFICE, sub)
-	return OFFICE
-
-def setoffice(office):
-	global OFFICE
-	OFFICE = office
-
 predefs = {
 	"strategy": "rsi",
 	"platform": "gemini",
@@ -50,6 +35,11 @@ presets = [{
 	"platform": "dydx",
 	"symbols": ["BTC-USD"]
 }]
+
+def gemget(path, cb):
+	from dez.http import post
+	post(GEMDOM, path, port=443, secure=True, headers=ask("credHead", path),
+		cb=cb, timeout=10, json=True)
 
 def getconf():
 	from cantools.util.io import selnum
@@ -125,7 +115,7 @@ platforms = {
 		"subber": crsub
 	},
 	"gemini": {
-		"feeder": lambda sname : "wss://api.gemini.com/v1/marketdata/%s"%(sname,)
+		"feeder": lambda sname : "wss://%s/v1/marketdata/%s"%(GEMDOM, sname)
 	}
 }
 
