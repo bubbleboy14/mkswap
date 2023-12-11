@@ -24,7 +24,7 @@ class Office(Worker):
 			self.managers[symbol] = Manager(platform, symbol, self.review,
 				self.strategist or strat(symbol, trec), self.trader)
 		self.log("initialized %s managers"%(len(symbols),))
-		self.comptroller = Comptroller()
+		self.comptroller = Comptroller(self.price)
 		rel.timeout(1, self.tick)
 
 	def sig(self):
