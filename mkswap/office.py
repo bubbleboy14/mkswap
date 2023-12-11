@@ -1,7 +1,8 @@
 from pprint import pformat
 from .backend import rel, start, getconf, predefs
-from .strategist import strategies
+from .comptroller import Comptroller
 from .accountant import Accountant
+from .strategist import strategies
 from .manager import Manager
 from .trader import Trader
 from .base import Worker
@@ -23,6 +24,7 @@ class Office(Worker):
 			self.managers[symbol] = Manager(platform, symbol, self.review,
 				self.strategist or strat(symbol, trec), self.trader)
 		self.log("initialized %s managers"%(len(symbols),))
+		self.comptroller = Comptroller(self.price)
 		rel.timeout(1, self.tick)
 
 	def sig(self):

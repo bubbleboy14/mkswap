@@ -116,10 +116,14 @@ platforms = {
 	},
 	"gemini": {
 		"feeder": lambda sname : "wss://%s/v1/marketdata/%s"%(GEMDOM, sname)
+	},
+	"gemorders": {
+		"feed": "wss://%s/v1/order/events"%(GEMDOM,),
+		"credHead": "/v1/order/events"
 	}
 }
 
-def feed(platname, streamname, **cbs): # {on_message,on_error,on_open,on_close}
+def feed(platname, streamname=None, **cbs): # {on_message,on_error,on_open,on_close}
 	plat = platforms[platname]
 	feed = "feed" in plat and plat["feed"] or plat["feeder"](streamname)
 	if "subber" in plat:

@@ -1,4 +1,5 @@
 from math import sqrt
+from rel.util import emit
 from .base import Base, INNER, OUTER
 
 class Slosh(Base):
@@ -106,7 +107,7 @@ class Slosh(Base):
 
 	def compare(self, symbol, side, price, eobj, history):
 		self.shouldUpdate = True
-		self.log("compare", symbol, side, price)
+		self.log("compare", symbol, side, price, eobj)
 		if symbol not in self.histories:
 			self.histories[symbol] = {
 				"all": []
@@ -118,3 +119,4 @@ class Slosh(Base):
 		inner = symhis["all"][-INNER:]
 		symhis["high"] = max(inner)
 		symhis["low"] = min(inner)
+		emit("priceChange")

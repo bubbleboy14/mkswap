@@ -20,7 +20,7 @@ class Worker(object):
 		stop()
 
 class Feeder(Worker):
-	def feed(self, platform, channel):
+	def feed(self, platform, channel=None):
 		self.log("feed", platform, channel)
 		if hasattr(self, "ws"):
 			return self.log("feed already loaded!")

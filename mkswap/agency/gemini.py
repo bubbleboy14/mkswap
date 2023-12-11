@@ -1,6 +1,6 @@
 import base64, json, time, hmac, hashlib
 from ..base import Worker
-from ..backend import emit, listen, memget, gemget
+from ..backend import emit, listen, memget
 
 LIVE = False
 
@@ -39,8 +39,7 @@ class Gemini(Worker):
 	def trade(self, trade):
 		self.log("TRADE:", trade)
 		if not LIVE: return
-		params = { "type": "exchange limit" }
-		params.update(trade)
+		trade["type"] = "exchange limit"
 		for item in ["price", "amount"]:
-			params[item] = str(params[item])
-		gemget("/v1/order/new", self.log, params)
+			trade[item] = str(trade[item])
+		emit("enqueueOrder", trade)
