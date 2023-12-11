@@ -41,4 +41,6 @@ class Gemini(Worker):
 		if not LIVE: return
 		params = { "type": "exchange limit" }
 		params.update(trade)
+		for item in ["price", "amount"]:
+			params[item] = str(params[item])
 		gemget("/v1/order/new", self.log, params)
