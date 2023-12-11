@@ -1,4 +1,5 @@
 from math import sqrt
+from rel.util import emit
 from .base import Base, INNER, OUTER
 
 class Slosh(Base):
@@ -118,3 +119,4 @@ class Slosh(Base):
 		inner = symhis["all"][-INNER:]
 		symhis["high"] = max(inner)
 		symhis["low"] = min(inner)
+		emit("priceChange")
