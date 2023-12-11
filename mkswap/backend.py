@@ -118,7 +118,8 @@ platforms = {
 		"feeder": lambda sname : "wss://%s/v1/marketdata/%s"%(GEMDOM, sname)
 	},
 	"gemorders": {
-		"feed": "wss://%s/v1/order/events"%(GEMDOM,)
+		"feed": "wss://%s/v1/order/events"%(GEMDOM,),
+		"credHead": "/v1/order/events"
 	}
 }
 
