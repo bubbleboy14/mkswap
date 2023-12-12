@@ -2,8 +2,6 @@ import base64, json, time, hmac, hashlib
 from ..base import Worker
 from ..backend import emit, listen, memget
 
-LIVE = False
-
 class Gemini(Worker):
 	def __init__(self):
 		self.apiKey = memget("gemini key")
@@ -38,7 +36,6 @@ class Gemini(Worker):
 
 	def trade(self, trade):
 		self.log("TRADE:", trade)
-		if not LIVE: return
 		trade["type"] = "exchange limit"
 		for item in ["price", "amount"]:
 			trade[item] = str(trade[item])

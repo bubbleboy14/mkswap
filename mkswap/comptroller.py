@@ -3,6 +3,7 @@ from .backend import listen, emit, gemget
 from .base import Feeder
 
 orderNumber = 0
+ACTIVES_ALLOWED = 0#10
 
 class Comptroller(Feeder):
 	def __init__(self, pricer):
@@ -68,7 +69,7 @@ class Comptroller(Feeder):
 		del self.actives[tnum]
 
 	def refill(self):
-		while self.backlog and len(self.actives.keys()) < 10:
+		while self.backlog and len(self.actives.keys()) < ACTIVES_ALLOWED:
 			self.submit(self.backlog.pop(0))
 
 	def submit(self, trade):
