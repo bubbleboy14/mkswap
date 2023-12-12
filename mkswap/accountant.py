@@ -54,13 +54,12 @@ class Accountant(Feeder):
 			self.counts["filled"] += len(ask("fills", sym))
 		return True
 
-	def balanceses(self, pricer):
-		return {
-			"actual": self.balances(pricer, self._balances),
-			"theoretical": self.balances(pricer)
-		}
-
 	def balances(self, pricer, bz=None):
+		if bz == "both":
+			return {
+				"actual": self.balances(pricer, self._balances),
+				"theoretical": self.balances(pricer)
+			}
 		total = 0
 		bz = bz or self._theoretical
 		obz = self._obals
