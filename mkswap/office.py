@@ -47,7 +47,7 @@ class Office(Worker):
 		return {
 			"counts": acc.counts,
 			"strategists": self.stratuses(),
-			"balances": acc.balances(self.price)
+			"balances": acc.balances(self.price, "both")
 		}
 
 	def assess(self, trade, curprice=None):
