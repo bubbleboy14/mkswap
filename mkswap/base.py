@@ -1,4 +1,4 @@
-from pprint import pprint
+import traceback, pprint
 from .backend import log, stop, feed
 
 UNSPAMMED = True
@@ -17,6 +17,7 @@ class Worker(object):
 
 	def error(self, *msg):
 		self.log("ERROR", *msg)
+		traceback.print_last()
 		stop()
 
 class Feeder(Worker):
@@ -33,7 +34,7 @@ class Feeder(Worker):
 
 	def on_message(self, ws, msg):
 		self.log("message:")
-		pprint(msg)
+		pprint.pprint(msg)
 
 	def on_close(self, ws, code, message):
 		self.log("closed!!", code, message)
