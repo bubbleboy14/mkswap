@@ -41,7 +41,7 @@ class Comptroller(Feeder):
 	def score(self, trade):
 		sym = trade["symbol"]
 		curprice = self.pricer(sym)
-		trade["score"] = trade["price"] - curprice
+		trade["score"] = float(trade["price"]) - curprice
 		if trade["side"] == "buy":
 			trade["score"] *= -1
 
