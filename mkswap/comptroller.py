@@ -60,6 +60,8 @@ class Comptroller(Feeder):
 				cancels.push(tnum)
 		for tnum in cancels:
 			self.cancel(tnum)
+		self.log("curate() completed with:", len(self.backlog),
+			"backlogged; and", len(self.actives.keys()), "actives")
 
 	def cancel(self, tnum):
 		trade = self.actives[tnum]
@@ -69,10 +71,12 @@ class Comptroller(Feeder):
 		del self.actives[tnum]
 
 	def refill(self):
+		self.log("refill()")
 		while self.backlog and len(self.actives.keys()) < ACTIVES_ALLOWED:
 			self.submit(self.backlog.pop(0))
 
 	def submit(self, trade):
+		self.log("submit()", trade)
 		orderNumber += 1
 		self.actives[orderNumber] = trade
 		trade["client_order_id"] = orderNumber
@@ -84,4 +88,5 @@ class Comptroller(Feeder):
 
 	def enqueue(self, trade):
 		self.backlog.append(trade)
+		self.log("enqueue()", len(self.backlog), trade)
 		self.refill()
