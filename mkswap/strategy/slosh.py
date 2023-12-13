@@ -2,6 +2,8 @@ from math import sqrt
 from rel.util import emit
 from .base import Base, INNER, OUTER
 
+VOLATILITY_MULT = 10
+
 class Slosh(Base):
 	def __init__(self, symbol, recommender=None):
 		self.top, self.bottom = symbol
@@ -85,7 +87,7 @@ class Slosh(Base):
 			self.log("ratio is new low:", cur)
 			rz["low"] = cur;
 		if abs(volatility) > 0.5:
-			self.swap(volatility * 10)
+			self.swap(volatility * VOLATILITY_MULT)
 
 	def tick(self, history=None):
 		history = self.histories
