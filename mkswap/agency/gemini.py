@@ -36,7 +36,9 @@ class Gemini(Worker):
 
 	def trade(self, trade):
 		self.log("TRADE:", trade)
-		trade["type"] = "exchange limit"
+		tdesc = {}
+		tdesc.update(trade)
+		tdesc["type"] = "exchange limit"
 		for item in ["price", "amount"]:
-			trade[item] = str(trade[item])
-		emit("enqueueOrder", trade)
+			tdesc[item] = str(tdesc[item])
+		emit("enqueueOrder", tdesc)
