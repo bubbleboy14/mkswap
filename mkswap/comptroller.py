@@ -2,8 +2,9 @@ import json
 from .backend import listen, emit, gemget
 from .base import Feeder
 
+LIVE = False
 orderNumber = 0
-ACTIVES_ALLOWED = 0#10
+ACTIVES_ALLOWED = 10
 
 class Comptroller(Feeder):
 	def __init__(self, pricer):
@@ -46,10 +47,12 @@ class Comptroller(Feeder):
 			trade["score"] *= -1
 
 	def curate(self):
+		icount = len(self.backlog)
 		# backlog: rate, filter, and sort
 		for trade in self.backlog:
 			self.score(trade)
 		self.backlog = list(filter(lambda t : t["score"] > 0, self.backlog))
+		blsremoved = icount - len(self.backlog)
 		self.backlog.sort(key=lambda t : t["score"])
 		# actives: rate and cancel (as necessary)
 		cancels = []
@@ -60,8 +63,8 @@ class Comptroller(Feeder):
 				cancels.push(tnum)
 		for tnum in cancels:
 			self.cancel(tnum)
-		self.log("curate() completed with:", len(self.backlog),
-			"backlogged; and", len(self.actives.keys()), "actives")
+		self.log("curate() pruned:", blsremoved, "backlogged - now at",
+			len(self.backlog), "; and", len(cancels), "actives - now at", len(self.actives.keys()))
 
 	def cancel(self, tnum):
 		trade = self.actives[tnum]
@@ -80,7 +83,7 @@ class Comptroller(Feeder):
 		orderNumber += 1
 		self.actives[orderNumber] = trade
 		trade["client_order_id"] = orderNumber
-		gemget("/v1/order/new", self.submitted, trade)
+		LIVE and gemget("/v1/order/new", self.submitted, trade)
 
 	def submitted(self, resp):
 		self.actives[resp["client_order_id"]]["order_id"] = resp["order_id"]
