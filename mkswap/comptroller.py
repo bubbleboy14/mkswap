@@ -60,7 +60,7 @@ class Comptroller(Feeder):
 			trade = self.actives[tnum]
 			self.score(trade)
 			if trade["score"] < 0:
-				cancels.push(tnum)
+				cancels.append(tnum)
 		for tnum in cancels:
 			self.cancel(tnum)
 		self.log("curate() pruned:", blsremoved, "backlogged - now at",
@@ -68,7 +68,7 @@ class Comptroller(Feeder):
 
 	def cancel(self, tnum):
 		trade = self.actives[tnum]
-		gemget("/v1/order/cancel", self.log, { "order_id": trade["order_id"] })
+		LIVE and gemget("/v1/order/cancel", self.log, { "order_id": trade["order_id"] })
 		self.log("cancel()", trade)
 		emit("tradeCancelled", trade)
 		del self.actives[tnum]
@@ -79,6 +79,7 @@ class Comptroller(Feeder):
 			self.submit(self.backlog.pop(0))
 
 	def submit(self, trade):
+		global orderNumber
 		self.log("submit()", trade)
 		orderNumber += 1
 		self.actives[orderNumber] = trade
