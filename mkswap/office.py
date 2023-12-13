@@ -44,13 +44,17 @@ class Office(Worker):
 
 	def status(self):
 		acc = self.accountant
+		com = self.comptroller
 		return {
 			"counts": acc.counts,
+			"actives": com.actives,
+			"backlog": com.backlog,
 			"strategists": self.stratuses(),
 			"balances": acc.balances(self.price, "both")
 		}
 
 	def assess(self, trade, curprice=None):
+		self.log("assess", trade)
 		action = trade["side"]
 		price = trade["price"]
 		symbol = trade["symbol"]
