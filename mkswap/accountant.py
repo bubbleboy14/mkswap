@@ -93,8 +93,8 @@ class Accountant(Feeder):
 
 	def updateBalances(self, prop, bz=None, revert=False):
 		bz = bz or self._theoretical
-		s = rs = prop.get("amount", 10)
-		v = rv = s / prop["price"]
+		s = rs = float(prop.get("amount", 10))
+		v = rv = s / float(prop["price"])
 		if revert:
 			rs *= -1
 			rv *= -1
