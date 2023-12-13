@@ -54,7 +54,7 @@ class Office(Worker):
 		}
 
 	def assess(self, trade, curprice=None):
-		self.log("assess", trade)
+#		self.log("assess", trade)
 		action = trade["side"]
 		price = trade["price"]
 		symbol = trade["symbol"]
