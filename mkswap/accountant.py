@@ -7,6 +7,7 @@ CAP_BALANCES = True
 class Accountant(Feeder):
 	def __init__(self, platform=predefs["platform"], balances=predefs["balances"], balcaps=CAP_BALANCES):
 		self.counts = {
+			"active": 0,
 			"filled": 0,
 			"approved": 0,
 			"cancelled": 0
@@ -25,8 +26,9 @@ class Accountant(Feeder):
 			self._usd = "-USD"
 		elif not balcaps:
 			listen("clientReady", self.getBalances)
-		listen("tradeComplete", self.tradeComplete)
-		listen("tradeCancelled", self.tradeCancelled)
+		listen("orderCancelled", self.orderCancelled)
+		listen("orderFilled", self.orderFilled)
+		listen("orderActive", self.orderActive)
 		listen("affordable", self.affordable)
 
 	def getBalances(self):
@@ -77,19 +79,25 @@ class Accountant(Feeder):
 		vz["dph"] = secs and (total * 60 * 60 / secs)
 		return vz
 
-	def tradeCancelled(self, trade):
+	def orderCancelled(self, trade):
 		if self.updateBalances(trade, revert=True):
 			self.counts["cancelled"] += 1
-			self.log("trade cancelled!")
+			self.counts["active"] -= 1
+			self.log("order cancelled!")
 		else:
 			self.log("balances out of sync!")
 
-	def tradeComplete(self, trade):
+	def orderFilled(self, trade):
 		if self.updateBalances(trade, self._balances):
 			self.counts["filled"] += 1
-			self.log("trade complete!")
+			self.counts["active"] -= 1
+			self.log("order filled!")
 		else:
 			self.log("balances out of sync!")
+
+	def orderActive(self, trade):
+		self.log("order active!")
+		self.counts["active"] += 1
 
 	def updateBalances(self, prop, bz=None, revert=False):
 		bz = bz or self._theoretical
