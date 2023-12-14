@@ -92,7 +92,7 @@ class Comptroller(Feeder):
 
 	def refill(self):
 		self.log("refill()")
-		while self.backlog and len(self.actives.keys()) < ACTIVES_ALLOWED:
+		while self.backlog and (len(self.actives.keys()) < ACTIVES_ALLOWED):
 			self.submit(self.backlog.pop(0))
 
 	def submit(self, trade):
