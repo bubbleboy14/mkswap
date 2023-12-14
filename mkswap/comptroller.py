@@ -74,7 +74,7 @@ class Comptroller(Feeder):
 		del self.actives[tnum]
 
 	def withdraw(self):
-		akeys = self.actives.keys()
+		akeys = list(self.actives.keys())
 		self.log("withdraw() cancelling", len(akeys), "active orders")
 		for tnum in akeys:
 			self.cancel(tnum)
