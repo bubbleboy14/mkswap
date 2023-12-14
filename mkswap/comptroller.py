@@ -45,12 +45,14 @@ class Comptroller(Feeder):
 		trade["score"] = float(trade["price"]) - curprice
 		if trade["side"] == "buy":
 			trade["score"] *= -1
+		return trade["score"]
 
 	def curate(self):
 		icount = len(self.backlog)
 		# backlog: rate, filter, and sort
 		for trade in self.backlog:
-			self.score(trade)
+			if self.score(trade) <= 0:
+				emit("orderCancelled", trade, True)
 		self.backlog = list(filter(lambda t : t["score"] > 0, self.backlog))
 		blsremoved = icount - len(self.backlog)
 		self.backlog.sort(key=lambda t : t["score"])
