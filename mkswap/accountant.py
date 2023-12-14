@@ -103,24 +103,24 @@ class Accountant(Feeder):
 	def updateBalances(self, prop, bz=None, revert=False):
 		bz = bz or self._theoretical
 		s = rs = float(prop.get("amount", 10))
-		v = rv = s / float(prop["price"])
+		v = rv = s * float(prop["price"])
 		if revert:
 			rs *= -1
 			rv *= -1
 		sym1, sym2 = self.pair(prop["symbol"])
 		self.log("balances", bz)
 		if prop["side"] == "buy":
-			if s > bz[sym2]:
+			if v > bz[sym2]:
 				self.log("not enough %s!"%(sym2,))
 				return False
-			bz[sym2] -= rs
-			bz[sym1] += rv
+			bz[sym2] -= rv
+			bz[sym1] += rs
 		else:
-			if v > bz[sym1]:
+			if s > bz[sym1]:
 				self.log("not enough %s!"%(sym1,))
 				return False
-			bz[sym2] += rs
-			bz[sym1] -= rv
+			bz[sym2] += rv
+			bz[sym1] -= rs
 		return True
 
 	def affordable(self, prop):

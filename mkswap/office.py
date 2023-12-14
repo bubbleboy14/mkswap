@@ -73,7 +73,7 @@ class Office(Worker):
 		VERBOSE and self.log("%s %s at %s - %s trade!"%(action,
 			symbol, price, isgood and "GOOD" or "BAD"))
 		direction = isgood and 1 or -1
-		return direction, abs(diff) * trade["amount"] * direction
+		return direction, abs(diff) * trade["amount"] * price * direction
 
 	def review(self, symbol=None, trader=None, curprice=None):
 		mans = self.managers
