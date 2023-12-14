@@ -60,9 +60,12 @@ class Comptroller(Feeder):
 		cancels = []
 		for tnum in self.actives:
 			trade = self.actives[tnum]
-			self.score(trade)
-			if trade["score"] < 0:
-				cancels.append(tnum)
+			if "order_id" in trade:
+				self.score(trade)
+				if trade["score"] < 0:
+					cancels.append(tnum)
+			else:
+				self.log("curate() skipping uninitialized trade", trade)
 		for tnum in cancels:
 			self.cancel(tnum)
 		self.log("curate() pruned:", blsremoved, "backlogged - now at",
@@ -91,13 +94,13 @@ class Comptroller(Feeder):
 		self.log("submit()", trade)
 		orderNumber += 1
 		self.actives[orderNumber] = trade
-		trade["client_order_id"] = orderNumber
+		trade["client_order_id"] = str(orderNumber)
 		LIVE and gemget("/v1/order/new", self.submitted, trade)
 		emit("orderActive", trade)
 
 	def submitted(self, resp):
-		self.actives[resp["client_order_id"]]["order_id"] = resp["order_id"]
 		self.log("submitted()", resp)
+		self.actives[resp["client_order_id"]]["order_id"] = resp["order_id"]
 
 	def enqueue(self, trade):
 		self.backlog.append(trade)
