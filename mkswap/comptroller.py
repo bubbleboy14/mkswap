@@ -19,10 +19,12 @@ class Comptroller(Feeder):
 		coi = msg.get("client_order_id", None)
 		if not coi:
 			return self.log("proc(%s): NO client_order_id!!!"%(msg,))
+		if coi not in self.actives:
+			return self.log("proc(%s): unlisted client_order_id!!!"%(msg,))
 		order = self.actives[coi]
 		etype = msg["type"]
 		if msg.get("is_cancelled", None):
-			self.cancel(coi)
+			self.cancel(coi, False)
 		elif etype == "closed":
 			self.log("proc(): trade closed", order)
 			emit("orderFilled", order)
@@ -71,9 +73,9 @@ class Comptroller(Feeder):
 		self.log("curate() pruned:", blsremoved, "backlogged - now at",
 			len(self.backlog), "; and", len(cancels), "actives - now at", len(self.actives.keys()))
 
-	def cancel(self, tnum):
+	def cancel(self, tnum, tellgem=True):
 		trade = self.actives[tnum]
-		LIVE and gemget("/v1/order/cancel", self.log, { "order_id": trade["order_id"] })
+		LIVE and tellgem and gemget("/v1/order/cancel", self.log, { "order_id": trade["order_id"] })
 		self.log("cancel()", trade)
 		emit("orderCancelled", trade)
 		del self.actives[tnum]
@@ -97,7 +99,7 @@ class Comptroller(Feeder):
 		global orderNumber
 		self.log("submit()", trade)
 		orderNumber += 1
-		self.actives[orderNumber] = trade
+		self.actives[str(orderNumber)] = trade
 		trade["client_order_id"] = str(orderNumber)
 		LIVE and gemget("/v1/order/new", self.submitted, trade)
 		emit("orderActive", trade)
