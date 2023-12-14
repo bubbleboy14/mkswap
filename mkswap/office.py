@@ -27,6 +27,10 @@ class Office(Worker):
 		self.comptroller = Comptroller(self.price)
 		rel.timeout(1, self.tick)
 
+	def teardown(self):
+		self.log("teardown()")
+		self.comptroller.withdraw()
+
 	def sig(self):
 		return "Office[%s]"%(self.platform,)
 

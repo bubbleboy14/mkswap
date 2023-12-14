@@ -73,6 +73,12 @@ class Comptroller(Feeder):
 		emit("tradeCancelled", trade)
 		del self.actives[tnum]
 
+	def withdraw(self):
+		akeys = self.actives.keys()
+		self.log("withdraw() cancelling", len(akeys), "active orders")
+		for tnum in akeys:
+			self.cancel(tnum)
+
 	def refill(self):
 		self.log("refill()")
 		while self.backlog and len(self.actives.keys()) < ACTIVES_ALLOWED:
