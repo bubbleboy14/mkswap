@@ -79,10 +79,11 @@ class Accountant(Feeder):
 		vz["dph"] = secs and (total * 60 * 60 / secs)
 		return vz
 
-	def orderCancelled(self, trade):
+	def orderCancelled(self, trade, backlogged=False):
 		if self.updateBalances(trade, revert=True):
 			self.counts["cancelled"] += 1
-			self.counts["active"] -= 1
+			if not backlogged:
+				self.counts["active"] -= 1
 			self.log("order cancelled!")
 		else:
 			self.log("balances out of sync!")
