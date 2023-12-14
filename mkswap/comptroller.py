@@ -60,6 +60,7 @@ class Comptroller(Feeder):
 		self.backlog.sort(key=lambda t : t["score"])
 		# actives: rate and cancel (as necessary)
 		cancels = []
+		skips = 0
 		for tnum in self.actives:
 			trade = self.actives[tnum]
 			if "order_id" in trade:
@@ -67,11 +68,12 @@ class Comptroller(Feeder):
 				if trade["score"] < 0:
 					cancels.append(tnum)
 			else:
-				self.log("curate() skipping uninitialized trade", trade)
+				skips += 1
 		for tnum in cancels:
 			self.cancel(tnum)
 		self.log("curate() pruned:", blsremoved, "backlogged - now at",
-			len(self.backlog), "; and", len(cancels), "actives - now at", len(self.actives.keys()))
+			len(self.backlog), "; and", len(cancels), "actives - now at", len(self.actives.keys()),
+			"; skipped", skips, "uninitialized orders")
 
 	def cancel(self, tnum, tellgem=True):
 		trade = self.actives[tnum]
