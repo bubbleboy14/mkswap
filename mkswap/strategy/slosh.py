@@ -41,14 +41,14 @@ class Slosh(Base):
 		self.recommender({
 			"side": "sell",
 			"symbol": sellsym,
-			"price": round(sellprice, 8),
-			"amount": round(size / sellprice, 8)
+			"price": round(sellprice, 6),
+			"amount": round(size / sellprice, 6)
 		})
 		self.recommender({
 			"side": "buy",
 			"symbol": buysym,
-			"price": round(buyprice, 8),
-			"amount": round(size / buyprice, 8)
+			"price": round(buyprice, 6),
+			"amount": round(size / buyprice, 6)
 		})
 
 	def swap(self, size=10):
