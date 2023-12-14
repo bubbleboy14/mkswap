@@ -82,7 +82,10 @@ class Comptroller(Feeder):
 		akeys = list(self.actives.keys())
 		self.log("withdraw() cancelling", len(akeys), "active orders")
 		for tnum in akeys:
-			self.cancel(tnum)
+			if "order_id" in self.actives[tnum]:
+				self.cancel(tnum)
+			else:
+				self.log("trade uninitialized! (cancelling cancel)", trade)
 
 	def refill(self):
 		self.log("refill()")
