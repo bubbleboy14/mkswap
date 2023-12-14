@@ -1,4 +1,4 @@
-from pprint import pformat
+import pprint, atexit
 from .backend import rel, start, getconf, predefs
 from .comptroller import Comptroller
 from .accountant import Accountant
@@ -104,7 +104,7 @@ class Office(Worker):
 			score += s
 		lstr.extend(["\n- trade score:", rate, "(", score, ")"])
 		lstr.append("\n- balances are:")
-		lstr.append(pformat(self.accountant.balances(self.price)))
+		lstr.append(pprint.pformat(self.accountant.balances(self.price)))
 		self.log(*lstr)
 
 	def tick(self):
@@ -121,6 +121,11 @@ class Office(Worker):
 				self.managers[manager].tick(manStrat, manTrad)
 		return True
 
+def getOffice(**kwargs):
+	office = Office(**(kwargs or getconf()))
+	atexit.register(office.teardown)
+	return office
+
 if __name__ == "__main__":
-	Office(**getconf())
+	getOffice()
 	start()
