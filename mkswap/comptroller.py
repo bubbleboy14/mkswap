@@ -25,7 +25,7 @@ class Comptroller(Feeder):
 			self.cancel(coi)
 		elif etype == "closed":
 			self.log("proc(): trade closed", order)
-			emit("tradeComplete", order)
+			emit("tradeFilled", order)
 			del self.actives[coi]
 		else:
 			self.log("proc(): %s"%(etype,))
@@ -91,6 +91,7 @@ class Comptroller(Feeder):
 		self.actives[orderNumber] = trade
 		trade["client_order_id"] = orderNumber
 		LIVE and gemget("/v1/order/new", self.submitted, trade)
+		emit("tradeActive", trade)
 
 	def submitted(self, resp):
 		self.actives[resp["client_order_id"]]["order_id"] = resp["order_id"]
