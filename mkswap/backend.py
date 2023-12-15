@@ -36,6 +36,11 @@ presets = [{
 	"symbols": ["BTC-USD"]
 }]
 
+def spew(event):
+	if hasattr(event, "decode"):
+		event = event.decode()
+	log(json.dumps(event))
+
 def gemget(path, cb, params={}):
 	from dez.http import post
 	post(hosts["gemini"], path, port=443, secure=True, headers=ask("credHead", path, params),
@@ -195,8 +200,3 @@ def events(message, use_initial=False):
 		else:
 			log("skipping event!!!")
 			return []
-
-def spew(event):
-	if hasattr(event, "decode"):
-		event = event.decode()
-	log(json.dumps(event))
