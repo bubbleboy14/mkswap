@@ -1,6 +1,6 @@
 from .accountant import Accountant
 from .agent import agencies
-from .backend import start, spew, predefs, GEMDOM, echofeed
+from .backend import start, spew, predefs, hosts, echofeed
 
 plat = predefs["platform"]
 Agent = agencies[plat]
@@ -11,15 +11,10 @@ SILENT_REQUEST = False
 #
 def get(path, ag=None):
 	from dez.http import fetch, post
-	getter = post
+	getter = (plat == "dydx") and fetch or post
+	host = hosts[plat]
 	ag = ag or Agent()
 	hz = ag.credHead(path)
-	if plat == "dydx":
-		getter = fetch
-		from dydx3 import constants
-		host = constants.API_HOST_GOERLI.split("//")[1]
-	else: # gemini
-		host = GEMDOM
 	print("fetching:", host, path)
 	getter(host, path, port=443, secure=True, headers=hz, cb=spew, dispatch=True, silent=SILENT_REQUEST)
 
