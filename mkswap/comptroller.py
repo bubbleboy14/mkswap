@@ -11,6 +11,11 @@ def setLive(islive):
 	global LIVE
 	LIVE = islive
 
+def setActives(actall):
+	log("setActives(%s)"%(actall,))
+	global ACTIVES_ALLOWED
+	ACTIVES_ALLOWED = actall
+
 class Comptroller(Feeder):
 	def __init__(self, pricer):
 		self.actives = {}
