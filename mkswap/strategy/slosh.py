@@ -1,8 +1,14 @@
 from math import sqrt
 from rel.util import emit
+from ..backend import log
 from .base import Base, INNER, OUTER
 
 VOLATILITY_MULT = 10
+
+def setVolatilityMult(vmult):
+	log("setVolatilityMult(%s)"%(vmult,))
+	global VOLATILITY_MULT
+	VOLATILITY_MULT = vmult
 
 class Slosh(Base):
 	def __init__(self, symbol, recommender=None):

@@ -1,7 +1,18 @@
 from .base import Base, INNER, OUTER
+from ..backend import log
 
 TRADE_SIZE = 10
 RSI_PERIOD = 14
+
+def setSize(size):
+	log("setSize(%s)"%(size,))
+	global TRADE_SIZE
+	TRADE_SIZE = size
+
+def setPeriod(period):
+	log("setPeriod(%s)"%(period,))
+	global RSI_PERIOD
+	RSI_PERIOD = period
 
 class RSI(Base):
 	def __init__(self, symbol, recommender=None):

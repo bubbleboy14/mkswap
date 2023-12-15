@@ -3,6 +3,11 @@ from .backend import log, stop, feed
 
 UNSPAMMED = True
 
+def setUnspammed(isunspammed):
+	log("setUnspammed(%s)"%(isunspammed,))
+	global UNSPAMMED
+	UNSPAMMED = isunspammed
+
 class Worker(object):
 	def sig(self):
 		return self.__class__.__name__
