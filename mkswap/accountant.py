@@ -56,7 +56,7 @@ class Accountant(Feeder):
 			self.counts["filled"] += len(ask("fills", sym))
 		return True
 
-	def balances(self, pricer, bz=None):
+	def balances(self, pricer, bz=None, nodph=False):
 		if bz == "both":
 			return {
 				"actual": self.balances(pricer, self._balances),
@@ -76,7 +76,8 @@ class Accountant(Feeder):
 			total += amount
 		vz["diff"] = total
 		secs = (datetime.now() - self.starttime).seconds
-		vz["dph"] = secs and (total * 60 * 60 / secs)
+		if not nodph:
+			vz["dph"] = secs and (total * 60 * 60 / secs)
 		return vz
 
 	def orderCancelled(self, trade, backlogged=False):
