@@ -1,11 +1,12 @@
 import pprint, atexit, rel
-from .backend import log, start, getconf, predefs
+from .backend import log, start, predefs
 from .comptroller import Comptroller
 from .accountant import Accountant
 from .strategist import strategies
 from .manager import Manager
 from .trader import Trader
 from .base import Worker
+from .config import config
 
 VERBOSE = False
 
@@ -127,7 +128,7 @@ class Office(Worker):
 		return True
 
 def getOffice(**kwargs):
-	office = Office(**(kwargs or getconf()))
+	office = Office(**(kwargs or config.select()))
 	atexit.register(office.teardown)
 	return office
 

@@ -49,46 +49,6 @@ def gemget(path, cb, params={}):
 def gemtrade(trade, cb=spew):
 	gemget("/v1/order/new", cb, trade)
 
-def getconf():
-	from cantools.util.io import selnum
-	print("noting Office defaults (%s), please select a configuration from the following presets.\n"%(predefs,))
-	return selnum(presets)
-
-def curconf():
-	from .comptroller import ACTIVES_ALLOWED, LIVE
-	from .office import VERBOSE
-	from .base import UNSPAMMED
-	from .strategy import base, rsi, slosh
-	return {
-	    "comptroller": {
-	        "actives": ACTIVES_ALLOWED,
-	        "live": LIVE
-	    },
-	    "backend": {
-	        "staging": STAGING
-	    },
-	    "office": {
-	        "verbose": VERBOSE
-	    },
-	    "base": {
-	        "unspammed": UNSPAMMED
-	    },
-	    "strategy": {
-	        "base": {
-	            "inner": base.INNER,
-	            "outer": base.OUTER,
-	            "loud": base.LOUD
-	        },
-	        "rsi": {
-	            "size": rsi.TRADE_SIZE,
-	            "period": rsi.RSI_PERIOD
-	        },
-	        "slosh": {
-	            "vmult": slosh.VOLATILITY_MULT
-	        }
-	    }
-	}
-
 def crsub(streamname):
 	return {
 		"name": "SubscribeTicker",
