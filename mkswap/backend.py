@@ -38,8 +38,11 @@ presets = [{
 
 def gemget(path, cb, params={}):
 	from dez.http import post
-	post(GEMDOM, path, port=443, secure=True, headers=ask("credHead", path, params),
+	post(hosts["gemini"], path, port=443, secure=True, headers=ask("credHead", path, params),
 		cb=cb, timeout=10, json=True)
+
+def gemtrade(trade, cb=spew):
+	gemget("/v1/order/new", cb, trade)
 
 def getconf():
 	from cantools.util.io import selnum
