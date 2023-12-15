@@ -1,10 +1,15 @@
 import json
-from .backend import listen, emit, gemget
+from .backend import log, listen, emit, gemget, gemtrade
 from .base import Feeder
 
 LIVE = False
 orderNumber = 0
 ACTIVES_ALLOWED = 10
+
+def setLive(islive):
+	log("setLive(%s)"%(islive,))
+	global LIVE
+	LIVE = islive
 
 class Comptroller(Feeder):
 	def __init__(self, pricer):
@@ -103,7 +108,7 @@ class Comptroller(Feeder):
 		orderNumber += 1
 		self.actives[str(orderNumber)] = trade
 		trade["client_order_id"] = str(orderNumber)
-		LIVE and gemget("/v1/order/new", self.submitted, trade)
+		LIVE and gemtrade(trade, self.submitted)
 		emit("orderActive", trade)
 
 	def submitted(self, resp):
