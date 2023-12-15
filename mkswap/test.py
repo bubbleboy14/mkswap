@@ -53,8 +53,20 @@ def gemOrders():
 	echofeed("gemorders")
 	start()
 
+#
+# general
+#
+def confy():
+	from .backend import curconf, setStaging
+	from .comptroller import setActives
+	spew(curconf())
+	setStaging(False)
+	setActives(100)
+	spew(curconf())
+
 if __name__ == "__main__":
-	gemOrders()
+	confy()
+	#gemOrders()
 	#gemBalances()
 	#gemAccount()
 	#gemNotionalVolume()
