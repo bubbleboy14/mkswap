@@ -1,5 +1,5 @@
-import pprint, atexit
-from .backend import rel, start, getconf, predefs
+import pprint, atexit, rel
+from .backend import log, start, getconf, predefs
 from .comptroller import Comptroller
 from .accountant import Accountant
 from .strategist import strategies
@@ -8,6 +8,11 @@ from .trader import Trader
 from .base import Worker
 
 VERBOSE = False
+
+def setVerbose(isverb):
+	log("setVerbose(%s)"%(isverb,))
+	global VERBOSE
+	VERBOSE = isverb
 
 class Office(Worker):
 	def __init__(self, platform=predefs["platform"], symbols=[], strategy=predefs["strategy"], globalStrategy=False, globalTrade=False):
@@ -104,7 +109,7 @@ class Office(Worker):
 			score += s
 		lstr.extend(["\n- trade score:", rate, "(", score, ")"])
 		lstr.append("\n- balances are:")
-		lstr.append(pprint.pformat(self.accountant.balances(self.price)))
+		lstr.append(pprint.pformat(self.accountant.balances(self.price, nodph=not VERBOSE)))
 		self.log(*lstr)
 
 	def tick(self):
