@@ -95,33 +95,44 @@ def jsend(ws):
 	return _jsend
 
 STAGING = True
-DFP = "wss://api.dydx.exchange/v3/ws"
-GEMDOM = "api.gemini.com"
-if STAGING:
-	DFP = DFP.replace("api.", "api.stage.")
-	GEMDOM = GEMDOM.replace("api.", "api.sandbox.")
-platforms = {
+hosts = {
+	"gemini": "api.gemini.com",
+	"dydx": "api.dydx.exchange"
+}
+platforms = { # setStaging() sets dacc/dydx/gemorders feeds, gemini feeder
 	"dacc": {
-		"feed": DFP,
 		"subber": ddaccount,
 		"credHead": "/ws/accounts"
 	},
 	"dydx": {
-		"feed": DFP,
 		"subber": ddtrades # or ddorders
 	},
 	"chainrift": {
 		"feed": "wss://ws.chainrift.com/v1",
 		"subber": crsub
 	},
-	"gemini": {
-		"feeder": lambda sname : "wss://%s/v1/marketdata/%s"%(GEMDOM, sname)
-	},
+	"gemini": {},
 	"gemorders": {
-		"feed": "wss://%s/v1/order/events"%(GEMDOM,),
 		"credHead": "/v1/order/events"
 	}
 }
+
+def setStaging(stagflag=STAGING):
+	log("setStaging(%s)"%(stagflag,))
+	global STAGING
+	h = hosts
+	p = platforms
+	STAGING = stagflag
+	h["dydx"] = "api.dydx.exchange"
+	h["gemini"] = "api.gemini.com"
+	if STAGING:
+		h["dydx"] = h["dydx"].replace("api.", "api.stage.")
+		h["gemini"] = h["gemini"].replace("api.", "api.sandbox.")
+	p["dacc"]["feed"] = p["dydx"]["feed"] = "wss://%s/v3/ws"%(h["dydx"],)
+	p["gemini"]["feeder"] = lambda sname : "wss://%s/v1/marketdata/%s"%(h["gemini"], sname)
+	p["gemorders"]["feed"] = "wss://%s/v1/order/events"%(h["gemini"],)
+
+setStaging()
 
 def feed(platname, streamname=None, **cbs): # {on_message,on_error,on_open,on_close}
 	plat = platforms[platname]
