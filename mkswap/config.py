@@ -41,13 +41,13 @@ class Config(object):
 		}
 
 	def set(self, c):
-		from .comptroller import setActive
+		from .comptroller import setActives
 		from .office import setVerbose
 		from .base import setUnspammed
 		from .strategy import base, rsi, slosh
 		s = {
 		    "comptroller": {
-		        "actives": setActive
+		        "actives": setActives
 		    },
 		    "office": {
 		        "verbose": setVerbose
@@ -70,8 +70,9 @@ class Config(object):
 		        }
 		    }
 		}
+		print("CONFIG SET", c)
 		while type(c) is dict:
-			k = c.keys().pop()
+			k = list(c.keys()).pop()
 			s = s[k]
 			c = c[k]
 		s(c)
