@@ -73,7 +73,7 @@ class Slosh(Base):
 
 	def volatility(self, cur, sigma):
 		if sigma:
-			return (cur - self.averages["inner"]) / sigma
+			return (cur - self.averages["outer"]) / sigma
 		print("sigma is 0 - volatility() returning 0")
 		return 0
 
