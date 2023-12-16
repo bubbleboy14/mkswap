@@ -1,3 +1,5 @@
+from .backend import predefs, presets
+
 class Config(object):
 	def select(self):
 		from cantools.util.io import selnum
@@ -6,7 +8,7 @@ class Config(object):
 
 	def current(self):
 		from .comptroller import ACTIVES_ALLOWED, LIVE
-		from .office import VERBOSE
+		from .office import VERBOSE, STAGISH
 		from .base import UNSPAMMED
 		from .backend import STAGING
 		from .strategy import base, rsi, slosh
@@ -19,7 +21,8 @@ class Config(object):
 		        "staging": STAGING
 		    },
 		    "office": {
-		        "verbose": VERBOSE
+		        "verbose": VERBOSE,
+		        "stagish": STAGISH
 		    },
 		    "base": {
 		        "unspammed": UNSPAMMED
