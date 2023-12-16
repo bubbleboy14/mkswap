@@ -6,8 +6,9 @@ from .backend import start, setStaging, predefs, gemtrade
 from .agent import agencies
 
 class Cat(Worker):
-	def __init__(self, symbols=["ETHUSD", "BTCUSD"], platform=predefs["platform"]):
+	def __init__(self, relay=gemtrade, symbols=["ETHUSD", "BTCUSD"], platform=predefs["platform"]):
 		setStaging(False)
+		self.relay = relay
 		self.symbols = symbols
 		self.platform = platform
 		self.watchers = {}
@@ -27,14 +28,14 @@ class Cat(Worker):
 	def churn(self):
 		if self.pending:
 			self.relayed += 1
-			gemtrade(self.pending.pop(0))
+			self.relay(self.pending.pop(0))
 		return True
 
 	def setWatcher(self, symbol):
 		self.watchers[symbol] = Observer(self.platform,
-			symbol, lambda event : self.relay(symbol, event))
+			symbol, lambda event : self.intake(symbol, event))
 
-	def relay(self, symbol, event):
+	def intake(self, symbol, event):
 #		self.log("relay", symbol, event)
 		self.pending.append({
 			"symbol": symbol,
