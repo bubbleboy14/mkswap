@@ -109,10 +109,10 @@ class Slosh(Base):
 		self.averages["total"] = self.ave()
 		self.averages["inner"] = self.ave(INNER)
 		self.averages["outer"] = self.ave(OUTER)
-		if self.ratios["current"]:
-			self.hilo(cur)
-		else:
+		if not self.ratios["current"]:
 			self.ratios["current"] = self.ratios["high"] = self.ratios["low"] = cur
+		elif len(self.allratios) >= OUTER:
+			self.hilo(cur)
 		self.log(self.ratios, "\n", self.averages)
 
 	def compare(self, symbol, side, price, eobj, history):
