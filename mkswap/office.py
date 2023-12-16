@@ -1,5 +1,5 @@
 import pprint, atexit, rel
-from .backend import log, start, predefs
+from .backend import log, start, predefs, setStaging
 from .comptroller import Comptroller
 from .accountant import Accountant
 from .strategist import strategies
@@ -9,11 +9,17 @@ from .base import Worker
 from .config import config
 
 VERBOSE = False
+STAGISH = False
 
 def setVerbose(isverb):
 	log("setVerbose(%s)"%(isverb,))
 	global VERBOSE
 	VERBOSE = isverb
+
+def setStagish(stag):
+	log("setStagish(%s)"%(stag,))
+	global STAGISH
+	STAGISH = stag
 
 class Office(Worker):
 	def __init__(self, platform=predefs["platform"], symbols=[], strategy=predefs["strategy"], globalStrategy=False, globalTrade=False):
@@ -25,11 +31,13 @@ class Office(Worker):
 		strat = strategies[strategy]
 		self.stratname = strategy
 		self.strategist = globalStrategy and strat(symbols, trec)
+		STAGISH and setStaging(False)
 		self.managers = {}
 		for symbol in symbols:
 			self.managers[symbol] = Manager(platform, symbol, self.review,
 				self.strategist or strat(symbol, trec), self.trader)
 		self.log("initialized %s managers"%(len(symbols),))
+		STAGISH and setStaging(True)
 		self.comptroller = Comptroller(self.price)
 		rel.timeout(1, self.tick)
 
