@@ -140,6 +140,10 @@ def getOffice(**kwargs):
 	atexit.register(office.teardown)
 	return office
 
-if __name__ == "__main__":
+def load():
+	config.init()
 	getOffice()
 	start()
+
+if __name__ == "__main__":
+	load()
