@@ -81,27 +81,23 @@ class Accountant(Feeder):
 		return vz
 
 	def orderCancelled(self, trade, backlogged=False):
-		if self.updateBalances(trade, revert=True):
-			self.counts["cancelled"] += 1
-			if not backlogged:
-				self.counts["active"] -= 1
-			self.log("order cancelled!")
-		else:
-			self.log("balances out of sync!")
+		self.updateBalances(trade, revert=True, force=True)
+		self.counts["cancelled"] += 1
+		if not backlogged:
+			self.counts["active"] -= 1
+		self.log("order cancelled!")
 
 	def orderFilled(self, trade):
-		if self.updateBalances(trade, self._balances):
-			self.counts["filled"] += 1
-			self.counts["active"] -= 1
-			self.log("order filled!")
-		else:
-			self.log("balances out of sync!")
+		self.updateBalances(trade, self._balances, force=True)
+		self.counts["filled"] += 1
+		self.counts["active"] -= 1
+		self.log("order filled!")
 
 	def orderActive(self, trade):
 		self.log("order active!")
 		self.counts["active"] += 1
 
-	def updateBalances(self, prop, bz=None, revert=False):
+	def updateBalances(self, prop, bz=None, revert=False, force=False):
 		bz = bz or self._theoretical
 		s = rs = float(prop.get("amount", 10))
 		v = rv = s * float(prop["price"])
@@ -111,13 +107,13 @@ class Accountant(Feeder):
 		sym1, sym2 = self.pair(prop["symbol"])
 		self.log("balances", bz)
 		if prop["side"] == "buy":
-			if v > bz[sym2]:
+			if v > bz[sym2] and not force:
 				self.log("not enough %s!"%(sym2,))
 				return False
 			bz[sym2] -= rv
 			bz[sym1] += rs
 		else:
-			if s > bz[sym1]:
+			if s > bz[sym1] and not force:
 				self.log("not enough %s!"%(sym1,))
 				return False
 			bz[sym2] += rv
