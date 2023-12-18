@@ -56,6 +56,9 @@ class Accountant(Feeder):
 			self.counts["filled"] += len(ask("fills", sym))
 		return True
 
+	def fullSym(self, sym):
+		return sym + self._usd
+
 	def balances(self, pricer, bz=None, nodph=False):
 		if bz == "both":
 			return {
@@ -70,7 +73,7 @@ class Accountant(Feeder):
 			amount = bz[sym] - obz[sym]
 			v = vz[sym] = bz[sym]
 			if amount and sym != "USD":
-				price = pricer(sym + self._usd)
+				price = pricer(self.fullSym(sym))
 				amount *= price
 				vz[sym] = "%s ($%s)"%(v, v * price)
 			total += amount
