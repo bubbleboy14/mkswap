@@ -3,6 +3,7 @@ from .backend import log, start, predefs, setStaging
 from .comptroller import Comptroller
 from .accountant import Accountant
 from .strategist import strategies
+from .harvester import Harvester
 from .manager import Manager
 from .trader import Trader
 from .base import Worker
@@ -39,6 +40,7 @@ class Office(Worker):
 		self.log("initialized %s managers"%(len(symbols),))
 		STAGISH and setStaging(True)
 		self.comptroller = Comptroller(self.price)
+		self.harvester = Harvester(self)
 		rel.timeout(1, self.tick)
 
 	def teardown(self):
