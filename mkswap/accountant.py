@@ -13,6 +13,7 @@ class Accountant(Feeder):
 			"cancelled": 0
 		}
 		self.syms = []
+		self._skimmed = {}
 		self._obals = {}
 		self._theoretical = {}
 		self._balances = balances
@@ -80,6 +81,8 @@ class Accountant(Feeder):
 		vz["diff"] = total
 		secs = (datetime.now() - self.starttime).seconds
 		if not nodph:
+			for sym in self._skimmed:
+				total += self._skimmed[sym] * pricer(self.fullSym(sym))
 			vz["dph"] = secs and (total * 60 * 60 / secs)
 		return vz
 
@@ -101,7 +104,11 @@ class Accountant(Feeder):
 		self.counts["active"] += 1
 
 	def deduct(self, sym, amount):
-		self.log("deducting", amount, "from", sym)
+		skz = self._skimmed
+		if (sym not in skz):
+			skz[sym] = 0;
+		skz[sym] += amount
+		self.log("deducting", amount, "from", sym, "- now @", skz[sym])
 		self._theoretical[sym] -= amount
 		self._balances[sym] -= amount
 
