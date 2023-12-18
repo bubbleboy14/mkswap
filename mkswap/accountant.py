@@ -97,6 +97,11 @@ class Accountant(Feeder):
 		self.log("order active!")
 		self.counts["active"] += 1
 
+	def deduct(self, sym, amount):
+		self.log("deducting", amount, "from", sym)
+		self._theoretical[sym] -= amount
+		self._balances[sym] -= amount
+
 	def updateBalances(self, prop, bz=None, revert=False, force=False):
 		bz = bz or self._theoretical
 		s = rs = float(prop.get("amount", 10))

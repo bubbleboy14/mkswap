@@ -68,6 +68,7 @@ class Harvester(Worker):
 		memo = "skim #%s"%(self.hauls,)
 		self.log(memo, ":", amount, self.symbol, "- now @",
 			self.harvest, "($%s)"%(round(self.harvest * price, 2),))
+		self.accountant.deduct(self.symbol, amount)
 		gemget("/v1/withdraw/%s"%(self.symbol,), self.skimmed, {
 			"memo": memo,
 			"amount": str(amount),
