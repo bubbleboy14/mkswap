@@ -9,14 +9,14 @@ SILENT_REQUEST = False
 #
 # mkswap tests
 #
-def get(path, ag=None):
+def get(path, ag=None, dispatch=True):
 	from dez.http import fetch, post
 	getter = (plat == "dydx") and fetch or post
 	host = hosts[plat]
 	ag = ag or Agent()
 	hz = ag.credHead(path)
 	print("fetching:", host, path)
-	getter(host, path, port=443, secure=True, headers=hz, cb=spew, dispatch=True, silent=SILENT_REQUEST)
+	getter(host, path, port=443, secure=True, headers=hz, cb=spew, dispatch=dispatch, silent=SILENT_REQUEST)
 
 def accountant():
 	acc = Accountant()
@@ -53,6 +53,9 @@ def gemOrders():
 	echofeed("gemorders")
 	start()
 
+def gemAddresses(network="bitcoin"):
+	get("/v1/addresses/%s"%(network,))
+
 #
 # general
 #
@@ -65,7 +68,8 @@ def confy():
 	spew(curconf())
 
 if __name__ == "__main__":
-	confy()
+	gemAddresses()
+	#confy()
 	#gemOrders()
 	#gemBalances()
 	#gemAccount()

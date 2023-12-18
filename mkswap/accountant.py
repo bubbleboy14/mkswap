@@ -13,6 +13,7 @@ class Accountant(Feeder):
 			"cancelled": 0
 		}
 		self.syms = []
+		self._skimmed = {}
 		self._obals = {}
 		self._theoretical = {}
 		self._balances = balances
@@ -56,6 +57,9 @@ class Accountant(Feeder):
 			self.counts["filled"] += len(ask("fills", sym))
 		return True
 
+	def fullSym(self, sym):
+		return sym + self._usd
+
 	def balances(self, pricer, bz=None, nodph=False):
 		if bz == "both":
 			return {
@@ -70,13 +74,15 @@ class Accountant(Feeder):
 			amount = bz[sym] - obz[sym]
 			v = vz[sym] = bz[sym]
 			if amount and sym != "USD":
-				price = pricer(sym + self._usd)
+				price = pricer(self.fullSym(sym))
 				amount *= price
 				vz[sym] = "%s ($%s)"%(v, v * price)
 			total += amount
 		vz["diff"] = total
 		secs = (datetime.now() - self.starttime).seconds
 		if not nodph:
+			for sym in self._skimmed:
+				total += self._skimmed[sym] * pricer(self.fullSym(sym))
 			vz["dph"] = secs and (total * 60 * 60 / secs)
 		return vz
 
@@ -96,6 +102,15 @@ class Accountant(Feeder):
 	def orderActive(self, trade):
 		self.log("order active!")
 		self.counts["active"] += 1
+
+	def deduct(self, sym, amount):
+		skz = self._skimmed
+		if (sym not in skz):
+			skz[sym] = 0;
+		skz[sym] += amount
+		self.log("deducting", amount, "from", sym, "- now @", skz[sym])
+		self._theoretical[sym] -= amount
+		self._balances[sym] -= amount
 
 	def updateBalances(self, prop, bz=None, revert=False, force=False):
 		bz = bz or self._theoretical
