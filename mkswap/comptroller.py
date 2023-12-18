@@ -21,7 +21,7 @@ class Comptroller(Feeder):
 		self.actives = {}
 		self.backlog = []
 		self.pricer = pricer
-		listen("priceChange", self.curate)
+		listen("priceChange", self.prune)
 		listen("enqueueOrder", self.enqueue)
 		self.feed("gemorders")
 
@@ -59,7 +59,7 @@ class Comptroller(Feeder):
 			trade["score"] *= -1
 		return trade["score"]
 
-	def curate(self):
+	def prune(self):
 		icount = len(self.backlog)
 		# backlog: rate, filter, and sort
 		for trade in self.backlog:
@@ -81,7 +81,7 @@ class Comptroller(Feeder):
 				skips += 1
 		for tnum in cancels:
 			self.cancel(tnum)
-		self.log("curate() pruned:", blsremoved, "backlogged - now at",
+		self.log("prune():", blsremoved, "backlogged - now at",
 			len(self.backlog), "; and", len(cancels), "actives - now at", len(self.actives.keys()),
 			"; skipped", skips, "uninitialized orders")
 
