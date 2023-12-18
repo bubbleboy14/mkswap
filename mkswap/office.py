@@ -66,10 +66,11 @@ class Office(Worker):
 		acc = self.accountant
 		com = self.comptroller
 		return {
-			"counts": acc.counts,
+			"orders": acc.counts,
 			"actives": com.actives,
 			"backlog": com.backlog,
 			"strategists": self.stratuses(),
+			"harvester": self.harvester.status(),
 			"balances": acc.balances(self.price, "both")
 		}
 

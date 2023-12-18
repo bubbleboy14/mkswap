@@ -1,6 +1,6 @@
 import rel
 from .base import Worker
-from .backend import gemget
+from .backend import log, gemget
 
 BATCH = 10
 BALANCE = False
@@ -35,6 +35,12 @@ class Harvester(Worker):
 		self.accountant = office.accountant
 		gemget("/v1/addresses/%s"%(NETWORK,), self.setStorehouse)
 		rel.timeout(10, self.measure)
+
+	def status(self):
+		return {
+			"hauls": self.hauls,
+			"harvest": self.harvest
+		}
 
 	def setStorehouse(self, resp):
 		self.storehouse = resp[0]["address"]
