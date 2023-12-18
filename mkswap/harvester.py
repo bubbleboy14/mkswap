@@ -32,8 +32,9 @@ class Harvester(Worker):
 		self.harvest = 0
 		self.pricer = office.price
 		self.symbol = net2sym[NETWORK]
+		self.bigSym = self.symbol.upper()
 		self.accountant = office.accountant
-		self.fullSym = self.accountant.fullSym(self.symbol)
+		self.fullSym = self.accountant.fullSym(self.bigSym)
 		gemget("/v1/addresses/%s"%(NETWORK,), self.setStorehouse)
 		rel.timeout(10, self.measure)
 
@@ -63,7 +64,7 @@ class Harvester(Worker):
 	def skim(self, bals):
 		price = self.pricer(self.fullSym)
 		amount = round(BATCH / price, 5)
-		bal = bals["actual"][self.symbol]
+		bal = bals["actual"][self.bigSym]
 		if amount > bal:
 			self.log("balance (%s) < skim (%s)"%(bal, amount))
 			if bal <= 0:
@@ -75,7 +76,7 @@ class Harvester(Worker):
 		memo = "skim #%s"%(self.hauls,)
 		self.log(memo, ":", amount, self.symbol, "- now @",
 			self.harvest, "($%s)"%(round(self.harvest * price, 2),))
-		self.accountant.deduct(self.symbol, amount)
+		self.accountant.deduct(self.bigSym, amount)
 		gemget("/v1/withdraw/%s"%(self.symbol,), self.skimmed, {
 			"memo": memo,
 			"amount": str(amount),
