@@ -112,7 +112,10 @@ class Accountant(Feeder):
 		self._theoretical[sym] -= amount
 		self._balances[sym] -= amount
 
-	def updateBalances(self, prop, bz=None, revert=False, force=False):
+	def realistic(self, prop):
+		return self.updateBalances(prop, self._balances, test=True)
+
+	def updateBalances(self, prop, bz=None, revert=False, force=False, test=False):
 		bz = bz or self._theoretical
 		s = rs = float(prop.get("amount", 10))
 		v = rv = s * float(prop["price"])
@@ -125,20 +128,22 @@ class Accountant(Feeder):
 			if v > bz[sym2] and not force:
 				self.log("not enough %s!"%(sym2,))
 				return False
-			bz[sym2] -= rv
-			bz[sym1] += rs
+			if not test:
+				bz[sym2] -= rv
+				bz[sym1] += rs
 		else:
 			if s > bz[sym1] and not force:
 				self.log("not enough %s!"%(sym1,))
 				return False
-			bz[sym2] += rv
-			bz[sym1] -= rs
+			if not test:
+				bz[sym2] += rv
+				bz[sym1] -= rs
 		return True
 
 	def affordable(self, prop):
 		if prop["symbol"] not in self.syms:
 			self.syms.append(prop["symbol"])
-		if self.updateBalances(prop):
+		if self.realistic(prop) and self.updateBalances(prop):
 			self.counts["approved"] += 1
 			self.log("trade approved!")
 			return True
