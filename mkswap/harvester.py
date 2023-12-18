@@ -64,7 +64,7 @@ class Harvester(Worker):
 	def skim(self, bals):
 		price = self.pricer(self.fullSym)
 		amount = round(BATCH / price, 5)
-		bal = bals["actual"][self.bigSym]
+		bal = float(bals["actual"][self.bigSym].split(" ").pop(0))
 		if amount > bal:
 			self.log("balance (%s) < skim (%s)"%(bal, amount))
 			if bal <= 0:

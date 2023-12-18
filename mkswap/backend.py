@@ -6,7 +6,7 @@ predefs = {
 	"strategy": "rsi",
 	"platform": "gemini",
 	"balances": {
-		"USD": 100,
+		"USD": 200,
 		"ETH": 0.05,
 		"BTC": 0.0025
 	}
