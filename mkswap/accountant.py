@@ -63,8 +63,8 @@ class Accountant(Feeder):
 	def balances(self, pricer, bz=None, nodph=False):
 		if bz == "both":
 			return {
-				"actual": self.balances(pricer, self._balances),
-				"theoretical": self.balances(pricer)
+				"actual": self.balances(pricer, self._balances, nodph),
+				"theoretical": self.balances(pricer, nodph=nodph)
 			}
 		total = 0
 		bz = bz or self._theoretical
