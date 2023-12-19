@@ -1,10 +1,12 @@
 import rel
+from rel.util import ask, emit
 from .base import Worker
 from .backend import log, gemget
 
 BATCH = 10
+BOTTOM = 50
 SKIM = False
-BALANCE = False
+BALANCE = True
 NETWORK = "bitcoin" # ethereum available on production...
 
 net2sym = {
@@ -12,15 +14,20 @@ net2sym = {
 	"ethereum": "eth"
 }
 
-def setSkim(skim):
-	log("setSkim(%s)"%(skim,))
-	global SKIM
-	SKIM = skim
-
 def setBatch(batch):
 	log("setBatch(%s)"%(batch,))
 	global BATCH
 	BATCH = batch
+
+def setBottom(bottom):
+	log("setBottom(%s)"%(bottom,))
+	global BOTTOM
+	BOTTOM = bottom
+
+def setSkim(skim):
+	log("setSkim(%s)"%(skim,))
+	global SKIM
+	SKIM = skim
 
 def setBalance(shouldBal):
 	log("setBalance(%s)"%(shouldBal,))
@@ -36,6 +43,7 @@ class Harvester(Worker):
 	def __init__(self, office):
 		self.hauls = 0
 		self.harvest = 0
+		self.office = office
 		self.pricer = office.price
 		self.symbol = net2sym[NETWORK]
 		self.bigSym = self.symbol.upper()
@@ -54,7 +62,7 @@ class Harvester(Worker):
 		self.storehouse = resp[0]["address"]
 
 	def measure(self):
-		if SKIM or BALANCE:
+		if SKIM or BALANCE and self.office.hasMan(self.fullSym):
 			bals = self.accountant.balances(self.pricer, "both", True)
 			actual = bals["actual"]["diff"]
 			target = BATCH + self.harvest * self.pricer(self.fullSym)
@@ -66,7 +74,31 @@ class Harvester(Worker):
 		return True
 
 	def balance(self, balances):
-		self.log("balance (unimplemented)")
+		self.log("balance(%s)"%(balances,))
+		abals = balances["actual"]
+		for sym in abals:
+			if sym == "diff":
+				continue
+			if sym == "USD": # handle later...
+				continue
+			fs = self.accountant.fullSym(sym)
+			bal = abals[sym]
+			if type(bal) is float:
+				bal *= self.pricer(fs)
+			else:
+				bal = float(bal[:-1].split(" ($").pop())
+			diff = bal - BOTTOM
+			if diff < 0:
+				price = self.bestPrice(fs)
+				emit("balanceTrade", {
+					"symbol": fs,
+					"side": "buy",
+					"price": price,
+					"amount": diff / price
+				})
+
+	def bestPrice(self, sym, side):
+		return ask("best", sym, side) or round(self.pricer(sym), 6)
 
 	def skimmed(self, resp):
 		self.log("skimmed #%s:"%(self.hauls,), resp["message"])
