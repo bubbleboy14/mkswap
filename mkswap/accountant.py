@@ -74,6 +74,8 @@ class Accountant(Feeder):
 			amount = bz[sym] - obz[sym]
 			v = vz[sym] = bz[sym]
 			if amount and sym != "USD":
+				if sym in self._skimmed:
+					amount += self._skimmed[sym]
 				price = pricer(self.fullSym(sym))
 				amount *= price
 				vz[sym] = "%s ($%s)"%(v, v * price)
@@ -81,8 +83,6 @@ class Accountant(Feeder):
 		vz["diff"] = total
 		secs = (datetime.now() - self.starttime).seconds
 		if not nodph:
-			for sym in self._skimmed:
-				total += self._skimmed[sym] * pricer(self.fullSym(sym))
 			vz["dph"] = secs and (total * 60 * 60 / secs)
 		return vz
 
