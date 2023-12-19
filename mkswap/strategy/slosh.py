@@ -4,11 +4,17 @@ from ..backend import log
 from .base import Base, INNER, OUTER, LONG
 
 VOLATILITY_MULT = 8
+VOLATILITY_CUTOFF = 0.5
 
 def setVolatilityMult(vmult):
 	log("setVolatilityMult(%s)"%(vmult,))
 	global VOLATILITY_MULT
 	VOLATILITY_MULT = vmult
+
+def setVolatilityCutoff(cutoff):
+	log("setVolatilityCutoff(%s)"%(cutoff,))
+	global VOLATILITY_CUTOFF
+	VOLATILITY_CUTOFF = cutoff
 
 class Slosh(Base):
 	def __init__(self, symbol, recommender=None):
@@ -95,7 +101,7 @@ class Slosh(Base):
 		elif cur < rz["low"]:
 			self.log("ratio is new low:", cur)
 			rz["low"] = cur;
-		if abs(volatility) > 0.5:
+		if abs(volatility) > VOLATILITY_CUTOFF:
 			self.swap(volatility * VOLATILITY_MULT)
 
 	def tick(self, history=None):

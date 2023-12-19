@@ -46,7 +46,8 @@ class Config(object):
 		            "period": rsi.RSI_PERIOD
 		        },
 		        "slosh": {
-		            "vmult": slosh.VOLATILITY_MULT
+		            "vmult": slosh.VOLATILITY_MULT,
+		            "vcutoff": slosh.VOLATILITY_CUTOFF
 		        }
 		    }
 		}
@@ -92,7 +93,8 @@ class Config(object):
 		            "period": rsi.setPeriod
 		        },
 		        "slosh": {
-		            "vmult": slosh.setVolatilityMult
+		            "vmult": slosh.setVolatilityMult,
+		            "vcutoff": slosh.setVolatilityCutoff
 		        }
 		    }
 		}
