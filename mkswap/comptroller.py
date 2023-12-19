@@ -1,10 +1,10 @@
-import json
+import json, random
 from .backend import log, listen, emit, gemget, gemtrade
 from .base import Feeder
 
 LIVE = False
-orderNumber = 0
 ACTIVES_ALLOWED = 10
+orderNumber = random.randint(0, 500)
 
 def setLive(islive):
 	log("setLive(%s)"%(islive,))
