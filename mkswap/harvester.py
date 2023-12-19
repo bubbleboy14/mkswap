@@ -3,6 +3,7 @@ from .base import Worker
 from .backend import log, gemget
 
 BATCH = 10
+SKIM = False
 BALANCE = False
 NETWORK = "bitcoin" # ethereum available on production...
 
@@ -10,6 +11,11 @@ net2sym = {
 	"bitcoin": "btc",
 	"ethereum": "eth"
 }
+
+def setSkim(skim):
+	log("setSkim(%s)"%(skim,))
+	global SKIM
+	SKIM = skim
 
 def setBatch(batch):
 	log("setBatch(%s)"%(batch,))
@@ -50,9 +56,10 @@ class Harvester(Worker):
 	def measure(self):
 		bals = self.accountant.balances(self.pricer, "both", True)
 		self.log("measure", bals)
-		if bals["actual"]["diff"] > BATCH:
+		if bals["actual"]["diff"] > BATCH + self.harvest * self.pricer(self.fullSym):
+			self.log("full!")
 			BALANCE and self.balance(bals)
-			self.skim(bals)
+			SKIM and self.skim(bals)
 		return True
 
 	def balance(self, balances):
