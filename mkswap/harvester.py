@@ -54,12 +54,15 @@ class Harvester(Worker):
 		self.storehouse = resp[0]["address"]
 
 	def measure(self):
-		bals = self.accountant.balances(self.pricer, "both", True)
-		self.log("measure", bals)
-		if bals["actual"]["diff"] > BATCH + self.harvest * self.pricer(self.fullSym):
-			self.log("full!")
-			BALANCE and self.balance(bals)
-			SKIM and self.skim(bals)
+		if SKIM or BALANCE:
+			bals = self.accountant.balances(self.pricer, "both", True)
+			actual = bals["actual"]["diff"]
+			target = BATCH + self.harvest * self.pricer(self.fullSym)
+			self.log("measure():", actual, "actual;", target, "target.", bals)
+			if actual > target:
+				self.log("full!")
+				BALANCE and self.balance(bals)
+				SKIM and self.skim(bals)
 		return True
 
 	def balance(self, balances):
