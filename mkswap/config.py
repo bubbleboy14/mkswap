@@ -6,7 +6,7 @@ class Config(object):
 		return selnum(presets)
 
 	def current(self):
-		from .comptroller import ACTIVES_ALLOWED, LIVE
+		from .comptroller import ACTIVES_ALLOWED, PRUNE_LIMIT, LIVE
 		from .office import VERBOSE, STAGISH
 		from .base import UNSPAMMED
 		from .backend import STAGING
@@ -21,6 +21,7 @@ class Config(object):
 			},
 		    "comptroller": {
 		        "actives": ACTIVES_ALLOWED,
+		        "prunelimit": PRUNE_LIMIT,
 		        "live": LIVE
 		    },
 		    "backend": {
@@ -51,7 +52,7 @@ class Config(object):
 		}
 
 	def set(self, c):
-		from .comptroller import setActives, setLive
+		from .comptroller import setPruneLimit, setActives, setLive
 		from .office import setVerbose, setStagish
 		from .backend import setStaging
 		from .base import setUnspammed
@@ -66,7 +67,8 @@ class Config(object):
 			},
 		    "comptroller": {
 		        "live": setLive,
-		        "actives": setActives
+		        "actives": setActives,
+		        "prunelimit": setPruneLimit
 		    },
 		    "office": {
 		        "verbose": setVerbose,

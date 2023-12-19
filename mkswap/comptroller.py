@@ -1,8 +1,9 @@
-import json, random
+import json, random, rel
 from .backend import log, listen, emit, gemget, gemtrade
 from .base import Feeder
 
 LIVE = False
+PRUNE_LIMIT = 0.1
 ACTIVES_ALLOWED = 10
 orderNumber = random.randint(0, 500)
 
@@ -10,6 +11,11 @@ def setLive(islive):
 	log("setLive(%s)"%(islive,))
 	global LIVE
 	LIVE = islive
+
+def setPruneLimit(pl):
+	log("setPruneLimit(%s)"%(pl,))
+	global PRUNE_LIMIT
+	PRUNE_LIMIT = pl
 
 def setActives(actall):
 	log("setActives(%s)"%(actall,))
@@ -24,6 +30,7 @@ class Comptroller(Feeder):
 		listen("priceChange", self.prune)
 		listen("enqueueOrder", self.enqueue)
 		self.feed("gemorders")
+		rel.timeout(10, self.longPrune)
 
 	def proc(self, msg):
 		coi = msg.get("client_order_id", None)
@@ -59,6 +66,30 @@ class Comptroller(Feeder):
 			trade["score"] *= -1
 		return trade["score"]
 
+	def pruneActives(self, limit=None):
+		cancels = []
+		skips = 0
+		for tnum in self.actives:
+			trade = self.actives[tnum]
+			if "order_id" in trade:
+				s = self.score(trade)
+				toofar = False
+				if limit:
+					ratio = float(trade["price"]) / self.pricer(trade["symbol"])
+					toofar = abs(1 - ratio) > limit
+				if s < 0 or toofar:
+					cancels.append(tnum)
+			else:
+				skips += 1
+		for tnum in cancels:
+			self.cancel(tnum)
+		return skips, cancels
+
+	def longPrune(self):
+		skips, cancels = self.pruneActives(PRUNE_LIMIT)
+		self.log("longPrune():", len(cancels), "cancels;", skips, "skips")
+		return True
+
 	def prune(self):
 		icount = len(self.backlog)
 		# backlog: rate, filter, and sort
@@ -69,18 +100,7 @@ class Comptroller(Feeder):
 		blsremoved = icount - len(self.backlog)
 		self.backlog.sort(key=lambda t : t["score"])
 		# actives: rate and cancel (as necessary)
-		cancels = []
-		skips = 0
-		for tnum in self.actives:
-			trade = self.actives[tnum]
-			if "order_id" in trade:
-				self.score(trade)
-				if trade["score"] < 0:
-					cancels.append(tnum)
-			else:
-				skips += 1
-		for tnum in cancels:
-			self.cancel(tnum)
+		skips, cancels = self.pruneActives()
 		self.log("prune():", blsremoved, "backlogged - now at",
 			len(self.backlog), "; and", len(cancels), "actives - now at", len(self.actives.keys()),
 			"; skipped", skips, "uninitialized orders")
