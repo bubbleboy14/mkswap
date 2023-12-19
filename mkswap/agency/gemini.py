@@ -7,6 +7,7 @@ class Gemini(Worker):
 		self.apiKey = memget("gemini key")
 		self.account = memget("gemini account")
 		self.secret = memget("gemini secret").encode()
+		listen("balanceTrade", self.trade)
 		listen("credHead", self.credHead)
 		emit("clientReady")
 
