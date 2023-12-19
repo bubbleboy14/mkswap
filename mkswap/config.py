@@ -37,6 +37,7 @@ class Config(object):
 		        "base": {
 		            "inner": base.INNER,
 		            "outer": base.OUTER,
+		            "long": base.LONG,
 		            "loud": base.LOUD
 		        },
 		        "rsi": {
@@ -81,6 +82,7 @@ class Config(object):
 		        "base": {
 		            "inner": base.setInner,
 		            "outer": base.setOuter,
+		            "long": base.setLong,
 		            "loud": base.setLoud
 		        },
 		        "rsi": {

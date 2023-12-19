@@ -1,4 +1,4 @@
-from .base import Base, INNER, OUTER
+from .base import Base, OUTER, LONG
 from ..backend import log
 
 TRADE_SIZE = 10
@@ -46,11 +46,11 @@ class RSI(Base):
 		hs.append(self.latest)
 		hwa.append(self.weighted_average(hs))
 		self.log(side, "weighted average (full):", hwa[-1])
-		if len(hs) >= OUTER:
-			w_far = self.weighted_average(hs[-OUTER:])
-			w_near = self.weighted_average(hs[-INNER:])
-			self.log(side, "far average (last", OUTER, "):", w_far)
-			self.log(side, "near average (last", INNER, "):", w_near)
+		if len(hs) >= LONG:
+			w_far = self.weighted_average(hs[-LONG:])
+			w_near = self.weighted_average(hs[-OUTER:])
+			self.log(side, "far average (last", LONG, "):", w_far)
+			self.log(side, "near average (last", OUTER, "):", w_near)
 			rec = False
 			if w_near > w_far:
 				self.log("near average > far average -> upswing!")

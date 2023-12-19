@@ -1,7 +1,8 @@
 from ..backend import log
 
-INNER = 10
-OUTER = 40
+INNER = 3
+OUTER = 10
+LONG = 40
 LOUD = True
 
 def setInner(inner):
@@ -13,6 +14,11 @@ def setOuter(outer):
 	log("setOuter(%s)"%(outer,))
 	global OUTER
 	OUTER = outer
+
+def setLong(howlong):
+	log("setLong(%s)"%(howlong,))
+	global LONG
+	LONG = howlong
 
 def setLoud(loud):
 	log("setLoud(%s)"%(loud,))

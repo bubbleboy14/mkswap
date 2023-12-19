@@ -1,7 +1,7 @@
 from math import sqrt
 from rel.util import emit
 from ..backend import log
-from .base import Base, INNER, OUTER
+from .base import Base, INNER, OUTER, LONG
 
 VOLATILITY_MULT = 10
 
@@ -19,9 +19,10 @@ class Slosh(Base):
 			"low": None
 		}
 		self.averages = {
+			"total": None,
 			"inner": None,
 			"outer": None,
-			"total": None
+			"long": None
 		}
 		self.allratios = []
 		self.histories = {}
@@ -109,6 +110,7 @@ class Slosh(Base):
 		self.averages["total"] = self.ave()
 		self.averages["inner"] = self.ave(INNER)
 		self.averages["outer"] = self.ave(OUTER)
+		self.averages["long"] = self.ave(LONG)
 		if not self.ratios["current"]:
 			self.ratios["current"] = self.ratios["high"] = self.ratios["low"] = cur
 		elif len(self.allratios) >= OUTER:
