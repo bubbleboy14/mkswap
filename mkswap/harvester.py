@@ -43,6 +43,7 @@ class Harvester(Worker):
 	def __init__(self, office):
 		self.hauls = 0
 		self.harvest = 0
+		self.refills = 0
 		self.office = office
 		self.pricer = office.price
 		self.symbol = net2sym[NETWORK]
@@ -55,10 +56,12 @@ class Harvester(Worker):
 	def status(self):
 		return {
 			"hauls": self.hauls,
-			"harvest": self.harvest
+			"harvest": self.harvest,
+			"refills": self.refills
 		}
 
 	def setStorehouse(self, resp):
+		self.log("setStorehouse()", resp)
 		self.storehouse = resp[0]["address"]
 
 	def measure(self):
@@ -69,36 +72,64 @@ class Harvester(Worker):
 			self.log("measure():", actual, "actual;", target, "target.", bals)
 			if actual > target:
 				self.log("full!")
-				BALANCE and self.balance(bals)
 				SKIM and self.skim(bals)
+			BALANCE and self.balance(bals)
 		return True
 
 	def balance(self, balances):
-		self.log("balance(%s)"%(balances,))
 		abals = balances["actual"]
+		sellsym = None
+		ssbal = None
 		for sym in abals:
-			if sym == "diff":
-				continue
-			if sym == "USD": # handle later...
+			if sym == "diff" or sym == "USD": # USD handled below
 				continue
 			fs = self.accountant.fullSym(sym)
-			bal = abals[sym]
-			if type(bal) is float:
-				bal *= self.pricer(fs)
-			else:
-				bal = float(bal[:-1].split(" ($").pop())
-			diff = bal - BOTTOM
-			if diff < 0:
-				price = self.bestPrice(fs)
-				emit("balanceTrade", {
-					"symbol": fs,
-					"side": "buy",
-					"price": price,
-					"amount": diff / price
-				})
+			bal = self.office.hasMan(fs) and self.getUSD(fs, abals[sym])
+			if bal == None:
+				self.log("no balance for", fs)
+				continue
+			self.log("balance(%s %s $%s %s) %s"%(sym,
+				fs, bal, abals[sym], balances))
+			if not sellsym or bal > ssbal:
+				sellsym = fs
+				ssbal = bal
+			self.maybeBalance(fs, bal)
+		self.maybeBalance(sellsym, abals["USD"], "sell")
+
+	def maybeBalance(self, sym, bal, side="buy"):
+		diff = BOTTOM - bal
+		if diff > 0:
+			self.log("maybeBalance(%s, %s, %s) refilling!"%(sym, bal, side))
+			self.refills += 1
+			self.orderBalance(sym, side, diff)
+
+	def getUSD(self, sym, bal):
+		iline = "getUSD(%s, %s) ->"%(sym, bal)
+		if type(bal) in [float, int]:
+			price = self.pricer(sym)
+			if not price:
+				return self.log("%s -> no price yet!"%(iline,))
+			bal *= price
+		else:
+			bal = float(bal[:-1].split(" ($").pop())
+		self.log(iline, "$%s"%(bal,))
+		return bal
+
+	def orderBalance(self, sym, side, diff):
+		price = self.bestPrice(sym, side)
+		order = {
+			"side": side,
+			"symbol": sym,
+			"price": price,
+			"amount": round(diff / price, 6)
+		}
+		self.log("orderBalance(%s, %s, %s) placing order: %s"%(sym, side, diff, order))
+		emit("balanceTrade", order)
 
 	def bestPrice(self, sym, side):
-		return ask("best", sym, side) or round(self.pricer(sym), 6)
+		bp = ask("best", sym, side) or round(self.pricer(sym), 6)
+		self.log("bestPrice(%s, %s) -> %s"%(sym, side, bp))
+		return bp
 
 	def skimmed(self, resp):
 		self.log("skimmed #%s:"%(self.hauls,), resp["message"])
