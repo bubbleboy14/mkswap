@@ -117,6 +117,14 @@ platforms = { # setStaging() sets dacc/dydx/gemorders feeds, gemini feeder
 	}
 }
 
+def getHost(hkind=predefs["platform"]):
+	return hosts[hkind]
+
+def dpost(path, headers={}, cb=spew, host=predefs["platform"]):
+	from dez.http import post
+	post(getHost(host), path, port=443, secure=True,
+		headers=headers, cb=cb, timeout=10, json=True)
+
 def setStaging(stagflag=STAGING):
 	log("setStaging(%s)"%(stagflag,))
 	global STAGING
