@@ -56,6 +56,9 @@ def gemOrders():
 def gemAddresses(network="bitcoin"):
 	get("/v1/addresses/%s"%(network,))
 
+def gemApprovedAddresses(network="bitcoin"):
+	get("/v1/approvedAddresses/account/%s"%(network,))
+
 #
 # general
 #
@@ -68,7 +71,8 @@ def confy():
 	spew(curconf())
 
 if __name__ == "__main__":
-	gemAddresses()
+	gemApprovedAddresses()
+	#gemAddresses()
 	#confy()
 	#gemOrders()
 	#gemBalances()
