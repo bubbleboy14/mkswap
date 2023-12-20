@@ -1,5 +1,4 @@
 from math import sqrt
-from rel.util import emit, listen
 from ..backend import log
 from .base import Base, INNER, OUTER, LONG
 
@@ -16,11 +15,6 @@ def setVolatilityCutoff(cutoff):
 	global VOLATILITY_CUTOFF
 	VOLATILITY_CUTOFF = cutoff
 
-side2height = {
-	"buy": "low",
-	"sell": "high"
-}
-
 class Slosh(Base):
 	def __init__(self, symbol, recommender=None):
 		self.top, self.bottom = symbol
@@ -36,25 +30,14 @@ class Slosh(Base):
 			"long": None
 		}
 		self.allratios = []
-		self.histories = {}
 		self.shouldUpdate = False
-		listen("best", self.bestPrice)
 		Base.__init__(self, symbol, recommender)
-
-	def bestPrice(self, sym, side):
-		return round(self.histories[sym][side2height[side]], 6)
 
 	def status(self):
 		return {
 			"ratios": self.ratios,
 			"averages": self.averages
 		}
-
-	def ave(self, limit=None, collection=None):
-		rats = collection or self.allratios
-		if limit:
-			rats = rats[-limit:]
-		return sum(rats) / len(rats)
 
 	def buysell(self, buysym, sellsym, size=10):
 		buyprice = self.bestPrice(buysym, "buy")
@@ -134,15 +117,4 @@ class Slosh(Base):
 	def compare(self, symbol, side, price, eobj, history):
 		self.shouldUpdate = True
 		self.log("compare", symbol, side, price, eobj)
-		if symbol not in self.histories:
-			self.histories[symbol] = {
-				"all": []
-			}
-		symhis = self.histories[symbol]
-		symhis["current"] = price
-		symhis["all"].append(price)
-		symhis["average"] = self.ave(collection=symhis["all"])
-		inner = symhis["all"][-INNER:]
-		symhis["high"] = max(inner)
-		symhis["low"] = min(inner)
-		emit("priceChange")
+		Base.compare(self, symbol, side, price, eobj, history)

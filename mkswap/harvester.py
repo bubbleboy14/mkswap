@@ -7,7 +7,7 @@ from .gem import gem
 BATCH = 10
 BOTTOM = 50
 SKIM = False
-BALANCE = False
+BALANCE = True
 NETWORK = "bitcoin" # ethereum available on production...
 
 net2sym = {
@@ -86,7 +86,7 @@ class Harvester(Worker):
 				continue
 			fs = self.accountant.fullSym(sym)
 			bal = self.office.hasMan(fs) and self.getUSD(fs, abals[sym])
-			if bal == None:
+			if bal in [False, None]:
 				self.log("no balance for", fs)
 				continue
 			self.log("balance(%s %s $%s %s) %s"%(sym,
@@ -117,20 +117,17 @@ class Harvester(Worker):
 		return bal
 
 	def orderBalance(self, sym, side, diff):
-		price = self.bestPrice(sym, side)
-		order = {
-			"side": side,
-			"symbol": sym,
-			"price": price,
-			"amount": round(diff / price, 6)
-		}
-		self.log("orderBalance(%s, %s, %s) placing order: %s"%(sym, side, diff, order))
-		emit("balanceTrade", order)
-
-	def bestPrice(self, sym, side):
-		bp = ask("best", sym, side) or round(self.pricer(sym), 6)
-		self.log("bestPrice(%s, %s) -> %s"%(sym, side, bp))
-		return bp
+		prices = ask("bestPrices%s"%(sym,), sym, side)
+		for span in prices:
+			price = prices[span]
+			order = {
+				"side": side,
+				"symbol": sym,
+				"price": price,
+				"amount": round(diff / price, 6)
+			}
+			self.log("orderBalance(%s, %s, %s) placing order: %s"%(sym, side, diff, order))
+			emit("balanceTrade", order)
 
 	def skimmed(self, resp):
 		self.log("skimmed #%s:"%(self.hauls,), resp["message"])

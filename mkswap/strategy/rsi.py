@@ -70,6 +70,7 @@ class RSI(Base):
 					"amount": TRADE_SIZE
 				}
 				self.recommender(self.lastrec)
+		Base.compare(self, symbol, side, price, eobj, history)
 
 	def tick(self, history):
 		_was = history['w_average']
