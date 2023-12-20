@@ -2,7 +2,7 @@ from math import sqrt
 from ..backend import log
 from .base import Base, INNER, OUTER, LONG
 
-VOLATILITY_MULT = 10
+VOLATILITY_MULT = 16
 VOLATILITY_CUTOFF = 0.5
 
 def setVolatilityMult(vmult):
