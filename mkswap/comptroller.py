@@ -1,6 +1,7 @@
 import json, random, rel
-from .backend import log, listen, emit, gemget, gemtrade
+from .backend import log, listen, emit
 from .base import Feeder
+from .gem import gem
 
 LIVE = False
 PRUNE_LIMIT = 0.1
@@ -107,7 +108,7 @@ class Comptroller(Feeder):
 
 	def cancel(self, tnum, tellgem=True):
 		trade = self.actives[tnum]
-		LIVE and tellgem and gemget("/v1/order/cancel", self.log, { "order_id": trade["order_id"] })
+		LIVE and tellgem and gem.cancel(trade)
 		self.log("cancel()", trade)
 		emit("orderCancelled", trade)
 		del self.actives[tnum]
@@ -133,7 +134,7 @@ class Comptroller(Feeder):
 		orderNumber += 1
 		self.actives[str(orderNumber)] = trade
 		trade["client_order_id"] = str(orderNumber)
-		LIVE and gemtrade(trade, self.submitted)
+		LIVE and gem.trade(trade, self.submitted)
 		emit("orderActive", trade)
 
 	def submitted(self, resp):

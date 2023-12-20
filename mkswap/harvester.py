@@ -1,7 +1,8 @@
 import rel
 from rel.util import ask, emit
 from .base import Worker
-from .backend import log, gemget
+from .backend import log
+from .gem import gem
 
 BATCH = 10
 BOTTOM = 50
@@ -50,7 +51,7 @@ class Harvester(Worker):
 		self.bigSym = self.symbol.upper()
 		self.accountant = office.accountant
 		self.fullSym = self.accountant.fullSym(self.bigSym)
-		gemget("/v1/addresses/%s"%(NETWORK,), self.setStorehouse)
+		gem.accounts(NETWORK, self.setStorehouse)
 		rel.timeout(10, self.measure)
 
 	def status(self):
@@ -150,8 +151,4 @@ class Harvester(Worker):
 		self.log(memo, ":", amount, self.symbol, "- now @",
 			self.harvest, "($%s)"%(round(self.harvest * price, 2),))
 		self.accountant.deduct(self.bigSym, amount)
-		gemget("/v1/withdraw/%s"%(self.symbol,), self.skimmed, {
-			"memo": memo,
-			"amount": str(amount),
-			"address": self.storehouse
-		})
+		gem.withdraw(self.symbol, amount, self.storehouse, memo, self.skimmed)

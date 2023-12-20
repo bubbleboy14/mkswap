@@ -1,6 +1,7 @@
 from datetime import datetime
-from .backend import rel, ask, listen, predefs, gemget
+from .backend import rel, ask, listen, predefs
 from .base import Feeder
+from .gem import gem
 
 CAP_BALANCES = True
 
@@ -34,7 +35,7 @@ class Accountant(Feeder):
 
 	def getBalances(self):
 		self.log("getBalances!!!")
-		gemget("/v1/balances", self.setBalances)
+		gem.balances(self.setBalances)
 
 	def setBalances(self, bals):
 		self.log("setBalances", bals)
