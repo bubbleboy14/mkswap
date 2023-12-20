@@ -7,7 +7,7 @@ from .gem import gem
 BATCH = 10
 BOTTOM = 50
 SKIM = False
-BALANCE = True
+BALANCE = False
 NETWORK = "bitcoin" # ethereum available on production...
 
 net2sym = {
