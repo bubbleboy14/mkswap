@@ -41,10 +41,29 @@ def spew(event):
 		event = event.decode()
 	log(json.dumps(event))
 
-def gemget(path, cb, params={}):
+def die(m, j):
+	log("i die:", m)
+	spew(j)
+	stop()
+
+def gemcb(path, cb, params, attempt):
+	def f(res):
+		if "result" not in res or res["result"] != "error":
+			return cb(res)
+		reason = res["reason"]
+		message = res["message"]
+		msg = "gemcb(%s) %s error: %s"%(path, reason, message)
+		if reason != "RateLimited":
+			die(msg, res)
+		timeout = int(msg.split(" ")[-2]) / 1000
+		log(msg, "-> retrying (attempt #%s) in %s seconds!"%(attempt, timeout))
+		rel.timeout(timeout, gemget, path, cb, params, attempt + 1)
+	return f
+
+def gemget(path, cb, params={}, attempt=1):
 	from dez.http import post
 	post(hosts["gemini"], path, port=443, secure=True, headers=ask("credHead", path, params),
-		cb=cb, timeout=10, json=True)
+		cb=gemcb(path, cb, params, attempt), timeout=10, json=True)
 
 def gemtrade(trade, cb=spew):
 	gemget("/v1/order/new", cb, trade)
