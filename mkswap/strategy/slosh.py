@@ -3,7 +3,7 @@ from rel.util import emit, listen
 from ..backend import log
 from .base import Base, INNER, OUTER, LONG
 
-VOLATILITY_MULT = 8
+VOLATILITY_MULT = 10
 VOLATILITY_CUTOFF = 0.5
 
 def setVolatilityMult(vmult):
