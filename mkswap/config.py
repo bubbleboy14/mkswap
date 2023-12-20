@@ -11,11 +11,12 @@ class Config(object):
 		from .base import UNSPAMMED
 		from .backend import STAGING
 		from .strategy import base, rsi, slosh
-		from .harvester import SKIM, BATCH, BALANCE, NETWORK
+		from .harvester import SKIM, BATCH, BOTTOM, BALANCE, NETWORK
 		return {
 			"harvester": {
 				"skim": SKIM,
 				"batch": BATCH,
+				"bottom": BOTTOM,
 				"balance": BALANCE,
 				"network": NETWORK
 			},
@@ -58,11 +59,12 @@ class Config(object):
 		from .backend import setStaging
 		from .base import setUnspammed
 		from .strategy import base, rsi, slosh
-		from .harvester import setSkim, setBatch, setBalance, setNetwork
+		from .harvester import setSkim, setBatch, setBottom, setBalance, setNetwork
 		s = { # live/staging/stagish should only be flipped by init()
 			"harvester": {
 				"skim": setSkim,
 				"batch": setBatch,
+				"bottom": setBottom,
 				"balance": setBalance,
 				"network": setNetwork
 			},

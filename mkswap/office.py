@@ -50,6 +50,9 @@ class Office(Worker):
 	def sig(self):
 		return "Office[%s]"%(self.platform,)
 
+	def hasMan(self, symbol):
+		return symbol in self.managers
+
 	def price(self, symbol):
 		return self.managers[symbol].latest["price"]
 

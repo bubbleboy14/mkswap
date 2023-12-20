@@ -1,5 +1,5 @@
 from math import sqrt
-from rel.util import emit
+from rel.util import emit, listen
 from ..backend import log
 from .base import Base, INNER, OUTER, LONG
 
@@ -15,6 +15,11 @@ def setVolatilityCutoff(cutoff):
 	log("setVolatilityCutoff(%s)"%(cutoff,))
 	global VOLATILITY_CUTOFF
 	VOLATILITY_CUTOFF = cutoff
+
+side2height = {
+	"buy": "low",
+	"sell": "high"
+}
 
 class Slosh(Base):
 	def __init__(self, symbol, recommender=None):
@@ -33,7 +38,11 @@ class Slosh(Base):
 		self.allratios = []
 		self.histories = {}
 		self.shouldUpdate = False
+		listen("best", self.bestPrice)
 		Base.__init__(self, symbol, recommender)
+
+	def bestPrice(self, sym, side):
+		return round(self.histories[sym][side2height[side]], 6)
 
 	def status(self):
 		return {
@@ -48,19 +57,18 @@ class Slosh(Base):
 		return sum(rats) / len(rats)
 
 	def buysell(self, buysym, sellsym, size=10):
-		hz = self.histories
-		buyprice = hz[buysym]["low"]
-		sellprice = hz[sellsym]["high"]
+		buyprice = self.bestPrice(buysym, "buy")
+		sellprice = self.bestPrice(sellsym, "sell")
 		self.recommender({
 			"side": "sell",
 			"symbol": sellsym,
-			"price": round(sellprice, 6),
+			"price": sellprice,
 			"amount": round(size / sellprice, 6)
 		})
 		self.recommender({
 			"side": "buy",
 			"symbol": buysym,
-			"price": round(buyprice, 6),
+			"price": buyprice,
 			"amount": round(size / buyprice, 6)
 		})
 

@@ -41,13 +41,10 @@ def spew(event):
 		event = event.decode()
 	log(json.dumps(event))
 
-def gemget(path, cb, params={}):
-	from dez.http import post
-	post(hosts["gemini"], path, port=443, secure=True, headers=ask("credHead", path, params),
-		cb=cb, timeout=10, json=True)
-
-def gemtrade(trade, cb=spew):
-	gemget("/v1/order/new", cb, trade)
+def die(m, j):
+	log("i die:", m)
+	spew(j)
+	stop()
 
 def crsub(streamname):
 	return {
@@ -119,6 +116,14 @@ platforms = { # setStaging() sets dacc/dydx/gemorders feeds, gemini feeder
 		"credHead": "/v1/order/events"
 	}
 }
+
+def getHost(hkind=predefs["platform"]):
+	return hosts[hkind]
+
+def dpost(path, headers={}, cb=spew, host=predefs["platform"]):
+	from dez.http import post
+	post(getHost(host), path, port=443, secure=True,
+		headers=headers, cb=cb, timeout=10, json=True)
 
 def setStaging(stagflag=STAGING):
 	log("setStaging(%s)"%(stagflag,))

@@ -2,11 +2,12 @@
 import rel
 from .base import Worker
 from .observer import Observer
-from .backend import start, setStaging, predefs, gemtrade
+from .backend import start, setStaging, predefs
 from .agent import agencies
+from .gem import gem
 
 class Cat(Worker):
-	def __init__(self, relay=gemtrade, symbols=["ETHUSD", "BTCUSD"], platform=predefs["platform"]):
+	def __init__(self, relay=gem.trade, symbols=["ETHUSD", "BTCUSD"], platform=predefs["platform"]):
 		setStaging(False)
 		self.relay = relay
 		self.symbols = symbols
