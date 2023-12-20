@@ -1,5 +1,5 @@
 import rel
-from .backend import ask, spew, die
+from .backend import ask, spew, die, dpost
 from .base import Worker
 
 class Gem(Worker):
@@ -18,10 +18,8 @@ class Gem(Worker):
 		return f
 
 	def get(self, path, cb=None, params={}, attempt=1):
-		from dez.http import post
 		self.log("get(%s, %s)"%(path, attempt), params)
-		post(hosts["gemini"], path, port=443, secure=True, headers=ask("credHead", path, params),
-			cb=self._cb(path, cb, params, attempt), timeout=10, json=True)
+		dpost(path, ask("credHead", path, params), self._cb(path, cb, params, attempt))
 
 	def accounts(self, network, cb=None):
 		self.get("/v1/addresses/%s"%(network,), cb)
