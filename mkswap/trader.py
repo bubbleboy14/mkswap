@@ -14,9 +14,15 @@ class Trader(Worker):
 		# TODO: wrap in timestamped object...?
 		self.trades.append(recommendation)
 
-	def recommend(self, recommendation):
-		self.log("recommended:", recommendation)
-		self.recommendations.append(recommendation)
+	def recommend(self, rec):
+		self.log("recommend(%s)"%(rec,))
+		mins = predefs["minimums"]
+		size = rec["amount"]
+		sym = rec["symbol"]
+		if size < mins[sym]:
+			rec["amount"] = mins[sym]
+			self.log("order is too small! increased amount from", size, "to", rec["amount"])
+		self.recommendations.append(rec)
 
 	def shouldTrade(self, recommendation): # TODO: actually evaluate
 		self.log("assessing recommendation:", recommendation)
