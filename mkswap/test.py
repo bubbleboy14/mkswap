@@ -1,6 +1,9 @@
 from .accountant import Accountant
+from .observer import Observer
 from .agent import agencies
-from .backend import start, spew, predefs, hosts, echofeed
+from .comptroller import setActives
+from .config import config
+from .backend import start, spew, predefs, hosts, echofeed, setStaging
 
 plat = predefs["platform"]
 Agent = agencies[plat]
@@ -63,15 +66,19 @@ def gemApprovedAddresses(network="bitcoin"):
 # general
 #
 def confy():
-	from .backend import curconf, setStaging
-	from .comptroller import setActives
-	spew(curconf())
+	spew(config.current())
 	setStaging(False)
 	setActives(100)
-	spew(curconf())
+	spew(config.current())
+
+def observe(sym="BTCUSD"):
+	setStaging(False)
+	Observer(sym)
+	start()
 
 if __name__ == "__main__":
-	gemApprovedAddresses()
+	observe()
+	#gemApprovedAddresses()
 	#gemAddresses()
 	#confy()
 	#gemOrders()
