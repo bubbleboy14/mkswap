@@ -9,6 +9,10 @@ predefs = {
 		"USD": 200,
 		"ETH": 0.05,
 		"BTC": 0.0025
+	},
+	"minimums": {
+		"ETHUSD": 0.001,
+		"BTCUSD": 0.00001
 	}
 }
 presets = [{
