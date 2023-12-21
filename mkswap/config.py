@@ -5,6 +5,12 @@ class Config(object):
 		print("\nnoting Office defaults (%s), please select a configuration from the following presets.\n"%(predefs,))
 		return selnum(presets)
 
+	def get(self, *path):
+		cur = self.current()
+		for k in path:
+			cur = cur[k]
+		return cur
+
 	def current(self):
 		from .comptroller import ACTIVES_ALLOWED, PRUNE_LIMIT, LIVE
 		from .office import VERBOSE, STAGISH
