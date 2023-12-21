@@ -42,6 +42,7 @@ class Comptroller(Feeder):
 		order = self.actives[coi]
 		etype = msg["type"]
 		if msg.get("is_cancelled", None):
+			self.log("proc() cancellation", msg["reason"])
 			self.cancel(coi, False)
 		elif etype == "closed":
 			self.log("proc(): trade closed", order)
@@ -138,8 +139,12 @@ class Comptroller(Feeder):
 		emit("orderActive", trade)
 
 	def submitted(self, resp):
-		self.log("submitted()", resp)
-		self.actives[resp["client_order_id"]]["order_id"] = resp["order_id"]
+		coid = resp["client_order_id"]
+		msg = "submitted(%s)"%(coid,)
+		if coid not in self.actives:
+			return self.log(msg, "order already cancelled!", resp)
+		self.log(msg, resp)
+		self.actives[coid]["order_id"] = resp["order_id"]
 
 	def enqueue(self, trade):
 		self.backlog.append(trade)
