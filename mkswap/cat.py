@@ -33,8 +33,8 @@ class Cat(Worker):
 		return True
 
 	def setWatcher(self, symbol):
-		self.watchers[symbol] = Observer(self.platform,
-			symbol, lambda event : self.intake(symbol, event))
+		self.watchers[symbol] = Observer(symbol, self.platform,
+			lambda event : self.intake(symbol, event))
 
 	def intake(self, symbol, event):
 #		self.log("relay", symbol, event)

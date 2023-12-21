@@ -14,7 +14,7 @@ class Manager(Worker):
 		self.reviewer = reviewer
 		self.trader = trader or Trader(platform)
 		setrec = not trader
-		self.observer = Observer(platform, symbol, self.observe)
+		self.observer = Observer(symbol, platform, self.observe)
 		if type(strategist) == str:
 			self.strategist = strategies[strategist](symbol)
 			setrec = True

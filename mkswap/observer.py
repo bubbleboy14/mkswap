@@ -1,8 +1,8 @@
-from .backend import events, spew
+from .backend import events, spew, predefs
 from .base import Feeder
 
 class Observer(Feeder):
-	def __init__(self, platform, symbol, observe=spew, use_initial=False):
+	def __init__(self, symbol, platform=predefs["platform"], observe=spew, use_initial=False):
 		self.symbol = symbol
 		self.observe = observe
 		self.use_initial = use_initial
