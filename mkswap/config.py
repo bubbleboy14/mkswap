@@ -53,6 +53,13 @@ class Config(object):
 		    }
 		}
 
+	def _set(self, c, s):
+		if type(c) is dict:
+			for k in c.keys():
+				self._set(c[k], s[k])
+		else:
+			s(c)
+
 	def set(self, c):
 		from .comptroller import setPruneLimit, setActives, setLive
 		from .office import setVerbose, setStagish
@@ -101,11 +108,7 @@ class Config(object):
 		    }
 		}
 		print("CONFIG SET", c)
-		while type(c) is dict:
-			k = list(c.keys()).pop()
-			s = s[k]
-			c = c[k]
-		s(c)
+		self._set(c, s)
 
 	def init(self):
 		from cantools.util.io import selnum
