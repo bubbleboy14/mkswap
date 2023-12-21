@@ -27,6 +27,7 @@ class Comptroller(Feeder):
 	def __init__(self, pricer):
 		self.actives = {}
 		self.backlog = []
+		self.cancels = []
 		self.pricer = pricer
 		listen("priceChange", self.prune)
 		listen("enqueueOrder", self.enqueue)
@@ -42,7 +43,10 @@ class Comptroller(Feeder):
 		order = self.actives[coi]
 		etype = msg["type"]
 		if msg.get("is_cancelled", None):
-			self.log("proc() cancellation", msg["reason"])
+			reason = msg["reason"]
+			self.log("proc() cancellation", reason)
+			self.cancels.insert(0, reason)
+			self.cancels = self.cancels[-10:]
 			self.cancel(coi, False)
 		elif etype == "closed":
 			self.log("proc(): trade closed", order)

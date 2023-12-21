@@ -72,6 +72,7 @@ class Office(Worker):
 			"orders": acc.counts,
 			"actives": com.actives,
 			"backlog": com.backlog,
+			"cancels": com.cancels,
 			"strategists": self.stratuses(),
 			"harvester": self.harvester.status(),
 			"balances": acc.balances(self.price, "both")
