@@ -11,6 +11,7 @@ predefs = {
 		"BTC": 0.0025
 	},
 	"minimums": {
+		"ETHBTC": 0.001,
 		"ETHUSD": 0.001,
 		"BTCUSD": 0.00001
 	}
