@@ -52,7 +52,7 @@ class Harvester(Worker):
 		self.accountant = office.accountant
 		self.fullSym = self.accountant.fullSym(self.bigSym)
 		gem.accounts(NETWORK, self.setStorehouse)
-		rel.timeout(5, self.measure)
+		rel.timeout(10, self.measure)
 
 	def status(self):
 		return {
