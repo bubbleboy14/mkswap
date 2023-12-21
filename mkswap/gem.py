@@ -11,7 +11,7 @@ class Gem(Worker):
 			message = res["message"]
 			msg = "_cb(%s) %s error: %s"%(path, reason, message)
 			if reason != "RateLimited":
-				die(msg, res)
+				return die(msg, res)
 			timeout = int(msg.split(" ")[-2]) / 1000
 			self.log(msg, "-> retrying (attempt #%s) in %s seconds!"%(attempt, timeout))
 			rel.timeout(timeout, self.get, path, cb, params, attempt + 1)
