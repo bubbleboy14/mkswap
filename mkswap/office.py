@@ -24,6 +24,7 @@ def setStagish(stag):
 
 class Office(Worker):
 	def __init__(self, platform=predefs["platform"], symbols=[], strategy=predefs["strategy"], globalStrategy=False, globalTrade=False):
+		stish = config.get("office", "stagish") # necessary w/ -m for some reason...
 		self.platform = platform
 		self.symbols = symbols
 		self.accountant = Accountant(platform)
@@ -32,13 +33,13 @@ class Office(Worker):
 		strat = strategies[strategy]
 		self.stratname = strategy
 		self.strategist = globalStrategy and strat(symbols, trec)
-		STAGISH and setStaging(False)
+		stish and setStaging(False)
 		self.managers = {}
 		for symbol in symbols:
 			self.managers[symbol] = Manager(platform, symbol, self.review,
 				self.strategist or strat(symbol, trec), self.trader)
 		self.log("initialized %s managers"%(len(symbols),))
-		STAGISH and setStaging(True)
+		stish and setStaging(True)
 		self.comptroller = Comptroller(self.price)
 		self.harvester = Harvester(self)
 		rel.timeout(1, self.tick)
