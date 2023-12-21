@@ -1,5 +1,5 @@
 from .base import Base, OUTER, LONG
-from ..backend import log
+from ..backend import log, predefs
 
 TRADE_SIZE = 10
 RSI_PERIOD = 14
@@ -67,7 +67,7 @@ class RSI(Base):
 					"side": rec,
 					"price": price,
 					"symbol": symbol,
-					"amount": TRADE_SIZE
+					"amount": TRADE_SIZE * predefs["minimums"][symbol]
 				}
 				self.recommender(self.lastrec)
 		Base.compare(self, symbol, side, price, eobj, history)
