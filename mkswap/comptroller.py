@@ -72,28 +72,36 @@ class Comptroller(Feeder):
 			trade["score"] *= -1
 		return trade["score"]
 
-	def pruneActives(self, limit=None):
+	def pruneActives(self, limit=None, undupe=False):
 		cancels = []
 		skips = 0
+		dupes = 0
+		prices = set()
 		for tnum in self.actives:
 			trade = self.actives[tnum]
 			if "order_id" in trade:
-				s = self.score(trade)
-				toofar = False
-				if limit:
-					ratio = float(trade["price"]) / self.pricer(trade["symbol"])
-					toofar = abs(1 - ratio) > limit
-				if s < 0 or toofar:
+				tp = trade["price"]
+				if undupe and tp in prices:
 					cancels.append(tnum)
+					dupes += 1
+				else:
+					prices.add(tp)
+					s = self.score(trade)
+					toofar = False
+					if limit:
+						ratio = float(tp) / self.pricer(trade["symbol"])
+						toofar = abs(1 - ratio) > limit
+					if s < 0 or toofar:
+						cancels.append(tnum)
 			else:
 				skips += 1
 		for tnum in cancels:
 			self.cancel(tnum)
-		return skips, cancels
+		return skips, cancels, dupes
 
 	def longPrune(self):
-		skips, cancels = self.pruneActives(PRUNE_LIMIT)
-		self.log("longPrune():", len(cancels), "cancels;", skips, "skips")
+		skips, cancels, dupes = self.pruneActives(PRUNE_LIMIT, True)
+		self.log("longPrune():", len(cancels), "cancels;", dupes, "dupes;", skips, "skips")
 		return True
 
 	def prune(self):
@@ -106,7 +114,7 @@ class Comptroller(Feeder):
 		blsremoved = icount - len(self.backlog)
 		self.backlog.sort(key=lambda t : t["score"])
 		# actives: rate and cancel (as necessary)
-		skips, cancels = self.pruneActives()
+		skips, cancels, dupes = self.pruneActives()
 		self.log("prune():", blsremoved, "backlogged - now at",
 			len(self.backlog), "; and", len(cancels), "actives - now at", len(self.actives.keys()),
 			"; skipped", skips, "uninitialized orders")
