@@ -65,6 +65,12 @@ def gemApprovedAddresses(network="bitcoin"):
 #
 # general
 #
+def multi():
+	ag = Agent()
+	get("/v1/notionalvolume", ag, False)
+	get("/v1/account", ag, False)
+	get("/v1/balances", ag)
+
 def confy():
 	spew(config.current())
 	setStaging(False)
@@ -77,7 +83,8 @@ def observe(sym="BTCUSD"):
 	start()
 
 if __name__ == "__main__":
-	observe()
+	multi()
+	#observe()
 	#gemApprovedAddresses()
 	#gemAddresses()
 	#confy()
