@@ -125,10 +125,12 @@ platforms = { # setStaging() sets dacc/dydx/gemorders feeds, gemini feeder
 def getHost(hkind=predefs["platform"]):
 	return hosts[hkind]
 
-def dpost(path, headers={}, cb=spew, host=predefs["platform"]):
+def dpost(path, headers={}, cb=spew, eb=None, host=predefs["platform"]):
 	from dez.http import post
-	post(getHost(host), path, port=443, secure=True, headers=headers, cb=cb,
-		timeout=10, json=True, eb=lambda : die("request failed: %s"%(path,)))
+	if not eb:
+		eb = lambda msg : die("request (%s) failed: %s"%(path, msg))
+	post(getHost(host), path, port=443, secure=True,
+		headers=headers, cb=cb, timeout=30, json=True, eb=eb)
 
 def setStaging(stagflag=STAGING):
 	log("setStaging(%s)"%(stagflag,))
