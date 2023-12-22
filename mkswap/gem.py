@@ -47,7 +47,7 @@ class Gem(Worker):
 		self.pending = []
 		self.paused = False
 		self.pauser = rel.timeout(None, self.unpause)
-		rel.timeout(0.2, self.churn) # 1/2 of rate limit
+		rel.timeout(0.1, self.churn) # rate limit
 
 	def churn(self):
 		self.pending and not self.paused and self.pending.pop(0).get()
@@ -65,7 +65,8 @@ class Gem(Worker):
 
 	def add(self, req):
 		self.pending.append(req)
-		self.log("added to", len(self.pending), "long queue:", req.path, req.attempt)
+		self.log("added to", len(self.pending), "long queue:",
+			req.path, req.attempt, "paused:", self.paused)
 
 	def get(self, path, cb=None, params={}):
 		self.log("get(%s)"%(path,), params)
