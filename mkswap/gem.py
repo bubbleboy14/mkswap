@@ -2,24 +2,50 @@ import rel
 from .backend import ask, spew, die, dpost
 from .base import Worker
 
-class Gem(Worker):
-	def _cb(self, path, cb, params, attempt):
-		def f(res):
-			if "result" not in res or res["result"] != "error":
-				return (cb or self.log)(res)
-			reason = res["reason"]
-			message = res["message"]
-			msg = "_cb(%s) %s error: %s"%(path, reason, message)
-			if reason != "RateLimited":
-				return die(msg, res)
-			timeout = int(msg.split(" ")[-2]) / 1000
-			self.log(msg, "-> retrying (attempt #%s) in %s seconds!"%(attempt, timeout))
-			rel.timeout(timeout, self.get, path, cb, params, attempt + 1)
-		return f
+class Req(Worker):
+	def __init__(self, path, params={}, cb=spew):
+		self.path = path
+		self.params = params
+		self.cb = cb
+		self.attempt = 0
+		self.log(path, params)
 
-	def get(self, path, cb=None, params={}, attempt=1):
-		self.log("get(%s, %s)"%(path, attempt), params)
-		dpost(path, ask("credHead", path, params), self._cb(path, cb, params, attempt))
+	def get(self):
+		self.attempt += 1
+		self.log("get(%s, %s)"%(self.path, self.attempt))
+		dpost(self.path, ask("credHead", self.path, self.params), self.receive, self.retry)
+
+	def retry(self, reason, timeout=4):
+		self.log("retry(#%s)[%s] %s seconds!"%(self.attempt, reason, timeout))
+		rel.timeout(timeout, self.get)
+
+	def receive(self, res):
+		if "result" not in res or res["result"] != "error":
+			return (self.cb or self.log)(res)
+		reason = res["reason"]
+		message = res["message"]
+		self.log("receive(%s) %s error: %s"%(self.path, reason, message))
+		if reason == "RateLimited":
+			timeout = int(message.split(" ")[-2]) / 1000
+		elif reason in ["RateLimit", "InvalidNonce"]:
+			timeout = 5
+		else:
+			return die(reason, res)
+		self.warn(reason)
+		self.retry(reason, timeout)
+
+class Gem(Worker):
+	def __init__(self):
+		self.pending = []
+		rel.timeout(0.1, self.churn)
+
+	def churn(self):
+		self.pending and self.pending.pop(0).get()
+		return True
+
+	def get(self, path, cb=None, params={}):
+		self.log("get(%s)"%(path,), params)
+		self.pending.append(Req(path, params, cb))
 
 	def accounts(self, network, cb=None):
 		self.get("/v1/addresses/%s"%(network,), cb)
