@@ -1,4 +1,4 @@
-from rel.util import emit, listen
+from rel.util import listen
 from ..backend import log
 
 INNER = 3
@@ -90,4 +90,3 @@ class Base(object):
 			stretch = symhis["all"][-getSpan(span):]
 			symhis[span]["high"] = max(stretch)
 			symhis[span]["low"] = min(stretch)
-		emit("priceChange")
