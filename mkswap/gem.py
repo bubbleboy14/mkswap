@@ -37,7 +37,7 @@ class Req(Worker):
 class Gem(Worker):
 	def __init__(self):
 		self.pending = []
-		rel.timeout(0.1, self.churn)
+		rel.timeout(0.2, self.churn) # half of rate limit
 
 	def churn(self):
 		self.pending and self.pending.pop(0).get()
