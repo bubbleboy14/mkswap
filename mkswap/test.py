@@ -7,7 +7,7 @@ from .backend import start, spew, predefs, hosts, echofeed, setStaging
 
 plat = predefs["platform"]
 Agent = agencies[plat]
-SILENT_REQUEST = False
+SILENT_REQUEST = True
 
 #
 # mkswap tests
