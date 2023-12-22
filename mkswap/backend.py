@@ -46,9 +46,9 @@ def spew(event):
 		event = event.decode()
 	log(json.dumps(event))
 
-def die(m, j):
+def die(m, j=None):
 	log("i die:", m)
-	spew(j)
+	j and spew(j)
 	stop()
 
 def crsub(streamname):
@@ -127,8 +127,8 @@ def getHost(hkind=predefs["platform"]):
 
 def dpost(path, headers={}, cb=spew, host=predefs["platform"]):
 	from dez.http import post
-	post(getHost(host), path, port=443, secure=True,
-		headers=headers, cb=cb, timeout=10, json=True)
+	post(getHost(host), path, port=443, secure=True, headers=headers, cb=cb,
+		timeout=10, json=True, eb=lambda : die("request failed: %s"%(path,)))
 
 def setStaging(stagflag=STAGING):
 	log("setStaging(%s)"%(stagflag,))
