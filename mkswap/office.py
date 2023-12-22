@@ -1,5 +1,5 @@
 import pprint, atexit, rel
-from .backend import log, start, predefs, setStaging
+from .backend import log, start, predefs, setStaging, listen
 from .comptroller import Comptroller
 from .accountant import Accountant
 from .strategist import strategies
@@ -43,6 +43,12 @@ class Office(Worker):
 		self.comptroller = Comptroller(self.price)
 		self.harvester = Harvester(self)
 		rel.timeout(1, self.tick)
+		self.warnings = []
+		listen("warning", self.warning)
+
+	def warning(self, msg):
+		self.warnings.append(msg)
+		self.warnings = self.warnings[-10:]
 
 	def teardown(self):
 		self.log("teardown()")
@@ -74,6 +80,7 @@ class Office(Worker):
 			"actives": com.actives,
 			"backlog": com.backlog,
 			"cancels": com.cancels,
+			"warnings": self.warnings,
 			"strategists": self.stratuses(),
 			"harvester": self.harvester.status(),
 			"balances": acc.balances(self.price, "both")
