@@ -6,7 +6,7 @@ from .gem import gem
 LIVE = False
 PRUNE_LIMIT = 0.1
 ACTIVES_ALLOWED = 10
-orderNumber = random.randint(0, 500)
+orderNumber = random.randint(0, 2000)
 
 def setLive(islive):
 	log("setLive(%s)"%(islive,))
@@ -42,7 +42,7 @@ class Comptroller(Feeder):
 		if etype == "initial": # configurize...
 			return self.log("proc() skipping initial")
 		if coi not in self.actives:
-			return self.warn("unlisted COID: %s"%(coi,))
+			return self.warn("unlisted %s %s"%(etype, coi))
 		order = self.actives[coi]
 		order["status"] = etype
 		if etype == "accepted":
@@ -177,7 +177,7 @@ class Comptroller(Feeder):
 			return self.warn("%s order not found!"%(msg,), resp)
 		trade = self.actives[coid]
 		if "order_id" in trade:
-			return self.warn("%s already noted!"%(msg,))
+			return self.warn("%s exists (%s)"%(msg, trade["status"]))
 		trade["order_id"] = oid
 		self.log(msg, trade, resp)
 		emit("orderActive", trade)
