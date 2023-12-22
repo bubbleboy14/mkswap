@@ -47,6 +47,8 @@ class Comptroller(Feeder):
 		order["status"] = etype
 		if etype == "accepted":
 			self.submitted(msg)
+		elif etype == "rejected":
+			self.error("order rejected!", msg["reason"], msg)
 		elif etype == "fill" and msg["remaining_amount"] == "0":
 			self.log("proc(): trade filled", order)
 			emit("orderFilled", order)
