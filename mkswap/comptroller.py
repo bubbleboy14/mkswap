@@ -29,6 +29,7 @@ class Comptroller(Feeder):
 		self.backlog = []
 		self.cancels = []
 		self.pricer = pricer
+		self.cancelling = set()
 		listen("priceChange", self.prune)
 		listen("enqueueOrder", self.enqueue)
 		self.feed("gemorders")
@@ -36,24 +37,30 @@ class Comptroller(Feeder):
 
 	def proc(self, msg):
 		coi = msg.get("client_order_id", None)
-		if not coi:
-			return self.log("proc(%s): NO client_order_id!!!"%(msg,))
-		if coi not in self.actives:
-			return self.log("proc(%s): unlisted client_order_id!!!"%(msg,))
-		order = self.actives[coi]
 		etype = msg["type"]
-		if msg.get("is_cancelled", None):
+		self.log("proc(%s, %s): %s"%(etype, coi, msg))
+		if etype == "initial": # configurize...
+			return self.log("proc() skipping initial")
+		if coi not in self.actives:
+			return self.warn("unlisted COID: %s"%(coi,))
+		order = self.actives[coi]
+		order["status"] = etype
+		if etype == "accepted":
+			self.submitted(msg)
+		elif etype == "fill" and msg["remaining_amount"] == "0":
+			self.log("proc(): trade filled", order)
+			emit("orderFilled", order)
+		elif etype == "cancelled":
 			reason = msg["reason"]
 			self.log("proc() cancellation", reason)
-			self.cancels.insert(0, reason)
+			self.cancels.append(reason)
 			self.cancels = self.cancels[-10:]
-			self.cancel(coi, False)
+			self.cancelled(coi)
 		elif etype == "closed":
 			self.log("proc(): trade closed", order)
-			emit("orderFilled", order)
 			del self.actives[coi]
 		else:
-			self.log("proc(): %s"%(etype,))
+			self.log("proc() unhandled event!")
 
 	def on_message(self, ws, msgs):
 		msgs = json.loads(msgs)
@@ -119,12 +126,23 @@ class Comptroller(Feeder):
 			len(self.backlog), "; and", len(cancels), "actives - now at", len(self.actives.keys()),
 			"; skipped", skips, "uninitialized orders")
 
-	def cancel(self, tnum, tellgem=True):
+	def cancel(self, tnum):
+		if tnum in self.cancelling:
+			return# self.log("cancel(%s) aborted (already cancelling)"%(tnum,))
+		self.cancelling.add(tnum)
 		trade = self.actives[tnum]
-		LIVE and tellgem and gem.cancel(trade)
-		self.log("cancel()", trade)
+		self.log("cancel(%s)"%(tnum,), trade)
+		LIVE and gem.cancel(trade)
+
+	def cancelled(self, tnum):
+		trade = self.actives[tnum]
+		msg = "cancelled(%s)"%(tnum,)
+		if tnum in self.cancelling:
+			self.cancelling.remove(tnum)
+		else:
+			msg = "%s unexpected!"%(msg,)
+		self.log(msg, trade)
 		emit("orderCancelled", trade)
-		del self.actives[tnum]
 
 	def withdraw(self):
 		akeys = list(self.actives.keys())
@@ -137,26 +155,30 @@ class Comptroller(Feeder):
 				self.log("trade uninitialized! (cancelling cancel)", trade)
 
 	def refill(self):
-		self.log("refill()")
+		self.log("refill(%s)"%(len(self.backlog),))
 		while self.backlog and (len(self.actives.keys()) < ACTIVES_ALLOWED):
 			self.submit(self.backlog.pop(0))
 
 	def submit(self, trade):
 		global orderNumber
-		self.log("submit()", trade)
 		orderNumber += 1
+		self.log("submit(%s)"%(orderNumber,), trade)
 		self.actives[str(orderNumber)] = trade
 		trade["client_order_id"] = str(orderNumber)
 		LIVE and gem.trade(trade, self.submitted)
-		emit("orderActive", trade)
 
 	def submitted(self, resp):
 		coid = resp["client_order_id"]
-		msg = "submitted(%s)"%(coid,)
+		oid = resp["order_id"]
+		msg = "submitted(%s, %s)"%(coid, oid)
 		if coid not in self.actives:
-			return self.log(msg, "order already cancelled!", resp)
-		self.log(msg, resp)
-		self.actives[coid]["order_id"] = resp["order_id"]
+			return self.warn("%s order not found!"%(msg,), resp)
+		trade = self.actives[coid]
+		if "order_id" in trade:
+			return self.warn("%s already noted!"%(msg,))
+		trade["order_id"] = oid
+		self.log(msg, trade, resp)
+		emit("orderActive", trade)
 
 	def enqueue(self, trade):
 		self.backlog.append(trade)
