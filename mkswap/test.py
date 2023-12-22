@@ -1,3 +1,4 @@
+import rel
 from .accountant import Accountant
 from .observer import Observer
 from .agent import agencies
@@ -65,11 +66,16 @@ def gemApprovedAddresses(network="bitcoin"):
 #
 # general
 #
-def multi():
-	ag = Agent()
+def reqsWithAgent(ag):
 	get("/v1/notionalvolume", ag, False)
 	get("/v1/account", ag, False)
-	get("/v1/balances", ag)
+	get("/v1/balances", ag, False)
+
+def multi():
+	ag = Agent()
+	reqsWithAgent(ag)
+	rel.timeout(1, reqsWithAgent, ag)
+	start()
 
 def confy():
 	spew(config.current())
