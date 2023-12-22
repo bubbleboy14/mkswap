@@ -15,7 +15,8 @@ class Req(Worker):
 		self.log("get(%s, %s)"%(self.path, self.attempt))
 		dpost(self.path, ask("credHead", self.path, self.params), self.receive, self.retry)
 
-	def retry(self, reason, timeout=4):
+	def retry(self, reason, timeout=None):
+		timeout = timeout or random.randint(5, 25)
 		self.log("retry(%s #%s)[%s] %s seconds!"%(self.path, self.attempt, reason, timeout))
 		rel.timeout(timeout, self.get)
 
@@ -25,14 +26,10 @@ class Req(Worker):
 		reason = res["reason"]
 		message = res["message"]
 		self.log("receive(%s) %s error: %s"%(self.path, reason, message))
-		if reason == "RateLimited":
-			timeout = int(message.split(" ")[-2]) / 1000
-		elif reason in ["RateLimit", "InvalidNonce"]:
-			timeout = random.randint(5, 25)
-		else:
+		if reason not in ["RateLimit", "RateLimited", "InvalidNonce"]:
 			return die(reason, res)
 		self.warn(reason)
-		self.retry(reason, timeout)
+		self.retry(reason, reason == "RateLimited" and int(message.split(" ")[-2]) / 1000)
 
 class Gem(Worker):
 	def __init__(self):
