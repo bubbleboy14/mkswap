@@ -1,4 +1,4 @@
-import rel
+import rel, random
 from .backend import ask, spew, die, dpost
 from .base import Worker
 
@@ -16,7 +16,7 @@ class Req(Worker):
 		dpost(self.path, ask("credHead", self.path, self.params), self.receive, self.retry)
 
 	def retry(self, reason, timeout=4):
-		self.log("retry(#%s)[%s] %s seconds!"%(self.attempt, reason, timeout))
+		self.log("retry(%s #%s)[%s] %s seconds!"%(self.path, self.attempt, reason, timeout))
 		rel.timeout(timeout, self.get)
 
 	def receive(self, res):
@@ -28,7 +28,7 @@ class Req(Worker):
 		if reason == "RateLimited":
 			timeout = int(message.split(" ")[-2]) / 1000
 		elif reason in ["RateLimit", "InvalidNonce"]:
-			timeout = 5
+			timeout = random.randint(5, 25)
 		else:
 			return die(reason, res)
 		self.warn(reason)
@@ -37,15 +37,15 @@ class Req(Worker):
 class Gem(Worker):
 	def __init__(self):
 		self.pending = []
-		rel.timeout(0.2, self.churn) # half of rate limit
+		rel.timeout(0.4, self.churn) # quarter of rate limit
 
 	def churn(self):
 		self.pending and self.pending.pop(0).get()
 		return True
 
 	def get(self, path, cb=None, params={}):
-		self.log("get(%s)"%(path,), params)
 		self.pending.append(Req(path, params, cb))
+		self.log("get(%s) %s pending"%(path, len(self.pending)), params)
 
 	def accounts(self, network, cb=None):
 		self.get("/v1/addresses/%s"%(network,), cb)
