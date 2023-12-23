@@ -10,7 +10,7 @@ class Req(Worker):
 		self.attempt = 0
 		self.params = params
 		self.client_order_id = client_order_id
-		self.name = path
+		self.name = path.split("/").pop()
 		if client_order_id:
 			self.name = "%s %s"%(self.name, client_order_id)
 		if "order_id" in params:
