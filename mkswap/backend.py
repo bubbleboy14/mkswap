@@ -130,7 +130,7 @@ def dpost(path, headers={}, cb=spew, eb=None, host=predefs["platform"]):
 	if not eb:
 		eb = lambda msg : die("request (%s) failed: %s"%(path, msg))
 	post(getHost(host), path, port=443, secure=True,
-		headers=headers, cb=cb, timeout=30, json=True, eb=eb)
+		headers=headers, cb=cb, timeout=60, json=True, eb=eb)
 
 def setStaging(stagflag=STAGING):
 	log("setStaging(%s)"%(stagflag,))

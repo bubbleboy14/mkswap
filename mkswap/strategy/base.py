@@ -4,7 +4,7 @@ from ..backend import log
 INNER = 3
 OUTER = 10
 LONG = 40
-LOUD = True
+LOUD = False
 
 def setInner(inner):
 	log("setInner(%s)"%(inner,))

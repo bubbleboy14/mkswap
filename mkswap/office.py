@@ -48,7 +48,7 @@ class Office(Worker):
 
 	def warning(self, msg):
 		self.warnings.append(msg)
-		self.warnings = self.warnings[-10:]
+		self.warnings = self.warnings[-20:]
 
 	def teardown(self):
 		self.log("teardown()")
