@@ -75,7 +75,7 @@ class Gem(Worker):
 	def add(self, req):
 		self.pending.append(req)
 		self.log("added to", len(self.pending), "long queue:",
-			req.path, req.attempt, "paused:", self.paused)
+			req.name, "attempt:", req.attempt, "paused:", self.paused)
 
 	def get(self, path, cb=None, params={}, client_order_id=None):
 		self.log("get(%s)"%(path,), client_order_id, params)
