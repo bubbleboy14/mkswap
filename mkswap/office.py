@@ -118,7 +118,7 @@ class Office(Worker):
 			curprice = man.latest["price"]
 		else:
 			trader = trader or self.trader
-		tz = trader.trades
+		tz = trader.trades = trader.trades[-20:] # or it keeps growing...
 		if symbol:
 			tz = list(filter(lambda t : t["symbol"] == symbol, tz))
 		if not tz:
