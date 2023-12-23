@@ -75,6 +75,8 @@ def multi():
 	ag = Agent()
 	reqsWithAgent(ag)
 	rel.timeout(1, reqsWithAgent, ag)
+	rel.timeout(2, reqsWithAgent, ag)
+	rel.timeout(3, reqsWithAgent, ag)
 	start()
 
 def confy():
