@@ -1,5 +1,6 @@
 import rel, random
-from .backend import ask, spew, die, dpost
+from rel.util import ask, listen
+from .backend import spew, die, dpost
 from .base import Worker
 
 class Req(Worker):
@@ -9,6 +10,7 @@ class Req(Worker):
 		self.path = path
 		self.attempt = 0
 		self.params = params
+		self.noretry = False
 		self.client_order_id = client_order_id
 		self.name = path.split("/").pop()
 		if client_order_id:
@@ -16,6 +18,7 @@ class Req(Worker):
 		if "order_id" in params:
 			self.name = "%s %s"%(self.name, params["order_id"])
 		self.log(params)
+		self.gem.reg(self)
 
 	def sig(self):
 		return "Req[%s]"%(self.name,)
@@ -26,20 +29,18 @@ class Req(Worker):
 		dpost(self.path, ask("credHead", self.path, self.params), self.receive, self.retry)
 
 	def resubmit(self):
-		self.log("resubmit(%s)"%(self.attempt,))
-		self.gem.add(self)
+		self.log("resubmit(%s)"%(self.attempt,),
+			self.noretry and "aborting retry!" or "passing self to gem")
+		self.noretry or self.gem.add(self)
 
 	def retry(self, reason, timeout=None):
 		timeout = timeout or random.randint(2, 10)
 		self.log("retry(%s)[%s] %s seconds!"%(self.attempt, reason, timeout))
 		rel.timeout(timeout, self.resubmit)
 
-	def decommission(self):
-		self.gem = None
-
 	def receive(self, res):
 		if "result" not in res or res["result"] != "error":
-			self.decommission()
+			self.gem.unreg(self)
 			return (self.cb or self.log)(res)
 		reason = res["reason"]
 		message = res["message"]
@@ -53,10 +54,22 @@ class Req(Worker):
 
 class Gem(Worker):
 	def __init__(self):
+		self.reqs = {}
 		self.pending = []
 		self.paused = False
 		self.pauser = rel.timeout(None, self.unpause)
 		rel.timeout(0.1, self.churn) # rate limit
+		listen("preventRetry", self.preventRetry)
+
+	def preventRetry(self, rname):
+		self.reqs[rname].noretry = True
+
+	def reg(self, req):
+		self.reqs[req.name] = req
+
+	def unreg(self, req):
+		req.gem = None
+		del self.reqs[req.name]
 
 	def churn(self):
 		self.pending and not self.paused and self.pending.pop(0).get()

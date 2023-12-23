@@ -178,6 +178,7 @@ class Comptroller(Feeder):
 		trade = self.actives[coid]
 		if "order_id" in trade:
 			return self.warn("%s exists (%s)"%(msg, trade["status"]))
+		emit("preventRetry", "new %s"%(coid,))
 		trade["order_id"] = oid
 		self.log(msg, trade, resp)
 		emit("orderActive", trade)
