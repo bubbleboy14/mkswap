@@ -1,3 +1,4 @@
+import rel
 from .accountant import Accountant
 from .observer import Observer
 from .agent import agencies
@@ -7,7 +8,7 @@ from .backend import start, spew, predefs, hosts, echofeed, setStaging
 
 plat = predefs["platform"]
 Agent = agencies[plat]
-SILENT_REQUEST = False
+SILENT_REQUEST = True
 
 #
 # mkswap tests
@@ -65,6 +66,19 @@ def gemApprovedAddresses(network="bitcoin"):
 #
 # general
 #
+def reqsWithAgent(ag):
+	get("/v1/notionalvolume", ag, False)
+	get("/v1/account", ag, False)
+	get("/v1/balances", ag, False)
+
+def multi():
+	ag = Agent()
+	reqsWithAgent(ag)
+	rel.timeout(1, reqsWithAgent, ag)
+	rel.timeout(2, reqsWithAgent, ag)
+	rel.timeout(3, reqsWithAgent, ag)
+	start()
+
 def confy():
 	spew(config.current())
 	setStaging(False)
@@ -77,7 +91,8 @@ def observe(sym="BTCUSD"):
 	start()
 
 if __name__ == "__main__":
-	observe()
+	multi()
+	#observe()
 	#gemApprovedAddresses()
 	#gemAddresses()
 	#confy()

@@ -1,3 +1,4 @@
+from rel.util import emit
 from .backend import events, spew, predefs
 from .base import Feeder
 
@@ -20,5 +21,7 @@ class Observer(Feeder):
 		return "Observer[%s]"%(self.symbol,)
 
 	def on_message(self, ws, message):
-		for event in events(message, self.use_initial):
+		eventz = events(message, self.use_initial)
+		for event in eventz:
 			self.observe(event)
+		eventz and emit("priceChange")

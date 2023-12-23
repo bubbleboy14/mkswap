@@ -46,9 +46,9 @@ def spew(event):
 		event = event.decode()
 	log(json.dumps(event))
 
-def die(m, j):
+def die(m, j=None):
 	log("i die:", m)
-	spew(j)
+	j and spew(j)
 	stop()
 
 def crsub(streamname):
@@ -125,10 +125,12 @@ platforms = { # setStaging() sets dacc/dydx/gemorders feeds, gemini feeder
 def getHost(hkind=predefs["platform"]):
 	return hosts[hkind]
 
-def dpost(path, headers={}, cb=spew, host=predefs["platform"]):
+def dpost(path, headers={}, cb=spew, eb=None, host=predefs["platform"]):
 	from dez.http import post
+	if not eb:
+		eb = lambda msg : die("request (%s) failed: %s"%(path, msg))
 	post(getHost(host), path, port=443, secure=True,
-		headers=headers, cb=cb, timeout=10, json=True)
+		headers=headers, cb=cb, timeout=60, json=True, eb=eb)
 
 def setStaging(stagflag=STAGING):
 	log("setStaging(%s)"%(stagflag,))

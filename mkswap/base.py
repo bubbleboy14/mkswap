@@ -1,5 +1,5 @@
 import traceback, pprint
-from .backend import log, stop, feed
+from .backend import log, stop, feed, emit
 
 UNSPAMMED = True
 
@@ -19,6 +19,11 @@ class Worker(object):
 				return print(".", end="", flush=True)
 			self._lastlog = line
 		log(line)
+
+	def warn(self, msg, extra=None):
+		self.log("WARNING:", msg)
+		extra and self.log(extra)
+		emit("warning", "%s: %s"%(self.sig(), msg))
 
 	def error(self, *msg):
 		self.log("ERROR", *msg)

@@ -1,5 +1,5 @@
 import pprint, atexit, rel
-from .backend import log, start, predefs, setStaging
+from .backend import log, start, predefs, setStaging, listen
 from .comptroller import Comptroller
 from .accountant import Accountant
 from .strategist import strategies
@@ -11,6 +11,7 @@ from .config import config
 
 VERBOSE = False
 STAGISH = False
+WARNINGS = 20
 
 def setVerbose(isverb):
 	log("setVerbose(%s)"%(isverb,))
@@ -21,6 +22,11 @@ def setStagish(stag):
 	log("setStagish(%s)"%(stag,))
 	global STAGISH
 	STAGISH = stag
+
+def setWarnings(warns):
+	log("setWarnings(%s)"%(warns,))
+	global WARNINGS
+	WARNINGS = warns
 
 class Office(Worker):
 	def __init__(self, platform=predefs["platform"], symbols=[], strategy=predefs["strategy"], globalStrategy=False, globalTrade=False):
@@ -43,6 +49,12 @@ class Office(Worker):
 		self.comptroller = Comptroller(self.price)
 		self.harvester = Harvester(self)
 		rel.timeout(1, self.tick)
+		self.warnings = []
+		listen("warning", self.warning)
+
+	def warning(self, msg):
+		self.warnings.append(msg)
+		self.warnings = self.warnings[-WARNINGS:]
 
 	def teardown(self):
 		self.log("teardown()")
@@ -74,6 +86,7 @@ class Office(Worker):
 			"actives": com.actives,
 			"backlog": com.backlog,
 			"cancels": com.cancels,
+			"warnings": self.warnings,
 			"strategists": self.stratuses(),
 			"harvester": self.harvester.status(),
 			"balances": acc.balances(self.price, "both")
