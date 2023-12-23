@@ -2,19 +2,19 @@ import rel, random
 from .backend import ask, spew, die, dpost
 from .base import Worker
 
-oidkeys = ["client_order_id", "order_id"]
-
 class Req(Worker):
-	def __init__(self, path, gem, params={}, cb=spew):
+	def __init__(self, path, gem, params={}, cb=spew, client_order_id=None):
 		self.cb = cb
 		self.gem = gem
 		self.path = path
 		self.attempt = 0
 		self.params = params
+		self.client_order_id = client_order_id
 		self.name = path
-		for key in oidkeys:
-			if key in params:
-				self.name = "%s %s"%(self.name, params[key])
+		if client_order_id:
+			self.name = "%s %s"%(self.name, client_order_id)
+		if "order_id" in params:
+			self.name = "%s %s"%(self.name, params["order_id"])
 		self.log(params)
 
 	def sig(self):
@@ -77,9 +77,9 @@ class Gem(Worker):
 		self.log("added to", len(self.pending), "long queue:",
 			req.path, req.attempt, "paused:", self.paused)
 
-	def get(self, path, cb=None, params={}):
-		self.log("get(%s)"%(path,), params)
-		self.add(Req(path, self, params, cb))
+	def get(self, path, cb=None, params={}, client_order_id=None):
+		self.log("get(%s)"%(path,), client_order_id, params)
+		self.add(Req(path, self, params, cb, client_order_id))
 
 	def accounts(self, network, cb=None):
 		self.get("/v1/addresses/%s"%(network,), cb)
@@ -88,10 +88,12 @@ class Gem(Worker):
 		self.get("/v1/balances", cb)
 
 	def trade(self, trade, cb=None):
-		self.get("/v1/order/new", cb, trade)
+		self.get("/v1/order/new", cb, trade, trade["client_order_id"])
 
 	def cancel(self, trade, cb=None):
-		self.get("/v1/order/cancel", cb, { "order_id": trade["order_id"] })
+		self.get("/v1/order/cancel", cb, {
+			"order_id": trade["order_id"]
+		}, trade["client_order_id"])
 
 	def withdraw(self, symbol, amount, address, memo, cb=None):
 		self.get("/v1/withdraw/%s"%(symbol,), cb, {
