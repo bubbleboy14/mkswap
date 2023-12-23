@@ -11,6 +11,7 @@ from .config import config
 
 VERBOSE = False
 STAGISH = False
+WARNINGS = 20
 
 def setVerbose(isverb):
 	log("setVerbose(%s)"%(isverb,))
@@ -21,6 +22,11 @@ def setStagish(stag):
 	log("setStagish(%s)"%(stag,))
 	global STAGISH
 	STAGISH = stag
+
+def setWarnings(warns):
+	log("setWarnings(%s)"%(warns,))
+	global WARNINGS
+	WARNINGS = warngs
 
 class Office(Worker):
 	def __init__(self, platform=predefs["platform"], symbols=[], strategy=predefs["strategy"], globalStrategy=False, globalTrade=False):
@@ -48,7 +54,7 @@ class Office(Worker):
 
 	def warning(self, msg):
 		self.warnings.append(msg)
-		self.warnings = self.warnings[-20:]
+		self.warnings = self.warnings[-WARNINGS:]
 
 	def teardown(self):
 		self.log("teardown()")
