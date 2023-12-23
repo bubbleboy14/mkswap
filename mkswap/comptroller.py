@@ -88,7 +88,7 @@ class Comptroller(Feeder):
 		prices = set()
 		for tnum in self.actives:
 			trade = self.actives[tnum]
-			if "order_id" in trade:
+			if trade.get("status", None) == "booked":
 				tp = trade["price"]
 				if undupe and tp in prices:
 					cancels.append(tnum)
