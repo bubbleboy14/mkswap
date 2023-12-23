@@ -31,7 +31,7 @@ class Req(Worker):
 	def resubmit(self):
 		self.log("resubmit(%s)"%(self.attempt,),
 			self.noretry and "aborting retry!" or "passing self to gem")
-		self.noretry or self.gem.add(self)
+		self.noretry or self.gem.add(self, True)
 
 	def retry(self, reason, timeout=None):
 		timeout = timeout or random.randint(2, 10)
@@ -55,11 +55,29 @@ class Req(Worker):
 class Gem(Worker):
 	def __init__(self):
 		self.reqs = {}
+		self.counts = {
+			"pauses": 0,
+			"trades": 0,
+			"cancels": 0,
+			"retries": 0,
+			"requests": 0
+		}
 		self.pending = []
 		self.paused = False
 		self.pauser = rel.timeout(None, self.unpause)
-		rel.timeout(0.1, self.churn) # rate limit
+		rel.timeout(0.11, self.churn) # 90% of rate limit
 		listen("preventRetry", self.preventRetry)
+
+	def status(self):
+		return {
+			**self.counts,
+			"paused": self.paused,
+			"pending": len(self.pending),
+			"active": len(self.reqs.keys())
+		}
+
+	def inc(self, count):
+		self.counts[count] += 1
 
 	def preventRetry(self, rname):
 		self.reqs[rname].noretry = True
@@ -72,10 +90,13 @@ class Gem(Worker):
 		del self.reqs[req.name]
 
 	def churn(self):
-		self.pending and not self.paused and self.pending.pop(0).get()
+		if self.pending and not self.paused:
+			self.inc("requests")
+			self.pending.pop(0).get()
 		return True
 
 	def pause(self):
+		self.inc("pauses")
 		self.log("pausing for 5 seconds!!")
 		self.pauser.pending() and self.pauser.delete()
 		self.pauser.add(5)
@@ -85,8 +106,9 @@ class Gem(Worker):
 		self.log("unpausing!")
 		self.paused = False
 
-	def add(self, req):
+	def add(self, req, retry=False):
 		self.pending.append(req)
+		retry and self.inc("retries")
 		self.log("added to", len(self.pending), "long queue:",
 			req.name, "attempt:", req.attempt, "paused:", self.paused)
 
@@ -101,9 +123,11 @@ class Gem(Worker):
 		self.get("/v1/balances", cb)
 
 	def trade(self, trade, cb=None):
+		self.inc("trades")
 		self.get("/v1/order/new", cb, trade, trade["client_order_id"])
 
 	def cancel(self, trade, cb=None):
+		self.inc("cancels")
 		self.get("/v1/order/cancel", cb, {
 			"order_id": trade["order_id"]
 		}, trade["client_order_id"])

@@ -7,6 +7,7 @@ from .harvester import Harvester
 from .manager import Manager
 from .trader import Trader
 from .base import Worker
+from .gem import gem
 from .config import config
 
 VERBOSE = False
@@ -82,6 +83,7 @@ class Office(Worker):
 		acc = self.accountant
 		com = self.comptroller
 		return {
+			"gem": gem.status(),
 			"orders": acc.counts,
 			"actives": com.actives,
 			"backlog": com.backlog,
