@@ -26,7 +26,7 @@ def setStagish(stag):
 def setWarnings(warns):
 	log("setWarnings(%s)"%(warns,))
 	global WARNINGS
-	WARNINGS = warngs
+	WARNINGS = warns
 
 class Office(Worker):
 	def __init__(self, platform=predefs["platform"], symbols=[], strategy=predefs["strategy"], globalStrategy=False, globalTrade=False):
