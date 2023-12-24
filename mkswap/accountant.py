@@ -108,6 +108,8 @@ class Accountant(Feeder):
 
 	def fee(self, sym, amount):
 		self.log("paying", amount, "fee from", sym)
+		if sym != "USD":
+			amount *= ask("price", sym)
 		self.counts["fees"] += amount
 		self.deduct(sym, amount)
 
