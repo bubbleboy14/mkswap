@@ -41,6 +41,12 @@ presets = [{
 	"symbols": ["BTC-USD"]
 }]
 
+REALDIE = True
+def setRealDie(rd):
+	log("setRealDie(%s)"%(rd,))
+	global REALDIE
+	REALDIE = rd
+
 def spew(event):
 	if hasattr(event, "decode"):
 		event = event.decode()
@@ -49,7 +55,7 @@ def spew(event):
 def die(m, j=None):
 	log("i die:", m)
 	j and spew(j)
-	stop()
+	REALDIE and stop()
 
 def crsub(streamname):
 	return {

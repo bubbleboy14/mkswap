@@ -15,7 +15,7 @@ class Config(object):
 		from .comptroller import ACTIVES_ALLOWED, PRUNE_LIMIT, LIVE
 		from .office import VERBOSE, STAGISH, WARNINGS
 		from .base import UNSPAMMED
-		from .backend import STAGING
+		from .backend import STAGING, REALDIE
 		from .strategy import base, rsi, slosh
 		from .harvester import SKIM, BATCH, BOTTOM, BALANCE, NETWORK
 		return {
@@ -32,7 +32,8 @@ class Config(object):
 		        "live": LIVE
 		    },
 		    "backend": {
-		        "staging": STAGING
+		        "staging": STAGING,
+		        "realdie": REALDIE
 		    },
 		    "office": {
 		        "verbose": VERBOSE,
@@ -70,7 +71,7 @@ class Config(object):
 	def set(self, c):
 		from .comptroller import setPruneLimit, setActives, setLive
 		from .office import setVerbose, setStagish, setWarnings
-		from .backend import setStaging
+		from .backend import setStaging, setRealDie
 		from .base import setUnspammed
 		from .strategy import base, rsi, slosh
 		from .harvester import setSkim, setBatch, setBottom, setBalance, setNetwork
@@ -93,7 +94,8 @@ class Config(object):
 		        "warnings": setWarnings
 		    },
 		    "backend": {
-		    	"staging": setStaging
+		    	"staging": setStaging,
+		    	"realdie": setRealDie
 		    },
 		    "base": {
 		        "unspammed": setUnspammed
