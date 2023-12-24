@@ -7,6 +7,7 @@ LIVE = False
 PRUNE_LIMIT = 0.1
 ACTIVES_ALLOWED = 10
 orderNumber = random.randint(0, 2000)
+SKIP_INITIAL = False
 
 def setLive(islive):
 	log("setLive(%s)"%(islive,))
@@ -40,7 +41,9 @@ class Comptroller(Feeder):
 		etype = msg["type"]
 		self.log("proc(%s, %s): %s"%(etype, coi, msg))
 		if etype == "initial": # configurize...
-			return self.log("proc() skipping initial")
+			if SKIP_INITIAL:
+				return self.log("proc() skipping initial")
+			return self.reactivate(msg)
 		if coi not in self.actives:
 			return self.warn("unlisted %s %s"%(etype, coi))
 		order = self.actives[coi]
@@ -66,6 +69,20 @@ class Comptroller(Feeder):
 			del self.actives[coi]
 		else:
 			self.log("proc() unhandled event!")
+
+	def reactivate(self, msg):
+		self.actives[msg["client_order_id"]] = order = {
+			"status": "booked",
+			"side": msg["side"],
+			"price": msg["price"],
+			"type": msg["order_type"],
+			"order_id": msg["order_id"],
+			"symbol": msg["symbol"].upper(),
+			"amount": msg["original_amount"],
+			"client_order_id": msg["client_order_id"]
+		}
+		self.log("reactivate()", order)
+		emit("orderActive", order)
 
 	def on_message(self, ws, msgs):
 		msgs = json.loads(msgs)
