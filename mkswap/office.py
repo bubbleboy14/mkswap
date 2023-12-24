@@ -52,6 +52,7 @@ class Office(Worker):
 		rel.timeout(1, self.tick)
 		self.warnings = []
 		listen("warning", self.warning)
+		listen("price", self.price)
 
 	def warning(self, msg):
 		self.warnings.append(msg)
