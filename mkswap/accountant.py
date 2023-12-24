@@ -8,6 +8,7 @@ CAP_BALANCES = True
 class Accountant(Feeder):
 	def __init__(self, platform=predefs["platform"], balances=predefs["balances"], balcaps=CAP_BALANCES):
 		self.counts = {
+			"fees": 0,
 			"active": 0,
 			"filled": 0,
 			"approved": 0,
@@ -32,6 +33,7 @@ class Accountant(Feeder):
 		listen("orderFilled", self.orderFilled)
 		listen("orderActive", self.orderActive)
 		listen("affordable", self.affordable)
+		listen("fee", self.fee)
 
 	def getBalances(self):
 		self.log("getBalances!!!")
@@ -104,12 +106,21 @@ class Accountant(Feeder):
 		self.log("order active!")
 		self.counts["active"] += 1
 
-	def deduct(self, sym, amount):
+	def fee(self, sym, amount):
+		self.log("paying", amount, "fee from", sym)
+		self.counts["fees"] += amount
+		self.deduct(sym, amount)
+
+	def skim(self, sym, amount):
 		skz = self._skimmed
 		if (sym not in skz):
 			skz[sym] = 0;
 		skz[sym] += amount
-		self.log("deducting", amount, "from", sym, "- now @", skz[sym])
+		self.log("skimming", amount, "from", sym, "- now @", skz[sym])
+		self.deduct(sym, amount)
+
+	def deduct(self, sym, amount):
+		self.log("deducting", amount, "from", sym)
 		self._theoretical[sym] -= amount
 		self._balances[sym] -= amount
 
