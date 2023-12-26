@@ -63,7 +63,10 @@ class Harvester(Worker):
 
 	def setStorehouse(self, resp):
 		self.log("setStorehouse()", resp)
-		self.storehouse = resp[0]["address"]
+		if type(resp) is list and len(resp):
+			self.storehouse = resp[0]["address"]
+		else:
+			self.warn("no storehouse!")
 
 	def measure(self):
 		if SKIM or BALANCE:
