@@ -24,8 +24,8 @@ class Req(Worker):
 
 	def get(self, sync=False):
 		self.attempt += 1
-		self.log("get(%s)"%(self.attempt,))
 		headers = ask("credHead", self.path, self.params)
+		self.log("get(%s)"%(self.attempt,), headers)
 		if sync:
 			requests.get("https://%s%s"%(getHost(), self.path), { headers: headers })
 		else:
