@@ -166,15 +166,16 @@ class Comptroller(Feeder):
 		self.log(msg, trade)
 		emit("orderCancelled", trade)
 
-	def withdraw(self):
+	def teardown(self):
 		akeys = list(self.actives.keys())
-		self.log("withdraw() cancelling", len(akeys), "active orders")
-		for tnum in akeys:
-			trade = self.actives[tnum]
-			if "order_id" in trade:
-				self.cancel(tnum)
-			else:
-				self.log("trade uninitialized! (cancelling cancel)", trade)
+		self.log("teardown() cancelling", len(akeys), "active orders")
+		gem.cancelAll()
+#		for tnum in akeys:
+#			trade = self.actives[tnum]
+#			if "order_id" in trade:
+#				self.cancel(tnum)
+#			else:
+#				self.log("trade uninitialized! (cancelling cancel)", trade)
 
 	def refill(self):
 		self.log("refill(%s)"%(len(self.backlog),))

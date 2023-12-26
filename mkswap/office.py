@@ -60,7 +60,7 @@ class Office(Worker):
 
 	def teardown(self):
 		self.log("teardown()")
-		self.comptroller.withdraw()
+		self.comptroller.teardown()
 
 	def sig(self):
 		return "Office[%s]"%(self.platform,)

@@ -132,6 +132,10 @@ class Gem(Worker):
 			"order_id": trade["order_id"]
 		}, trade["client_order_id"])
 
+	def cancelAll(self, cb=None):
+		self.log("cancelAll() cancelling all open orders!!!")
+		self.get("/v1/order/cancel/all", cb)
+
 	def withdraw(self, symbol, amount, address, memo, cb=None):
 		self.get("/v1/withdraw/%s"%(symbol,), cb, {
 			"memo": memo,
