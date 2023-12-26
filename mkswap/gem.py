@@ -1,6 +1,6 @@
-import rel, random
+import rel, random, requests
 from rel.util import ask, listen
-from .backend import spew, die, dpost
+from .backend import spew, die, dpost, getHost
 from .base import Worker
 
 class Req(Worker):
@@ -22,10 +22,14 @@ class Req(Worker):
 	def sig(self):
 		return "Req[%s]"%(self.name,)
 
-	def get(self):
+	def get(self, sync=False):
 		self.attempt += 1
 		self.log("get(%s)"%(self.attempt,))
-		dpost(self.path, ask("credHead", self.path, self.params), self.receive, self.retry)
+		headers = ask("credHead", self.path, self.params)
+		if sync:
+			requests.get("https://%s%s"%(getHost(), self.path), { headers: headers })
+		else:
+			dpost(self.path, headers, self.receive, self.retry)
 
 	def resubmit(self):
 		self.log("resubmit(%s)"%(self.attempt,),
@@ -136,8 +140,7 @@ class Gem(Worker):
 
 	def cancelAll(self, cb=None):
 		self.log("cancelAll() cancelling all open orders!!!")
-		Req("/v1/order/cancel/all").get()
-#		self.get("/v1/order/cancel/all", cb, {}) # why is {} necessary???
+		Req("/v1/order/cancel/all").get(True)
 
 	def withdraw(self, symbol, amount, address, memo, cb=None):
 		self.get("/v1/withdraw/%s"%(symbol,), cb, {
