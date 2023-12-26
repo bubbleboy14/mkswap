@@ -1,5 +1,5 @@
 import rel, random, requests
-from rel.util import ask, listen
+from rel.util import ask, listen, emit
 from .backend import spew, die, dpost, getHost
 from .base import Worker
 
