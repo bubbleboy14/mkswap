@@ -27,7 +27,7 @@ class Req(Worker):
 		headers = ask("credHead", self.path, self.params)
 		self.log("get(%s)"%(self.attempt,), headers)
 		if sync:
-			requests.get("https://%s%s"%(getHost(), self.path), { headers: headers })
+			requests.get("https://%s%s"%(getHost(), self.path), headers=headers)
 		else:
 			dpost(self.path, headers, self.receive, self.retry)
 
