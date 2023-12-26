@@ -97,6 +97,8 @@ class Comptroller(Feeder):
 	def score(self, trade):
 		sym = trade["symbol"]
 		curprice = self.pricer(sym)
+		if not curprice:
+			return
 		trade["score"] = float(trade["price"]) - curprice
 		if trade["side"] == "buy":
 			trade["score"] *= -1
@@ -117,6 +119,9 @@ class Comptroller(Feeder):
 				else:
 					prices.add(tp)
 					s = self.score(trade)
+					if not s:
+						skips += 1
+						continue
 					toofar = False
 					if limit:
 						ratio = float(tp) / self.pricer(trade["symbol"])
