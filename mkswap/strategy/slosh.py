@@ -64,7 +64,7 @@ class Slosh(Base):
 	def sigma(self):
 		sqds = []
 		cur = self.allratios[-1]
-		for r in self.allratios[-INNER:-1]:
+		for r in self.allratios[-OUTER:-1]:
 			d = r - cur
 			sqds.append(d * d)
 		return sqrt(self.ave(collection=sqds))
