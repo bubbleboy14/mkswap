@@ -133,7 +133,8 @@ class Gem(Worker):
 
 	def cancelAll(self, cb=None):
 		self.log("cancelAll() cancelling all open orders!!!")
-		self.get("/v1/order/cancel/all", cb, {})
+		Req("/v1/order/cancel/all").get()
+#		self.get("/v1/order/cancel/all", cb, {}) # why is {} necessary???
 
 	def withdraw(self, symbol, amount, address, memo, cb=None):
 		self.get("/v1/withdraw/%s"%(symbol,), cb, {
