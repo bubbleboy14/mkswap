@@ -61,8 +61,9 @@ class Comptroller(Feeder):
 		elif etype == "cancelled":
 			reason = msg["reason"]
 			self.log("proc() cancellation", reason)
-			self.cancels.append(reason)
-			self.cancels = self.cancels[-10:]
+			if reason != "Requested":
+				self.cancels.append(reason)
+				self.cancels = self.cancels[-10:]
 			self.cancelled(coi)
 		elif etype == "closed":
 			self.log("proc(): trade closed", order)
