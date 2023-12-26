@@ -11,6 +11,7 @@ class Gemini(Worker):
 		emit("clientReady")
 
 	def credHead(self, path, params={}):
+		self.log("credHead(%s) %s"%(path, params))
 		payload = self.payload(path, params)
 		return {
 			"Content-Length": "0",
