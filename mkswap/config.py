@@ -14,6 +14,7 @@ class Config(object):
 	def current(self):
 		from .comptroller import ACTIVES_ALLOWED, PRUNE_LIMIT, LIVE
 		from .office import VERBOSE, STAGISH, WARNINGS
+		from .accountant import CAPPED
 		from .base import UNSPAMMED
 		from .backend import STAGING, REALDIE
 		from .strategy import base, rsi, slosh
@@ -25,6 +26,9 @@ class Config(object):
 				"bottom": BOTTOM,
 				"balance": BALANCE,
 				"network": NETWORK
+			},
+			"accountant": {
+				"capped": CAPPED
 			},
 		    "comptroller": {
 		        "actives": ACTIVES_ALLOWED,
@@ -72,6 +76,7 @@ class Config(object):
 		from .comptroller import setPruneLimit, setActives, setLive
 		from .office import setVerbose, setStagish, setWarnings
 		from .backend import setStaging, setRealDie
+		from .accountant import setCapped
 		from .base import setUnspammed
 		from .strategy import base, rsi, slosh
 		from .harvester import setSkim, setBatch, setBottom, setBalance, setNetwork
@@ -82,6 +87,9 @@ class Config(object):
 				"bottom": setBottom,
 				"balance": setBalance,
 				"network": setNetwork
+			},
+			"accountant": {
+				"capped": setCapped
 			},
 		    "comptroller": {
 		        "live": setLive,

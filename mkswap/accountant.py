@@ -3,10 +3,15 @@ from .backend import rel, ask, listen, predefs
 from .base import Feeder
 from .gem import gem
 
-CAP_BALANCES = True
+CAPPED = True
+
+def setCapped(capped):
+	log("setCapped(%s)"%(capped,))
+	global CAPPED
+	CAPPED = capped
 
 class Accountant(Feeder):
-	def __init__(self, platform=predefs["platform"], balances=predefs["balances"], balcaps=CAP_BALANCES):
+	def __init__(self, platform=predefs["platform"], balances=predefs["balances"], balcaps=None):
 		self.counts = {
 			"fees": 0,
 			"active": 0,
@@ -24,6 +29,8 @@ class Accountant(Feeder):
 		self.starttime = datetime.now()
 		self.platform = platform
 		self._usd = "USD"
+		if balcaps is None:
+			balcaps = CAPPED
 		if platform == "dydx":
 			rel.timeout(10, self.checkFilled)
 			self._usd = "-USD"
