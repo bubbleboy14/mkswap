@@ -79,7 +79,10 @@ class Gem(Worker):
 		self.counts[count] += 1
 
 	def preventRetry(self, rname):
-		self.reqs[rname].noretry = True
+		if rname not in self.reqs:
+			self.warn("preventRetry(%s) not found!"%(rname,))
+		else:
+			self.reqs[rname].noretry = True
 
 	def reg(self, req):
 		self.reqs[req.name] = req
