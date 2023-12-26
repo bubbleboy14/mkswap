@@ -4,9 +4,8 @@ from .backend import spew, die, dpost
 from .base import Worker
 
 class Req(Worker):
-	def __init__(self, path, gem, params={}, cb=spew, client_order_id=None):
+	def __init__(self, path, params={}, cb=spew, client_order_id=None):
 		self.cb = cb
-		self.gem = gem
 		self.path = path
 		self.attempt = 0
 		self.params = params
@@ -18,7 +17,7 @@ class Req(Worker):
 		if "order_id" in params:
 			self.name = "%s %s"%(self.name, params["order_id"])
 		self.log(params)
-		self.gem.reg(self)
+		gem.reg(self)
 
 	def sig(self):
 		return "Req[%s]"%(self.name,)
@@ -31,7 +30,7 @@ class Req(Worker):
 	def resubmit(self):
 		self.log("resubmit(%s)"%(self.attempt,),
 			self.noretry and "aborting retry!" or "passing self to gem")
-		self.noretry or self.gem.add(self, True)
+		self.noretry or gem.add(self, True)
 
 	def retry(self, reason, timeout=None):
 		timeout = timeout or random.randint(2, 10)
@@ -40,7 +39,7 @@ class Req(Worker):
 
 	def receive(self, res):
 		if "result" not in res or res["result"] != "error":
-			self.gem.unreg(self)
+			gem.unreg(self)
 			return (self.cb or self.log)(res)
 		reason = res["reason"]
 		message = res["message"]
@@ -48,7 +47,7 @@ class Req(Worker):
 		if reason not in ["RateLimit", "RateLimited", "InvalidNonce"]:
 			return die(reason, res)
 		if reason == "RateLimit":
-			self.gem.pause()
+			gem.pause()
 		self.warn(reason)
 		self.retry(reason, reason == "RateLimited" and int(message.split(" ")[-2]) / 1000)
 
@@ -114,7 +113,7 @@ class Gem(Worker):
 
 	def get(self, path, cb=None, params={}, client_order_id=None):
 		self.log("get(%s)"%(path,), client_order_id, params)
-		self.add(Req(path, self, params, cb, client_order_id))
+		self.add(Req(path, params, cb, client_order_id))
 
 	def accounts(self, network, cb=None):
 		self.get("/v1/addresses/%s"%(network,), cb)
