@@ -51,7 +51,8 @@ class Comptroller(Feeder):
 		if etype == "accepted":
 			self.submitted(msg)
 		elif etype == "rejected":
-			self.error("order rejected!", msg["reason"], msg)
+			self.warn("rejected: %s"%(msg["reason"],), msg)
+			del self.actives[coi]
 		elif etype == "fill":
 			fdata = msg["fill"]
 			emit("fee", fdata["fee_currency"], float(fdata["fee"]))
