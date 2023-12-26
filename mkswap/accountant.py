@@ -1,5 +1,7 @@
+import rel
+from rel.util import ask, listen
 from datetime import datetime
-from .backend import rel, ask, listen, predefs
+from .backend import log, predefs
 from .base import Feeder
 from .gem import gem
 
