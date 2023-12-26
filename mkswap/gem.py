@@ -48,12 +48,16 @@ class Req(Worker):
 		reason = res["reason"]
 		message = res["message"]
 		self.log("receive(%s) %s error: %s"%(self.attempt, reason, message))
-		if reason not in ["RateLimit", "RateLimited", "InvalidNonce"]:
+		if reason not in ["RateLimit", "RateLimited", "InvalidNonce", "InsufficientFunds"]:
 			return die(reason, res)
-		if reason == "RateLimit":
-			gem.pause()
 		self.warn(reason)
-		self.retry(reason, reason == "RateLimited" and int(message.split(" ")[-2]) / 1000)
+		if reason == "InsufficientFunds":
+			gem.unreg(self)
+			emit("rejected", self.client_order_id, res)
+		else:
+			if reason == "RateLimit":
+				gem.pause()
+			self.retry(reason, reason == "RateLimited" and int(message.split(" ")[-2]) / 1000)
 
 class Gem(Worker):
 	def __init__(self):
@@ -92,7 +96,6 @@ class Gem(Worker):
 		self.reqs[req.name] = req
 
 	def unreg(self, req):
-		req.gem = None
 		del self.reqs[req.name]
 
 	def churn(self):

@@ -31,6 +31,7 @@ class Comptroller(Feeder):
 		self.cancels = []
 		self.pricer = pricer
 		self.cancelling = set()
+		listen("rejected", self.rejected)
 		listen("priceChange", self.prune)
 		listen("enqueueOrder", self.enqueue)
 		self.feed("gemorders")
@@ -51,8 +52,7 @@ class Comptroller(Feeder):
 		if etype == "accepted":
 			self.submitted(msg)
 		elif etype == "rejected":
-			self.warn("rejected: %s"%(msg["reason"],), msg)
-			del self.actives[coi]
+			self.rejected(coi, msg)
 		elif etype == "fill":
 			fdata = msg["fill"]
 			emit("fee", fdata["fee_currency"], float(fdata["fee"]))
@@ -172,6 +172,13 @@ class Comptroller(Feeder):
 			msg = "%s unexpected!"%(msg,)
 		self.log(msg, trade)
 		emit("orderCancelled", trade)
+
+	def rejected(self, coi, msg):
+		self.warn("rejected(%s): %s"%(coi, msg["reason"]), msg)
+		if coi in self.actives:
+			del self.actives[coi]
+		else:
+			self.log(coi, "already removed!")
 
 	def teardown(self):
 		akeys = list(self.actives.keys())
