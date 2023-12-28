@@ -29,6 +29,7 @@ class Comptroller(Feeder):
 		self.actives = {}
 		self.backlog = []
 		self.cancels = []
+		self.fills = []
 		self.pricer = pricer
 		self.cancelling = set()
 		listen("rejected", self.rejected)
@@ -55,6 +56,11 @@ class Comptroller(Feeder):
 			self.rejected(coi, msg)
 		elif etype == "fill":
 			fdata = msg["fill"]
+			self.fills.append({
+				"msg": "%s %s %s @ %s"%(msg["side"], msg["executed_amount"],
+					msg["symbol"], msg["avg_execution_price"]),
+				"data": msg
+			})
 			emit("fee", fdata["fee_currency"], float(fdata["fee"]))
 			if msg["remaining_amount"] == "0":
 				self.log("proc(): trade filled", order)
@@ -63,13 +69,18 @@ class Comptroller(Feeder):
 			reason = msg["reason"]
 			self.log("proc() cancellation", reason)
 			if reason != "Requested":
-				self.cancels.append(reason)
+				self.cancels.append({ "msg": reason, "data": msg })
 			self.cancelled(coi)
 		elif etype == "closed":
 			self.log("proc(): trade closed", order)
 			del self.actives[coi]
 		else:
 			self.log("proc() unhandled event!")
+
+	def getFills(self):
+		fills = self.fills
+		self.fills = []
+		return fills
 
 	def getCancels(self):
 		cancs = self.cancels

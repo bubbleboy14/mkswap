@@ -48,8 +48,8 @@ class Office(Worker):
 		listen("warning", self.warning)
 		listen("price", self.price)
 
-	def warning(self, msg):
-		self.warnings.append(msg)
+	def warning(self, msg, data=None):
+		self.warnings.append({ "msg": msg, "data": data })
 
 	def getWarnings(self):
 		warns = self.warnings
@@ -86,6 +86,7 @@ class Office(Worker):
 			"orders": acc.counts,
 			"actives": com.actives,
 			"backlog": com.backlog,
+			"fills": com.getFills(),
 			"cancels": com.getCancels(),
 			"warnings": self.getWarnings(),
 			"strategists": self.stratuses(),
