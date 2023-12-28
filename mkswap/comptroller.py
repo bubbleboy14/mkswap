@@ -64,13 +64,17 @@ class Comptroller(Feeder):
 			self.log("proc() cancellation", reason)
 			if reason != "Requested":
 				self.cancels.append(reason)
-				self.cancels = self.cancels[-10:]
 			self.cancelled(coi)
 		elif etype == "closed":
 			self.log("proc(): trade closed", order)
 			del self.actives[coi]
 		else:
 			self.log("proc() unhandled event!")
+
+	def getCancels(self):
+		cancs = self.cancels
+		self.cancels = []
+		return cancs
 
 	def reactivate(self, msg):
 		self.actives[msg["client_order_id"]] = order = {
