@@ -12,7 +12,6 @@ from .config import config
 
 VERBOSE = False
 STAGISH = False
-WARNINGS = 20
 
 def setVerbose(isverb):
 	log("setVerbose(%s)"%(isverb,))
@@ -23,11 +22,6 @@ def setStagish(stag):
 	log("setStagish(%s)"%(stag,))
 	global STAGISH
 	STAGISH = stag
-
-def setWarnings(warns):
-	log("setWarnings(%s)"%(warns,))
-	global WARNINGS
-	WARNINGS = warns
 
 class Office(Worker):
 	def __init__(self, platform=predefs["platform"], symbols=[], strategy=predefs["strategy"], globalStrategy=False, globalTrade=False):
@@ -56,7 +50,11 @@ class Office(Worker):
 
 	def warning(self, msg):
 		self.warnings.append(msg)
-		self.warnings = self.warnings[-WARNINGS:]
+
+	def getWarnings(self):
+		warns = self.warnings
+		self.warnings = []
+		return warns
 
 	def teardown(self):
 		self.log("teardown()")
@@ -88,8 +86,8 @@ class Office(Worker):
 			"orders": acc.counts,
 			"actives": com.actives,
 			"backlog": com.backlog,
-			"cancels": com.cancels,
-			"warnings": self.warnings,
+			"cancels": com.getCancels(),
+			"warnings": self.getWarnings(),
 			"strategists": self.stratuses(),
 			"harvester": self.harvester.status(),
 			"balances": acc.balances(self.price, "both")
