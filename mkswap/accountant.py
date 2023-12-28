@@ -19,6 +19,7 @@ class Accountant(Feeder):
 			"active": 0,
 			"filled": 0,
 			"approved": 0,
+			"rejected": 0,
 			"cancelled": 0
 		}
 		self.syms = []
@@ -39,6 +40,7 @@ class Accountant(Feeder):
 		elif not balcaps:
 			listen("clientReady", self.getBalances)
 		listen("orderCancelled", self.orderCancelled)
+		listen("orderRejected", self.orderRejected)
 		listen("orderFilled", self.orderFilled)
 		listen("orderActive", self.orderActive)
 		listen("affordable", self.affordable)
@@ -114,6 +116,10 @@ class Accountant(Feeder):
 	def orderActive(self, trade):
 		self.log("order active!")
 		self.counts["active"] += 1
+
+	def orderRejected(self, trade):
+		self.log("order rejected!")
+		self.counts["rejected"] += 1
 
 	def fee(self, sym, amount):
 		self.log("paying", amount, "fee from", sym)

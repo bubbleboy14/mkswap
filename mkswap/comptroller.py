@@ -191,6 +191,7 @@ class Comptroller(Feeder):
 	def rejected(self, coi, msg):
 		self.warn("rejected(%s): %s"%(coi, msg["reason"]), msg)
 		if coi in self.actives:
+			emit("orderRejected", self.actives[coi])
 			del self.actives[coi]
 		else:
 			self.log(coi, "already removed!")
