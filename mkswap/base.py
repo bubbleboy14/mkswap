@@ -23,7 +23,7 @@ class Worker(object):
 	def warn(self, msg, extra=None):
 		self.log("WARNING:", msg)
 		extra and self.log(extra)
-		emit("warning", "%s: %s"%(self.sig(), msg))
+		emit("warning", "%s: %s"%(self.sig(), msg), extra)
 
 	def error(self, *msg):
 		self.log("ERROR", *msg)

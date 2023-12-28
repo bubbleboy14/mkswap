@@ -13,7 +13,7 @@ class Config(object):
 
 	def current(self):
 		from .comptroller import ACTIVES_ALLOWED, PRUNE_LIMIT, LIVE
-		from .office import VERBOSE, STAGISH, WARNINGS
+		from .office import VERBOSE, STAGISH
 		from .accountant import CAPPED
 		from .base import UNSPAMMED
 		from .backend import STAGING, REALDIE
@@ -41,8 +41,7 @@ class Config(object):
 		    },
 		    "office": {
 		        "verbose": VERBOSE,
-		        "stagish": STAGISH,
-		        "warnings": WARNINGS
+		        "stagish": STAGISH
 		    },
 		    "base": {
 		        "unspammed": UNSPAMMED
@@ -74,7 +73,7 @@ class Config(object):
 
 	def set(self, c):
 		from .comptroller import setPruneLimit, setActives, setLive
-		from .office import setVerbose, setStagish, setWarnings
+		from .office import setVerbose, setStagish
 		from .backend import setStaging, setRealDie
 		from .accountant import setCapped
 		from .base import setUnspammed
@@ -98,8 +97,7 @@ class Config(object):
 		    },
 		    "office": {
 		        "verbose": setVerbose,
-		        "stagish": setStagish,
-		        "warnings": setWarnings
+		        "stagish": setStagish
 		    },
 		    "backend": {
 		    	"staging": setStaging,
