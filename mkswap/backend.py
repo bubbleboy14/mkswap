@@ -125,6 +125,9 @@ platforms = { # setStaging() sets dacc/dydx/gemorders feeds, gemini feeder
 	"gemini": {},
 	"gemorders": {
 		"credHead": "/v1/order/events"
+	},
+	"binance": {
+		"feeder": lambda sname : "wss://stream.binance.us:9443/ws/%s@ticker"%(sname,)
 	}
 }
 
