@@ -69,6 +69,12 @@ class Office(Worker):
 	def price(self, symbol):
 		return self.managers[symbol].latest["price"]
 
+	def prices(self):
+		pz = {}
+		for sym in self.managers.keys():
+			pz[sym] = self.managers[sym].latest["price"]
+		return pz
+
 	def stratuses(self):
 		ds = {}
 		if self.strategist:
@@ -87,6 +93,7 @@ class Office(Worker):
 			"actives": com.actives,
 			"backlog": com.backlog,
 			"fills": com.getFills(),
+			"prices": self.prices(),
 			"cancels": com.getCancels(),
 			"warnings": self.getWarnings(),
 			"strategists": self.stratuses(),
