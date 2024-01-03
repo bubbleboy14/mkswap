@@ -4,6 +4,7 @@ from .base import Base, INNER, OUTER, LONG
 
 VOLATILITY_MULT = 16
 VOLATILITY_CUTOFF = 0.5
+ONESWAP = True
 
 def setVolatilityMult(vmult):
 	log("setVolatilityMult(%s)"%(vmult,))
@@ -55,8 +56,22 @@ class Slosh(Base):
 			"amount": round(size / buyprice, 6)
 		})
 
+	def oneswap(self, size):
+		side = "buy"
+		if size < 0:
+			side = "sell"
+			size *= -1
+		self.recommender({
+			"side": side,
+			"amount": round(size, 6),
+			"symbol": self.top[:3] + self.bottom[:3],
+			"price": round(self.ratios["current"], 6)
+		})
+
 	def swap(self, size=10):
-		if size > 0:
+		if ONESWAP:
+			self.oneswap(size)
+		elif size > 0:
 			self.buysell(self.bottom, self.top, size)
 		else:
 			self.buysell(self.top, self.bottom, -size)
