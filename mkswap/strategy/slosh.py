@@ -4,7 +4,7 @@ from .base import Base, INNER, OUTER, LONG
 
 VOLATILITY_MULT = 16
 VOLATILITY_CUTOFF = 0.5
-ONESWAP = True
+ONESWAP = False
 
 def setVolatilityMult(vmult):
 	log("setVolatilityMult(%s)"%(vmult,))
@@ -64,7 +64,7 @@ class Slosh(Base):
 		self.recommender({
 			"side": side,
 			"amount": round(size, 6),
-			"symbol": self.top[:3] + self.bottom[:3],
+			"symbol": self.bottom[:3] + self.top[:3],
 			"price": round(self.ratios["current"], 6)
 		})
 
