@@ -27,7 +27,7 @@ class Req(Worker):
 		headers = ask("credHead", self.path, self.params)
 		self.log("get(%s)"%(self.attempt,), headers)
 		if sync:
-			requests.get("https://%s%s"%(getHost(), self.path), headers=headers)
+			self.cb(requests.get("https://%s%s"%(getHost(), self.path), headers=headers).content)
 		else:
 			dpost(self.path, headers, self.receive, self.retry)
 
@@ -72,7 +72,7 @@ class Gem(Worker):
 		self.pending = []
 		self.paused = False
 		self.pauser = rel.timeout(None, self.unpause)
-		rel.timeout(0.11, self.churn) # 90% of rate limit
+		rel.timeout(0.2, self.churn)
 		listen("preventRetry", self.preventRetry)
 
 	def status(self):
