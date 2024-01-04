@@ -66,11 +66,12 @@ class Slosh(Base):
 		if size < 0:
 			side = "sell"
 			size *= -1
+		price = round(1 / self.ratios["current"], 6)
 		self.recommender({
 			"side": side,
-			"amount": round(size, 6),
-			"symbol": self.bottom[:3] + self.top[:3],
-			"price": round(1 / self.ratios["current"], 6)
+			"price": price,
+			"amount": round(size * price / 8, 6),# ?
+			"symbol": self.bottom[:3] + self.top[:3]
 		})
 
 	def swap(self, size=10):
