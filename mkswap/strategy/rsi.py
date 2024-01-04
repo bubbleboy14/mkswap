@@ -1,5 +1,5 @@
 from .base import Base, OUTER, LONG
-from ..backend import log, predefs
+from ..backend import log, emit, predefs
 
 TRADE_SIZE = 10
 RSI_PERIOD = 14
@@ -26,7 +26,9 @@ class RSI(Base):
 		for hist in _history:
 			price_remaining += hist['price'] * hist['remaining']
 			remaining_total += hist['remaining']
-		return remaining_total and price_remaining / remaining_total or 0 # TODO: actual fix
+		wa = remaining_total and price_remaining / remaining_total or 0 # TODO: actual fix
+		emit("quote", "%sWA"%(self.symbol,), wa)
+		return wa
 
 	def status(self):
 		return {

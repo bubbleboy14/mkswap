@@ -103,6 +103,8 @@ class Slosh(Base):
 		az = self.averages
 		sigma = self.sigma()
 		volatility = self.volatility(cur, sigma)
+		emit("quote", "sigma", sigma)
+		emit("quote", "volatility", volatility)
 		print("\n\nsigma", sigma,
 			"\nvolatility", volatility,
 			"\ncurrent", cur,

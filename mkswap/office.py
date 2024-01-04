@@ -99,6 +99,7 @@ class Office(Worker):
 		acc = self.accountant
 		com = self.comptroller
 		return {
+			"ndx": self.ndx,
 			"gem": gem.status(),
 			"orders": acc.counts,
 			"actives": com.actives,
