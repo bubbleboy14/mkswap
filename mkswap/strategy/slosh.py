@@ -2,9 +2,14 @@ from math import sqrt
 from ..backend import log
 from .base import Base, INNER, OUTER, LONG
 
+ONESWAP = False
 VOLATILITY_MULT = 16
 VOLATILITY_CUTOFF = 0.5
-ONESWAP = False
+
+def setOneSwap(s1):
+	log("setOneSwap(%s)"%(s1,))
+	global ONESWAP
+	ONESWAP = s1
 
 def setVolatilityMult(vmult):
 	log("setVolatilityMult(%s)"%(vmult,))
@@ -56,7 +61,7 @@ class Slosh(Base):
 			"amount": round(size / buyprice, 6)
 		})
 
-	def oneswap(self, size):
+	def oneswap(self, size=10):
 		side = "buy"
 		if size < 0:
 			side = "sell"
@@ -65,7 +70,7 @@ class Slosh(Base):
 			"side": side,
 			"amount": round(size, 6),
 			"symbol": self.bottom[:3] + self.top[:3],
-			"price": round(self.ratios["current"], 6)
+			"price": round(1 / self.ratios["current"], 6)
 		})
 
 	def swap(self, size=10):

@@ -30,38 +30,39 @@ class Config(object):
 			"accountant": {
 				"capped": CAPPED
 			},
-		    "comptroller": {
-		        "actives": ACTIVES_ALLOWED,
-		        "prunelimit": PRUNE_LIMIT,
-		        "live": LIVE
-		    },
-		    "backend": {
-		        "staging": STAGING,
-		        "realdie": REALDIE
-		    },
-		    "office": {
-		        "verbose": VERBOSE,
-		        "stagish": STAGISH
-		    },
-		    "base": {
-		        "unspammed": UNSPAMMED
-		    },
-		    "strategy": {
-		        "base": {
-		            "inner": base.INNER,
-		            "outer": base.OUTER,
-		            "long": base.LONG,
-		            "loud": base.LOUD
-		        },
-		        "rsi": {
-		            "size": rsi.TRADE_SIZE,
-		            "period": rsi.RSI_PERIOD
-		        },
-		        "slosh": {
-		            "vmult": slosh.VOLATILITY_MULT,
-		            "vcutoff": slosh.VOLATILITY_CUTOFF
-		        }
-		    }
+			"comptroller": {
+				"actives": ACTIVES_ALLOWED,
+				"prunelimit": PRUNE_LIMIT,
+				"live": LIVE
+			},
+			"backend": {
+				"staging": STAGING,
+				"realdie": REALDIE
+			},
+			"office": {
+				"verbose": VERBOSE,
+				"stagish": STAGISH
+			},
+			"base": {
+				"unspammed": UNSPAMMED
+			},
+			"strategy": {
+				"base": {
+					"inner": base.INNER,
+					"outer": base.OUTER,
+					"long": base.LONG,
+					"loud": base.LOUD
+				},
+				"rsi": {
+					"size": rsi.TRADE_SIZE,
+					"period": rsi.RSI_PERIOD
+				},
+				"slosh": {
+					"oneswap": slosh.ONESWAP,
+					"vmult": slosh.VOLATILITY_MULT,
+					"vcutoff": slosh.VOLATILITY_CUTOFF
+				}
+			}
 		}
 
 	def _set(self, c, s):
@@ -90,38 +91,39 @@ class Config(object):
 			"accountant": {
 				"capped": setCapped
 			},
-		    "comptroller": {
-		        "live": setLive,
-		        "actives": setActives,
-		        "prunelimit": setPruneLimit
-		    },
-		    "office": {
-		        "verbose": setVerbose,
-		        "stagish": setStagish
-		    },
-		    "backend": {
-		    	"staging": setStaging,
-		    	"realdie": setRealDie
-		    },
-		    "base": {
-		        "unspammed": setUnspammed
-		    },
-		    "strategy": {
-		        "base": {
-		            "inner": base.setInner,
-		            "outer": base.setOuter,
-		            "long": base.setLong,
-		            "loud": base.setLoud
-		        },
-		        "rsi": {
-		            "size": rsi.setSize,
-		            "period": rsi.setPeriod
-		        },
-		        "slosh": {
-		            "vmult": slosh.setVolatilityMult,
-		            "vcutoff": slosh.setVolatilityCutoff
-		        }
-		    }
+			"comptroller": {
+				"live": setLive,
+				"actives": setActives,
+				"prunelimit": setPruneLimit
+			},
+			"office": {
+				"verbose": setVerbose,
+				"stagish": setStagish
+			},
+			"backend": {
+				"staging": setStaging,
+				"realdie": setRealDie
+			},
+			"base": {
+				"unspammed": setUnspammed
+			},
+			"strategy": {
+				"base": {
+					"inner": base.setInner,
+					"outer": base.setOuter,
+					"long": base.setLong,
+					"loud": base.setLoud
+				},
+				"rsi": {
+					"size": rsi.setSize,
+					"period": rsi.setPeriod
+				},
+				"slosh": {
+					"oneswap": slosh.setOneStop,
+					"vmult": slosh.setVolatilityMult,
+					"vcutoff": slosh.setVolatilityCutoff
+				}
+			}
 		}
 		print("CONFIG SET", c)
 		self._set(c, s)
