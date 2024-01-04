@@ -73,7 +73,7 @@ class Slosh(Base):
 			"side": side,
 			"symbol": self.onesym,
 			"price": self.onequote,
-			"amount": round(size / denom, 6)
+			"amount": round(size / denom, 5)
 		})
 
 	def swap(self, size=10):
