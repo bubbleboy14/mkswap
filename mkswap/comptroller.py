@@ -178,11 +178,13 @@ class Comptroller(Feeder):
 		self.log("cancel(%s)"%(tnum,), trade)
 		LIVE and gem.cancel(trade)
 
-	def cancelled(self, tnum):
+	def cancelled(self, tnum, reason=None):
 		trade = self.actives[tnum]
 		msg = "cancelled(%s)"%(tnum,)
 		if tnum in self.cancelling:
 			self.cancelling.remove(tnum)
+		elif reason:
+			msg = "%s %s"%(msg, reason)
 		else:
 			msg = "%s unexpected!"%(msg,)
 		self.log(msg, trade)
@@ -196,10 +198,13 @@ class Comptroller(Feeder):
 		else:
 			self.log(coi, "already removed!")
 
-	def teardown(self):
+	def cancelAll(self):
 		akeys = list(self.actives.keys())
-		self.log("teardown() cancelling", len(akeys), "active orders")
-		gem.cancelAll()
+		self.log("cancelAll() cancelling", len(akeys), "active orders")
+		for tnum in akeys: # is this necessary? cancel gem pendings?
+			self.cancelled(tnum, "blanket cancel")
+			del self.actives[tnum]
+		LIVE and gem.cancelAll() # TODO: get accepted/rejected cancels from return val
 #		for tnum in akeys:
 #			trade = self.actives[tnum]
 #			if "order_id" in trade:

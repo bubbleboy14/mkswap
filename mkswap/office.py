@@ -58,9 +58,13 @@ class Office(Worker):
 		self.warnings = []
 		return warns
 
+	def cancelAll(self):
+		self.log("cancelAll()")
+		self.comptroller.cancelAll()
+
 	def teardown(self):
 		self.log("teardown()")
-		self.comptroller.teardown()
+		self.cancelAll()
 
 	def sig(self):
 		return "Office[%s]"%(self.platform,)
