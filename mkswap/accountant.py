@@ -123,10 +123,10 @@ class Accountant(Feeder):
 
 	def fee(self, sym, amount):
 		self.log("paying", amount, "fee from", sym)
-		if sym != "USD":
-			amount *= ask("price", sym)
-		self.counts["fees"] += amount
 		self.deduct(sym, amount)
+		if sym != "USD":
+			amount *= ask("price", self.fullSym(sym))
+		self.counts["fees"] += amount
 
 	def skim(self, sym, amount):
 		skz = self._skimmed

@@ -1,5 +1,5 @@
 from math import sqrt
-from ..backend import log
+from ..backend import log, emit
 from .base import Base, INNER, OUTER, LONG
 
 ONESWAP = False
@@ -24,6 +24,8 @@ def setVolatilityCutoff(cutoff):
 class Slosh(Base):
 	def __init__(self, symbol, recommender=None):
 		self.top, self.bottom = symbol
+		self.onesym = self.bottom[:3] + self.top[:3]
+		self.onequote = None
 		self.ratios = {
 			"current": None,
 			"high": None,
@@ -66,12 +68,12 @@ class Slosh(Base):
 		if size < 0:
 			side = "sell"
 			size *= -1
-		price = round(1 / self.ratios["current"], 6)
+		denom = VOLATILITY_MULT * VOLATILITY_MULT / self.onequote # arbitrary
 		self.recommender({
 			"side": side,
-			"price": price,
-			"amount": round(size * price / 8, 6),# ?
-			"symbol": self.bottom[:3] + self.top[:3]
+			"symbol": self.onesym,
+			"price": self.onequote,
+			"amount": round(size / denom, 5)
 		})
 
 	def swap(self, size=10):
@@ -125,6 +127,8 @@ class Slosh(Base):
 			return self.log("skipping tick (waiting for history)")
 		cur = history[self.top]["current"] / history[self.bottom]["current"]
 		self.allratios.append(cur)
+		self.onequote = round(1 / cur, 5)
+		emit("quote", self.onesym, self.onequote)
 		self.averages["total"] = self.ave()
 		self.averages["inner"] = self.ave(INNER)
 		self.averages["outer"] = self.ave(OUTER)

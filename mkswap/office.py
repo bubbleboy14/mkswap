@@ -36,6 +36,7 @@ class Office(Worker):
 		self.strategist = globalStrategy and strat(symbols, trec)
 		stish and setStaging(False)
 		self.managers = {}
+		self.ndx = {}
 		for symbol in symbols:
 			self.managers[symbol] = Manager(platform, symbol, self.review,
 				self.strategist or strat(symbol, trec), self.trader)
@@ -47,6 +48,7 @@ class Office(Worker):
 		self.warnings = []
 		listen("warning", self.warning)
 		listen("price", self.price)
+		listen("quote", self.quote)
 
 	def warning(self, msg, data=None):
 		self.warnings.append({ "msg": msg, "data": data })
@@ -66,8 +68,13 @@ class Office(Worker):
 	def hasMan(self, symbol):
 		return symbol in self.managers
 
+	def quote(self, symbol, price):
+		self.ndx[symbol] = price
+
 	def price(self, symbol):
-		return self.managers[symbol].latest["price"]
+		if symbol in self.managers:
+			return self.managers[symbol].latest["price"]
+		return self.ndx.get(symbol, None)
 
 	def prices(self):
 		pz = {}

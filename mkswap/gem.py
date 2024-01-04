@@ -96,7 +96,10 @@ class Gem(Worker):
 		self.reqs[req.name] = req
 
 	def unreg(self, req):
-		del self.reqs[req.name]
+		if req.name in self.reqs:
+			del self.reqs[req.name]
+		else:
+			self.warn("unreg(%s) not found!"%(req.name,))
 
 	def churn(self):
 		if self.pending and not self.paused:
