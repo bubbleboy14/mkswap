@@ -201,16 +201,15 @@ class Comptroller(Feeder):
 	def cancelAll(self):
 		akeys = list(self.actives.keys())
 		self.log("cancelAll() cancelling", len(akeys), "active orders")
-		for tnum in akeys: # is this necessary? cancel gem pendings?
+		for tnum in akeys:
 			self.cancelled(tnum, "blanket cancel")
+			trade = self.actives[tnum]
+			if "order_id" in trade:
+				emit("preventRetry", "cancel %s"%(tnum,))
+			else:
+				emit("preventRetry", "new %s"%(tnum,))
 			del self.actives[tnum]
 		LIVE and gem.cancelAll() # TODO: get accepted/rejected cancels from return val
-#		for tnum in akeys:
-#			trade = self.actives[tnum]
-#			if "order_id" in trade:
-#				self.cancel(tnum)
-#			else:
-#				self.log("trade uninitialized! (cancelling cancel)", trade)
 
 	def refill(self):
 		self.log("refill(%s)"%(len(self.backlog),))
