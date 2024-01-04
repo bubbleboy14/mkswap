@@ -119,7 +119,7 @@ class Config(object):
 					"period": rsi.setPeriod
 				},
 				"slosh": {
-					"oneswap": slosh.setOneStop,
+					"oneswap": slosh.setOneSwap,
 					"vmult": slosh.setVolatilityMult,
 					"vcutoff": slosh.setVolatilityCutoff
 				}
