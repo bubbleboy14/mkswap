@@ -105,7 +105,7 @@ class Slosh(Base):
 		volatility = self.volatility(cur, sigma)
 		emit("quote", "sigma", sigma)
 		emit("quote", "volatility", volatility)
-		emit("quote", "turb", sigma * sqrt(min(OUTER, len(self.allratios))))
+		emit("quote", "turbulence", sigma * sqrt(min(OUTER, len(self.allratios))))
 		print("\n\nsigma", sigma,
 			"\nvolatility", volatility,
 			"\ncurrent", cur,
