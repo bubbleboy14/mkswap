@@ -87,10 +87,17 @@ class Slosh(Base):
 	def sigma(self):
 		sqds = []
 		cur = self.allratios[-1]
-		for r in self.allratios[-OUTER:-1]:
+		for r in self.allratios[-(OUTER+1):-1]:
 			d = r - cur
 			sqds.append(d * d)
 		return sqrt(self.ave(collection=sqds))
+
+	def mad(self):
+		adiffs = []
+		cur = self.allratios[-1]
+		for r in self.allratios[-(OUTER+1):-1]:
+			adiffs.append(abs(r - cur))
+		return self.ave(collection=adiffs)
 
 	def volatility(self, cur, sigma):
 		if sigma:
@@ -102,9 +109,12 @@ class Slosh(Base):
 		rz = self.ratios
 		az = self.averages
 		sigma = self.sigma()
+		mad = self.mad()
 		volatility = self.volatility(cur, sigma)
 		emit("quote", "sigma", sigma)
 		emit("quote", "volatility", volatility)
+		emit("quote", "mad", mad)
+		emit("quote", "turbulence", self.volatility(cur, mad))
 		print("\n\nsigma", sigma,
 			"\nvolatility", volatility,
 			"\ncurrent", cur,
