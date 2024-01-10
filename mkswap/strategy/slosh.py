@@ -114,7 +114,7 @@ class Slosh(Base):
 		emit("quote", "sigma", sigma)
 		emit("quote", "volatility", volatility)
 		emit("quote", "mad", mad)
-		emit("quote", "turbulence", self.volatility(cur, mad))
+		emit("quote", "turb", self.volatility(cur, mad))
 		print("\n\nsigma", sigma,
 			"\nvolatility", volatility,
 			"\ncurrent", cur,
