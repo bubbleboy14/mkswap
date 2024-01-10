@@ -185,6 +185,8 @@ edata = {
 	"lastReason": None
 }
 
+gemfilter = "change" # or "trade", which isn't quite working...
+
 def events(message, use_initial=False):
 	msg = json.loads(message)
 	if "events" in msg: # gemini
@@ -199,12 +201,10 @@ def events(message, use_initial=False):
 					print("\nskipping reason:", reason, end="")
 					edata["lastReason"] = reason
 			else:
-				if not event.get("side"):
-					log("using makerSide")
-					event["side"] = event.get("makerSide")
-				if not event.get("side"):
-					log("skipping sideless", event)
-				elif event.get("type") == "change":
+				etype = event.get("type")
+				if etype == gemfilter:
+					if etype == "trade":
+						event["side"] = event.get("makerSide")
 					ez.append(event)
 				else:
 					log("skipping", event)
