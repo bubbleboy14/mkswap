@@ -99,6 +99,7 @@ class Comptroller(Feeder):
 			"client_order_id": msg["client_order_id"]
 		}
 		self.log("reactivate()", order)
+		emit("updateBalances", order)
 		emit("orderActive", order)
 
 	def on_message(self, ws, msgs):
