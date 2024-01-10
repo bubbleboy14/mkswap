@@ -95,7 +95,7 @@ class Comptroller(Feeder):
 			"type": msg["order_type"],
 			"order_id": msg["order_id"],
 			"symbol": msg["symbol"].upper(),
-			"amount": msg["original_amount"],
+			"amount": msg["remaining_amount"],
 			"client_order_id": msg["client_order_id"]
 		}
 		self.log("reactivate()", order)
