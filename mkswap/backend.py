@@ -1,6 +1,7 @@
 import rel, json, websocket
 from rel import start, stop
-from rel.util import log, read, write, remember, recall, memget, emit, ask, listen
+from rel.util import emit, ask, listen
+from fyg import remember, recall, memget
 
 predefs = {
 	"strategy": "rsi",
@@ -46,6 +47,9 @@ def setRealDie(rd):
 	log("setRealDie(%s)"%(rd,))
 	global REALDIE
 	REALDIE = rd
+
+def log(*msg):
+	print(*msg)
 
 def spew(event):
 	if hasattr(event, "decode"):
