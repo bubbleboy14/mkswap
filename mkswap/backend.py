@@ -57,6 +57,12 @@ def die(m, j=None):
 	j and spew(j)
 	REALDIE and stop()
 
+def indexersub(streamname):
+	return {
+		"action": "subscribe",
+		"channels": [streamname]
+	}
+
 def crsub(streamname):
 	return {
 		"name": "SubscribeTicker",
@@ -128,6 +134,10 @@ platforms = { # setStaging() sets dacc/dydx/gemorders feeds, gemini feeder
 	},
 	"binance": {
 		"feeder": lambda sname : "wss://stream.binance.us:9443/ws/%s@ticker"%(sname,)
+	},
+	"indexer": {
+		"feed": "wss://mkult.co:9876",
+		"subber": indexersub
 	}
 }
 
@@ -176,6 +186,10 @@ def echofeed(platform="gemini", streamname="ETHBTC"):
 		on_message = lambda ws, msg : log(msg),
 		on_close = lambda ws, code, msg: log("close!", code, msg),
 		on_error = lambda ws, exc : log("error!", str(exc)))
+
+def indexertest(streamname="assetPrice"):
+	echofeed("indexer", streamname)
+	start()
 
 def dydxtest():
 	echofeed("dydx", "BTC-USD")
