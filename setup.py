@@ -13,7 +13,8 @@ setup(
     ],
     zip_safe = False,
     install_requires = [
-
+        "fyg >= 0.1.0",
+        "rel >= 0.4.9.5"
     ],
     entry_points = '''''',
     classifiers = [
