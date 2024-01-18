@@ -76,7 +76,7 @@ class Config(object):
 	def set(self, c):
 		from .comptroller import setPruneLimit, setActives, setLive
 		from .office import setVerbose, setStagish
-		from .backend import setStaging, setRealDie
+		from .backend import setStaging, setRealDie, setCredSet
 		from .accountant import setCapped
 		from .base import setUnspammed
 		from .strategy import base, rsi, slosh
