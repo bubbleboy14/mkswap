@@ -1,7 +1,7 @@
 import rel, json, websocket
 from rel import start, stop
 from rel.util import emit, ask, listen
-from fyg import remember, recall, memget
+from fyg import remember, recall, memget, setbank
 
 predefs = {
 	"strategy": "rsi",
@@ -41,6 +41,18 @@ presets = [{
 	"platform": "dydx",
 	"symbols": ["BTC-USD"]
 }]
+
+CREDSET = "default"
+def setCredSet(cs):
+	global CREDSET
+	ll = "setCredSet(%s)"%(cs,)
+	if cs == "auto":
+		cs = STAGING and "sand" or "prod"
+		log("%s picking %s"%(ll, cs))
+	else:
+		log(ll)
+	CREDSET = cs
+	setbank(cs)
 
 REALDIE = True
 def setRealDie(rd):
