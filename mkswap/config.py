@@ -16,8 +16,8 @@ class Config(object):
 		from .office import VERBOSE, STAGISH
 		from .accountant import CAPPED
 		from .base import UNSPAMMED
-		from .backend import STAGING, REALDIE
 		from .strategy import base, rsi, slosh
+		from .backend import STAGING, REALDIE, CREDSET
 		from .harvester import SKIM, BATCH, BOTTOM, BALANCE, NETWORK
 		return {
 			"harvester": {
@@ -37,7 +37,8 @@ class Config(object):
 			},
 			"backend": {
 				"staging": STAGING,
-				"realdie": REALDIE
+				"realdie": REALDIE,
+				"credset": CREDSET
 			},
 			"office": {
 				"verbose": VERBOSE,
@@ -80,7 +81,7 @@ class Config(object):
 		from .base import setUnspammed
 		from .strategy import base, rsi, slosh
 		from .harvester import setSkim, setBatch, setBottom, setBalance, setNetwork
-		s = { # live/staging/stagish should only be flipped by init()
+		s = { # live/staging/stagish/credset should only be flipped by init()
 			"harvester": {
 				"skim": setSkim,
 				"batch": setBatch,
@@ -102,7 +103,8 @@ class Config(object):
 			},
 			"backend": {
 				"staging": setStaging,
-				"realdie": setRealDie
+				"realdie": setRealDie,
+				"credset": setCredSet
 			},
 			"base": {
 				"unspammed": setUnspammed
