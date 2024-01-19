@@ -1,5 +1,5 @@
 from math import sqrt
-from ..backend import log, emit
+from ..backend import log, ask, emit
 from .base import Base, INNER, OUTER, LONG
 
 ONESWAP = False
@@ -24,7 +24,8 @@ def setVolatilityCutoff(cutoff):
 class Slosh(Base):
 	def __init__(self, symbol, recommender=None):
 		self.top, self.bottom = symbol
-		self.onesym = self.bottom[:3] + self.top[:3]
+		self.syms = [self.bottom[:3], self.top[:3]]
+		self.onesym = "".join(self.syms)
 		self.onequote = None
 		self.ratios = {
 			"current": None,
@@ -76,8 +77,20 @@ class Slosh(Base):
 			"amount": round(size / denom, 5)
 		})
 
+	def shouldOneSwap(self):
+		if ONESWAP != "auto":
+			return ONESWAP
+		bals = ask("balances")
+		for sec in bals:
+			s = bals[sec]
+			for sym in self.syms:
+				usdval = ask("getUSD", sym, s[sym])
+				if usdval and ask("tooLow", usdval):
+					return False
+		return True
+
 	def swap(self, size=10):
-		if ONESWAP:
+		if self.shouldOneSwap():
 			self.oneswap(size)
 		elif size > 0:
 			self.buysell(self.bottom, self.top, size)
