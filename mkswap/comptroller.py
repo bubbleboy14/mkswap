@@ -223,7 +223,7 @@ class Comptroller(Feeder):
 		self.log("submit(%s)"%(orderNumber,), trade)
 		self.actives[str(orderNumber)] = trade
 		trade["client_order_id"] = str(orderNumber)
-		LIVE and gem.trade(trade, self.submitted)
+		LIVE and gem.trade(trade)#, self.submitted)
 
 	def submitted(self, resp):
 		coid = resp["client_order_id"]
