@@ -43,6 +43,7 @@ class Accountant(Feeder):
 		listen("orderRejected", self.orderRejected)
 		listen("orderFilled", self.orderFilled)
 		listen("orderActive", self.orderActive)
+		listen("accountsReady", self.accountsReady)
 		listen("affordable", self.affordable)
 		listen("balances", self.fullBalances)
 		listen("fee", self.fee)
@@ -78,10 +79,19 @@ class Accountant(Feeder):
 	def price(self, sym):
 		return ask("price", sym)
 
+	def accountsReady(self):
+		for sym in self.syms:
+			if self.price(sym) == None:
+				self.log("no price for", sym, "!!!!!!")
+				return False
+		return True
+
 	def fullBalances(self, nodph=True, pricer=None):
 		return self.balances(pricer, "both", nodph)
 
 	def balances(self, pricer=None, bz=None, nodph=False):
+		if not self.accountsReady():
+			return { "waiting": "balances not ready" }
 		if bz == "both":
 			return {
 				"actual": self.balances(pricer, self._balances, nodph),
