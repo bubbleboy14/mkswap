@@ -88,7 +88,7 @@ class Gem(Worker):
 
 	def preventRetry(self, rname):
 		if rname not in self.reqs:
-			self.warn("preventRetry(%s) not found!"%(rname,))
+			self.log("preventRetry(%s) not found!"%(rname,))
 		else:
 			self.reqs[rname].noretry = True
 
