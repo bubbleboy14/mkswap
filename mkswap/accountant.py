@@ -44,6 +44,7 @@ class Accountant(Feeder):
 		listen("orderFilled", self.orderFilled)
 		listen("orderActive", self.orderActive)
 		listen("affordable", self.affordable)
+		listen("balances", self.fullBalances)
 		listen("fee", self.fee)
 
 	def getBalances(self):
@@ -74,12 +75,19 @@ class Accountant(Feeder):
 	def fullSym(self, sym):
 		return sym + self._usd
 
-	def balances(self, pricer, bz=None, nodph=False):
+	def price(self, sym):
+		return ask("price", sym)
+
+	def fullBalances(self, nodph=True, pricer=None):
+		return self.balances(pricer, "both", nodph)
+
+	def balances(self, pricer=None, bz=None, nodph=False):
 		if bz == "both":
 			return {
 				"actual": self.balances(pricer, self._balances, nodph),
 				"theoretical": self.balances(pricer, nodph=nodph)
 			}
+		pricer = pricer or self.price
 		total = 0
 		bz = bz or self._theoretical
 		obz = self._obals
@@ -125,7 +133,7 @@ class Accountant(Feeder):
 		self.log("paying", amount, "fee from", sym)
 		self.deduct(sym, amount)
 		if sym != "USD":
-			amount *= ask("price", self.fullSym(sym))
+			amount *= self.price(self.fullSym(sym))
 		self.counts["fees"] += amount
 
 	def skim(self, sym, amount):
