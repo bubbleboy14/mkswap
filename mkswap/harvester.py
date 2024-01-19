@@ -1,5 +1,5 @@
 import rel
-from rel.util import ask, emit
+from rel.util import ask, emit, listen
 from .base import Worker
 from .backend import log
 from .gem import gem
@@ -53,6 +53,8 @@ class Harvester(Worker):
 		self.fullSym = self.accountant.fullSym(self.bigSym)
 		gem.accounts(NETWORK, self.setStorehouse)
 		rel.timeout(10, self.measure)
+		listen("tooLow", self.tooLow)
+		listen("getUSD", self.getUSD)
 
 	def status(self):
 		return {
@@ -109,12 +111,15 @@ class Harvester(Worker):
 			self.maybeBalance(fs, bal)
 		self.maybeBalance(sellsym, abals["USD"], "sell")
 
+	def tooLow(self, bal):
+		return max(0, BOTTOM - bal)
+
 	def maybeBalance(self, sym, bal, side="buy"):
-		diff = BOTTOM - bal
-		if diff > 0:
+		lowness = self.tooLow(bal)
+		if lowness:
 			self.log("maybeBalance(%s, %s, %s) refilling!"%(sym, bal, side))
 			self.refills += 1
-			self.orderBalance(sym, side, diff)
+			self.orderBalance(sym, side, lowness)
 
 	def getUSD(self, sym, bal):
 		iline = "getUSD(%s, %s) ->"%(sym, bal)
