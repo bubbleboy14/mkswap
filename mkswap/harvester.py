@@ -54,11 +54,8 @@ class Harvester(Worker):
 		gem.accounts(NETWORK, self.setStorehouse)
 		listen("tooLow", self.tooLow)
 		listen("getUSD", self.getUSD)
-		listen("clientReady", self.start)
-
-	def start(self):
-		self.log("starting to measure")
 		rel.timeout(10, self.measure)
+		self.log("starting to measure")
 
 	def status(self):
 		return {
