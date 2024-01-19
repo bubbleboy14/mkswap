@@ -52,9 +52,13 @@ class Harvester(Worker):
 		self.accountant = office.accountant
 		self.fullSym = self.accountant.fullSym(self.bigSym)
 		gem.accounts(NETWORK, self.setStorehouse)
-		rel.timeout(10, self.measure)
 		listen("tooLow", self.tooLow)
 		listen("getUSD", self.getUSD)
+		listen("clientReady", self.start)
+
+	def start(self):
+		self.log("starting to measure")
+		rel.timeout(10, self.measure)
 
 	def status(self):
 		return {
@@ -72,6 +76,9 @@ class Harvester(Worker):
 
 	def measure(self):
 		if SKIM or BALANCE:
+			if not ask("accountsReady"):
+				self.log("measure() waiting for accounts")
+				return True
 			bals = self.accountant.balances(self.pricer, "both", True)
 			self.log("measure(%s)"%(bals,))
 			msg = "measure() complete"
