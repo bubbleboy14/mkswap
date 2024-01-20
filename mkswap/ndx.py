@@ -5,7 +5,7 @@ from .base import Worker
 
 INNER = 8
 OUTER = 24
-LONG = 40
+LONG = 48
 
 def setInner(inner):
 	log("setInner(%s)"%(inner,))
