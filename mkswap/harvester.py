@@ -138,7 +138,7 @@ class Harvester(Worker):
 		return bal
 
 	def orderBalance(self, sym, side, diff):
-		prices = ask("bestPrices%s"%(sym,), sym, side)
+		prices = ask("bestPrices", sym, side)
 		for span in prices:
 			price = prices[span]
 			order = {
