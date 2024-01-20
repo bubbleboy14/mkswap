@@ -16,6 +16,7 @@ class Accountant(Feeder):
 	def __init__(self, platform=predefs["platform"], balances=predefs["balances"], balcaps=None):
 		self.counts = {
 			"fees": 0,
+			"fills": 0,
 			"active": 0,
 			"filled": 0,
 			"approved": 0,
@@ -46,7 +47,6 @@ class Accountant(Feeder):
 		listen("accountsReady", self.accountsReady)
 		listen("affordable", self.affordable)
 		listen("balances", self.fullBalances)
-		listen("fee", self.fee)
 
 	def getBalances(self):
 		self.log("getBalances!!!")
@@ -125,10 +125,13 @@ class Accountant(Feeder):
 			self.counts["active"] -= 1
 		self.log("order cancelled!")
 
-	def orderFilled(self, trade):
+	def orderFilled(self, trade, complete=False):
 		self.updateBalances(trade, self._balances, force=True)
-		self.counts["filled"] += 1
-		self.counts["active"] -= 1
+		self.fee(trade["feesym"], trade["fee"])
+		self.counts["fills"] += 1
+		if complete:
+			self.counts["filled"] += 1
+			self.counts["active"] -= 1
 		self.log("order filled!")
 
 	def orderActive(self, trade):

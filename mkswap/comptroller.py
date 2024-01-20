@@ -55,16 +55,7 @@ class Comptroller(Feeder):
 		elif etype == "rejected":
 			self.rejected(coi, msg)
 		elif etype == "fill":
-			fdata = msg["fill"]
-			self.fills.append({
-				"msg": "%s %s %s @ %s"%(msg["side"], msg["executed_amount"],
-					msg["symbol"], msg["avg_execution_price"]),
-				"data": msg
-			})
-			emit("fee", fdata["fee_currency"], float(fdata["fee"]))
-			if msg["remaining_amount"] == "0":
-				self.log("proc(): trade filled", order)
-				emit("orderFilled", order)
+			self.fill(order, msg)
 		elif etype == "cancelled":
 			reason = msg["reason"]
 			self.log("proc() cancellation", reason)
@@ -86,6 +77,31 @@ class Comptroller(Feeder):
 		cancs = self.cancels
 		self.cancels = []
 		return cancs
+
+	def fill(self, order, msg):
+		side = msg["side"]
+		fdata = msg["fill"]
+		fee = float(fdata["fee"])
+		sym = msg["symbol"].upper()
+		feesym = fdata["fee_currency"]
+		amount = float(msg["executed_amount"])
+		price = float(msg["avg_execution_price"])
+		remaining = float(msg["remaining_amount"]) # update trade
+		sig = "%s %s %s @ %s (%s %s fee)"%(side, amount, sym, price, fee, feesym)
+		self.log("fill(%s)"%(sig,), order)
+		order["amount"] = remaining
+		self.fills.append({
+			"msg": sig,
+			"data": msg
+		})
+		emit("orderFilled", {
+			"feesym": feesym,
+			"fee": fee,
+			"side": side,
+			"symbol": sym,
+			"price": price,
+			"amount": amount
+		}, not remaining)
 
 	def reactivate(self, msg):
 		self.actives[msg["client_order_id"]] = order = {
