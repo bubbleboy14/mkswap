@@ -29,7 +29,6 @@ class Slosh(Base):
 		self.onesym = "".join(self.syms)
 		self.onequote = None
 		self.shouldUpdate = False
-		self.stats = {}
 		Base.__init__(self, symbol, recommender)
 
 	def buysell(self, buysym, sellsym, size=10):
