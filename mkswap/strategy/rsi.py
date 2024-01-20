@@ -1,3 +1,4 @@
+from rel.util import emit
 from .base import Base
 from ..backend import log, predefs
 from ..ndx import getSpan
