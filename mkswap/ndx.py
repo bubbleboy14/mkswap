@@ -40,6 +40,7 @@ class NDX(Worker):
 		self.ratios = {}
 		self.histories = {}
 		listen("mad", self.mad)
+		listen("fave", self.fave)
 		listen("price", self.price)
 		listen("quote", self.quote)
 		listen("ratio", self.ratio)
@@ -130,6 +131,9 @@ class NDX(Worker):
 				rstats[span] = self.ave(tb, getSpan(span), True)
 		return rstats
 
+	def fave(self, key, val):
+		self.faves[key] = val
+
 	def quote(self, symbol, price, fave=False):
 		if symbol not in self.histories:
 			self.histories[symbol] = {
@@ -138,8 +142,7 @@ class NDX(Worker):
 				"outer": {},
 				"inner": {}
 			}
-		if fave:
-			self.faves[symbol] = price
+		fave and self.fave(symbol, price)
 		symhis = self.histories[symbol]
 		symhis["current"] = price
 		symhis["all"].append(price)
