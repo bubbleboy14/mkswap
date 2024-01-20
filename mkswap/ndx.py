@@ -3,8 +3,8 @@ from rel.util import listen
 from .backend import log
 from .base import Worker
 
-INNER = 3
-OUTER = 20
+INNER = 8
+OUTER = 24
 LONG = 40
 
 def setInner(inner):
