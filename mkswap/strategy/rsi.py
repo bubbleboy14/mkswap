@@ -16,10 +16,6 @@ def setPeriod(period):
 	RSI_PERIOD = period
 
 class RSI(Base):
-	def __init__(self, symbol, recommender=None):
-		Base.__init__(self, symbol, recommender)
-		self.stats["weighted_averages"] = {}
-
 	def weighted_average(self, _history):
 		price_remaining = 0
 		remaining_total = 0
@@ -27,7 +23,7 @@ class RSI(Base):
 			price_remaining += hist['price'] * hist['remaining']
 			remaining_total += hist['remaining']
 		wa = remaining_total and price_remaining / remaining_total or 0 # TODO: actual fix
-		self.stats["weighted_averages"][self.symbol] = wa
+		emit("fave", "WA%s"%(self.symbol,), wa)
 		return wa
 
 	def compare(self, symbol, side, price, eobj, history):
