@@ -4,7 +4,7 @@ from .backend import log
 from .base import Worker
 
 INNER = 3
-OUTER = 10
+OUTER = 20
 LONG = 40
 
 def setInner(inner):
