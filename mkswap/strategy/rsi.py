@@ -1,5 +1,6 @@
-from .base import Base, OUTER, LONG
-from ..backend import log, emit, predefs
+from .base import Base
+from ..backend import log, predefs
+from ..ndx import getSpan
 
 TRADE_SIZE = 10
 RSI_PERIOD = 14
@@ -16,9 +17,8 @@ def setPeriod(period):
 
 class RSI(Base):
 	def __init__(self, symbol, recommender=None):
-		self.latest = None
-		self.lastrec = None
 		Base.__init__(self, symbol, recommender)
+		self.stats["weighted_averages"] = {}
 
 	def weighted_average(self, _history):
 		price_remaining = 0
@@ -27,32 +27,28 @@ class RSI(Base):
 			price_remaining += hist['price'] * hist['remaining']
 			remaining_total += hist['remaining']
 		wa = remaining_total and price_remaining / remaining_total or 0 # TODO: actual fix
-		emit("quote", "%sWA"%(self.symbol,), wa)
+		self.stats["weighted_averages"][self.symbol] = wa
 		return wa
-
-	def status(self):
-		return {
-			"latest": self.latest,
-			"lastrec": self.lastrec
-		}
 
 	def compare(self, symbol, side, price, eobj, history):
 		remaining = float("remaining" in eobj and eobj["remaining"] or eobj["size"])
 		self.log("compare", side, price, remaining)
 		hs = history[side]
 		hwa = history["w_average"]
-		self.latest = {
+		self.stats["latest"] = {
 			"price": price,
 			"remaining": remaining
 		}
-		hs.append(self.latest)
+		hs.append(self.stats["latest"])
 		hwa.append(self.weighted_average(hs))
 		self.log(side, "weighted average (full):", hwa[-1])
-		if len(hs) >= LONG:
-			w_far = self.weighted_average(hs[-LONG:])
-			w_near = self.weighted_average(hs[-OUTER:])
-			self.log(side, "far average (last", LONG, "):", w_far)
-			self.log(side, "near average (last", OUTER, "):", w_near)
+		lspan = getSpan("long")
+		ospan = getSpan("outer")
+		if len(hs) >= ospan:
+			w_far = self.weighted_average(hs[-lspan:])
+			w_near = self.weighted_average(hs[-ospan:])
+			self.log(side, "far average (last", lspan, "):", w_far)
+			self.log(side, "near average (last", ospan, "):", w_near)
 			rec = False
 			if w_near > w_far:
 				self.log("near average > far average -> upswing!")
@@ -65,13 +61,13 @@ class RSI(Base):
 					self.log("bid price > average -> SELL!!!!")
 					rec = "sell"
 			if rec:
-				self.lastrec = {
+				self.stats["lastrec"] = {
 					"side": rec,
 					"price": price,
 					"symbol": symbol,
 					"amount": TRADE_SIZE * predefs["minimums"][symbol]
 				}
-				self.recommender(self.lastrec)
+				self.recommender(self.stats["lastrec"])
 		Base.compare(self, symbol, side, price, eobj, history)
 
 	def tick(self, history):

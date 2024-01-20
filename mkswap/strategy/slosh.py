@@ -1,7 +1,7 @@
 import random
-from math import sqrt
-from ..backend import log, ask, emit
-from .base import Base, INNER, OUTER, LONG
+from rel.util import ask, emit
+from ..backend import log
+from .base import Base
 
 ONESWAP = False
 VOLATILITY_MULT = 16
@@ -28,30 +28,12 @@ class Slosh(Base):
 		self.syms = [self.bottom[:3], self.top[:3]]
 		self.onesym = "".join(self.syms)
 		self.onequote = None
-		self.ratios = {
-			"current": None,
-			"high": None,
-			"low": None
-		}
-		self.averages = {
-			"total": None,
-			"inner": None,
-			"outer": None,
-			"long": None
-		}
-		self.allratios = []
 		self.shouldUpdate = False
 		Base.__init__(self, symbol, recommender)
 
-	def status(self):
-		return {
-			"ratios": self.ratios,
-			"averages": self.averages
-		}
-
 	def buysell(self, buysym, sellsym, size=10):
-		buyprice = self.bestPrice(buysym, "buy")
-		sellprice = self.bestPrice(sellsym, "sell")
+		buyprice = ask("bestPrice", buysym, "buy")
+		sellprice = ask("bestPrice", sellsym, "sell")
 		self.recommender({
 			"side": "sell",
 			"symbol": sellsym,
@@ -102,72 +84,29 @@ class Slosh(Base):
 		else:
 			self.buysell(self.top, self.bottom, -size)
 
-	def sigma(self):
-		sqds = []
-		cur = self.allratios[-1]
-		for r in self.allratios[-(OUTER+1):-1]:
-			d = r - cur
-			sqds.append(d * d)
-		return sqrt(self.ave(collection=sqds))
+	def upStats(self):
+		mad = self.stats["mad"] = ask("mad", self.top, self.bottom)
+		sigma = self.stats["sigma"] = ask("sigma", self.top, self.bottom)
+		self.stats["turb"] = ask("volatility", self.top, self.bottom, mad)
+		self.stats["volatility"] = ask("volatility", self.top, self.bottom, sigma)
 
-	def mad(self):
-		adiffs = []
-		cur = self.allratios[-1]
-		for r in self.allratios[-(OUTER+1):-1]:
-			adiffs.append(abs(r - cur))
-		return self.ave(collection=adiffs)
-
-	def volatility(self, cur, sigma):
-		if sigma:
-			return (cur - self.averages["outer"]) / sigma
-		print("sigma is 0 - volatility() returning 0")
-		return 0
-
-	def hilo(self, cur):
-		rz = self.ratios
-		az = self.averages
-		sigma = self.sigma()
-		mad = self.mad()
-		volatility = self.volatility(cur, sigma)
-		emit("quote", "sigma", sigma)
-		emit("quote", "volatility", volatility)
-		emit("quote", "mad", mad)
-		emit("quote", "turb", self.volatility(cur, mad))
-		print("\n\nsigma", sigma,
-			"\nvolatility", volatility,
-			"\ncurrent", cur,
-			"\naverage", az["total"],
-			"\ndifference", cur - az["total"], "\n\n")
-		rz["current"] = cur
-		if cur > rz["high"]:
-			self.log("ratio is new high:", cur)
-			rz["high"] = cur;
-		elif cur < rz["low"]:
-			self.log("ratio is new low:", cur)
-			rz["low"] = cur;
+	def hilo(self):
+		self.upStats()
+		volatility = self.stats["volatility"]
 		if abs(volatility) > VOLATILITY_CUTOFF:
 			self.swap(volatility * VOLATILITY_MULT)
 
 	def tick(self, history=None):
-		history = self.histories
 		if not self.shouldUpdate:
 			return
 		self.shouldUpdate = False
-		if self.top not in history or self.bottom not in history:
+		rdata = ask("ratio", self.top, self.bottom, True)
+		if not rdata:
 			return self.log("skipping tick (waiting for history)")
-		cur = history[self.top]["current"] / history[self.bottom]["current"]
-		self.allratios.append(cur)
-		self.onequote = round(1 / cur, 5)
-		emit("quote", self.onesym, self.onequote)
-		self.averages["total"] = self.ave()
-		self.averages["inner"] = self.ave(INNER)
-		self.averages["outer"] = self.ave(OUTER)
-		self.averages["long"] = self.ave(LONG)
-		if not self.ratios["current"]:
-			self.ratios["current"] = self.ratios["high"] = self.ratios["low"] = cur
-		elif len(self.allratios) >= OUTER:
-			self.hilo(cur)
-		self.log(self.ratios, "\n", self.averages)
+		self.onequote = round(1 / rdata["current"], 5)
+		emit("quote", self.onesym, self.onequote, True)
+		if ask("hadEnough", self.top, self.bottom):
+			self.hilo()
 
 	def compare(self, symbol, side, price, eobj, history):
 		self.shouldUpdate = True
