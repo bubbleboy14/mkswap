@@ -127,12 +127,25 @@ class Accountant(Feeder):
 
 	def orderFilled(self, trade, complete=False):
 		self.updateBalances(trade, self._balances, force=True)
-		self.fee(trade["feesym"], trade["fee"])
+		side = trade["side"]
+		price = trade["price"]
+		amount = trade["amount"]
+		feesym = trade["feesym"]
+		self.fee(feesym, trade["fee"])
+		pdiff = price - trade["oprice"]
+		sig = "orderFilled(%s %s @ %s)"%(side, trade["symbol"], price)
+		if pdiff:
+			if side == "buy":
+				pdiff *= -1
+			adjustment = amount * pdiff
+			self.log(sig, "adjusting", feesym, "by",
+				amount, "times", pdiff, "=", adjustment)
+			self._theoretical[feesym] += adjustment
 		self.counts["fills"] += 1
 		if complete:
 			self.counts["filled"] += 1
 			self.counts["active"] -= 1
-		self.log("order filled!")
+		self.log(sig, "complete:", str(complete))
 
 	def orderActive(self, trade):
 		self.log("order active!")
