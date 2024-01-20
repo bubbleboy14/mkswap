@@ -83,10 +83,10 @@ class Comptroller(Feeder):
 		fdata = msg["fill"]
 		fee = float(fdata["fee"])
 		sym = msg["symbol"].upper()
+		price = float(fdata["price"])
 		feesym = fdata["fee_currency"]
-		amount = float(msg["executed_amount"])
-		price = float(msg["avg_execution_price"])
-		remaining = float(msg["remaining_amount"]) # update trade
+		amount = float(fdata["amount"])
+		remaining = float(msg["remaining_amount"])
 		sig = "%s %s %s @ %s (%s %s fee)"%(side, amount, sym, price, fee, feesym)
 		self.log("fill(%s)"%(sig,), order)
 		order["amount"] = remaining
