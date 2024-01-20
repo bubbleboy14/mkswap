@@ -1,3 +1,4 @@
+import random
 from math import sqrt
 from ..backend import log, ask, emit
 from .base import Base, INNER, OUTER, LONG
@@ -84,10 +85,14 @@ class Slosh(Base):
 		for sec in bals:
 			s = bals[sec]
 			for sym in self.syms:
-				usdval = ask("getUSD", sym, s[sym])
-				if usdval and ask("tooLow", usdval):
-					return False
-		return True
+				if sym == "USD":
+					if ask("tooLow", s[sym]):
+						return True
+				else:
+					usdval = ask("getUSD", sym, s[sym])
+					if usdval and ask("tooLow", usdval):
+						return False
+		return random.randint(0, 1)
 
 	def swap(self, size=10):
 		if self.shouldOneSwap():
