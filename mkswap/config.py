@@ -16,6 +16,7 @@ class Config(object):
 		from .office import VERBOSE, STAGISH
 		from .accountant import CAPPED
 		from .base import UNSPAMMED
+		from .ndx import INNER, OUTER, LONG
 		from .strategy import base, rsi, slosh
 		from .backend import STAGING, REALDIE, CREDSET
 		from .harvester import SKIM, BATCH, BOTTOM, BALANCE, NETWORK
@@ -47,11 +48,13 @@ class Config(object):
 			"base": {
 				"unspammed": UNSPAMMED
 			},
+			"ndx": {
+				"inner": INNER,
+				"outer": OUTER,
+				"long": LONG
+			},
 			"strategy": {
 				"base": {
-					"inner": base.INNER,
-					"outer": base.OUTER,
-					"long": base.LONG,
 					"loud": base.LOUD
 				},
 				"rsi": {
@@ -80,6 +83,7 @@ class Config(object):
 		from .accountant import setCapped
 		from .base import setUnspammed
 		from .strategy import base, rsi, slosh
+		from .ndx import setInner, setOuter, setLong
 		from .harvester import setSkim, setBatch, setBottom, setBalance, setNetwork
 		s = { # live/staging/stagish/credset should only be flipped by init()
 			"harvester": {
@@ -109,11 +113,13 @@ class Config(object):
 			"base": {
 				"unspammed": setUnspammed
 			},
+			"ndx": {
+				"inner": setInner,
+				"outer": setOuter,
+				"long": setLong
+			},
 			"strategy": {
 				"base": {
-					"inner": base.setInner,
-					"outer": base.setOuter,
-					"long": base.setLong,
 					"loud": base.setLoud
 				},
 				"rsi": {
