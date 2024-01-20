@@ -7,6 +7,7 @@ from .harvester import Harvester
 from .manager import Manager
 from .trader import Trader
 from .base import Worker
+from .ndx import NDX
 from .gem import gem
 from .config import config
 
@@ -28,6 +29,7 @@ class Office(Worker):
 		stish = config.get("office", "stagish") # necessary w/ -m for some reason...
 		self.platform = platform
 		self.symbols = symbols
+		self.ndx = NDX()
 		self.accountant = Accountant(platform)
 		self.trader = globalTrade and Trader(platform)
 		trec = self.trader and self.trader.recommend
@@ -36,7 +38,6 @@ class Office(Worker):
 		self.strategist = globalStrategy and strat(symbols, trec)
 		stish and setStaging(False)
 		self.managers = {}
-		self.ndx = {}
 		for symbol in symbols:
 			self.managers[symbol] = Manager(platform, symbol, self.review,
 				self.strategist or strat(symbol, trec), self.trader)
@@ -47,8 +48,6 @@ class Office(Worker):
 		rel.timeout(1, self.tick)
 		self.warnings = []
 		listen("warning", self.warning)
-		listen("price", self.price)
-		listen("quote", self.quote)
 
 	def warning(self, msg, data=None):
 		self.warnings.append({ "msg": msg, "data": data })
@@ -72,13 +71,10 @@ class Office(Worker):
 	def hasMan(self, symbol):
 		return symbol in self.managers
 
-	def quote(self, symbol, price):
-		self.ndx[symbol] = price
-
 	def price(self, symbol):
 		if symbol in self.managers:
 			return self.managers[symbol].latest["price"]
-		return self.ndx.get(symbol, None)
+		return self.ndx.faves.get(symbol, None)
 
 	def prices(self):
 		pz = {}
@@ -89,19 +85,19 @@ class Office(Worker):
 	def stratuses(self):
 		ds = {}
 		if self.strategist:
-			ds[self.stratname] = self.strategist.status()
+			ds[self.stratname] = self.strategist.stats
 		else:
 			for sym in self.managers:
-				ds[sym] = self.managers[sym].strategist.status()
+				ds[sym] = self.managers[sym].strategist.stats
 		return ds
 
 	def status(self):
 		acc = self.accountant
 		com = self.comptroller
 		return {
-			"ndx": self.ndx,
 			"gem": gem.status(),
 			"orders": acc.counts,
+			"ndx": self.ndx.faves,
 			"actives": com.actives,
 			"backlog": com.backlog,
 			"fills": com.getFills(),
