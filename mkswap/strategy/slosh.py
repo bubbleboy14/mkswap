@@ -65,9 +65,8 @@ class Slosh(Base):
 		})
 
 	def shouldOneSwap(self, side):
-		diff = (ask("price", self.onesym) / ask("price", self.ratsym)) - 1
-		emit("fave", "bias", diff)
-		bigone = diff > 0
+		bias = self.stats["bias"]
+		bigone = bias > 0
 		if ONESWAP != "auto":
 			return ONESWAP
 		bals = ask("balances")
@@ -81,7 +80,7 @@ class Slosh(Base):
 					usdval = ask("getUSD", sym, s[sym])
 					if usdval and ask("tooLow", usdval):
 						return False
-		if abs(diff) < RANDLIM:
+		if abs(bias) < RANDLIM:
 			return random.randint(0, 1)
 		if side == "buy":
 			return not bigone
@@ -104,6 +103,7 @@ class Slosh(Base):
 		sigma = self.stats["sigma"] = ask("sigma", self.top, self.bottom)
 		self.stats["turb"] = ask("volatility", self.top, self.bottom, mad)
 		self.stats["volatility"] = ask("volatility", self.top, self.bottom, sigma)
+		self.stats["bias"] = (ask("price", self.onesym) / ask("price", self.ratsym)) - 1
 
 	def hilo(self):
 		self.upStats()
