@@ -4,6 +4,7 @@ from ..backend import log
 from .base import Base
 
 ONESWAP = False
+RANDLIM = 0.002
 VOLATILITY_MULT = 16
 VOLATILITY_CUTOFF = 0.5
 
@@ -11,6 +12,11 @@ def setOneSwap(s1):
 	log("setOneSwap(%s)"%(s1,))
 	global ONESWAP
 	ONESWAP = s1
+
+def setRandLim(rlim):
+	log("setRandLim(%s)"%(rlim,))
+	global RANDLIM
+	RANDLIM = rlim
 
 def setVolatilityMult(vmult):
 	log("setVolatilityMult(%s)"%(vmult,))
@@ -59,6 +65,9 @@ class Slosh(Base):
 		})
 
 	def shouldOneSwap(self, side):
+		diff = (ask("price", self.onesym) / ask("price", self.ratsym)) - 1
+		emit("fave", "bias", diff)
+		bigone = diff > 0
 		if ONESWAP != "auto":
 			return ONESWAP
 		bals = ask("balances")
@@ -72,9 +81,7 @@ class Slosh(Base):
 					usdval = ask("getUSD", sym, s[sym])
 					if usdval and ask("tooLow", usdval):
 						return False
-		diff = (ask("price", self.onesym) / ask("price", self.ratsym)) - 1
-		bigone = diff > 0
-		if abs(diff) < 0.005:
+		if abs(diff) < RANDLIM:
 			return random.randint(0, 1)
 		if side == "buy":
 			return not bigone

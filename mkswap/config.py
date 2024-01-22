@@ -63,6 +63,7 @@ class Config(object):
 				},
 				"slosh": {
 					"oneswap": slosh.ONESWAP,
+					"randlim": slosh.RANDLIM,
 					"vmult": slosh.VOLATILITY_MULT,
 					"vcutoff": slosh.VOLATILITY_CUTOFF
 				}
@@ -128,6 +129,7 @@ class Config(object):
 				},
 				"slosh": {
 					"oneswap": slosh.setOneSwap,
+					"randlim": slosh.setRandLim,
 					"vmult": slosh.setVolatilityMult,
 					"vcutoff": slosh.setVolatilityCutoff
 				}
