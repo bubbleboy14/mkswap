@@ -25,7 +25,7 @@ def setVolatilityCutoff(cutoff):
 class Slosh(Base):
 	def __init__(self, symbol, recommender=None):
 		self.top, self.bottom = symbol
-		self.syms = [self.bottom[:3], self.top[:3]]
+		self.syms = [self.top[:3], self.bottom[:3]]
 		self.onesym = "".join(self.syms)
 		self.onequote = None
 		self.shouldUpdate = False
@@ -103,7 +103,7 @@ class Slosh(Base):
 		rdata = ask("ratio", self.top, self.bottom, True)
 		if not rdata:
 			return self.log("skipping tick (waiting for history)")
-		self.onequote = round(1 / rdata["current"], 5)
+		self.onequote = round(rdata["current"], 5)
 		emit("quote", self.onesym, self.onequote, True)
 		if ask("hadEnough", self.top, self.bottom):
 			self.hilo()

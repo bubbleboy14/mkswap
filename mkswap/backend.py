@@ -21,7 +21,7 @@ presets = [{
 	"strategy": "slosh",
 	"globalTrade": True,
 	"globalStrategy": True,
-	"symbols": ["BTCUSD", "ETHUSD"]
+	"symbols": ["ETHUSD", "BTCUSD"]
 }, {
 	"symbols": ["ETHUSD"]
 }, {
