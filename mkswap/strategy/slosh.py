@@ -1,4 +1,3 @@
-import random
 from rel.util import ask, emit
 from ..backend import log
 from .base import Base
@@ -27,8 +26,9 @@ class Slosh(Base):
 		self.top, self.bottom = symbol
 		self.syms = [self.top[:3], self.bottom[:3]]
 		self.onesym = "".join(self.syms)
-		self.onequote = None
+		self.ratsym = "/".join(self.syms)
 		self.shouldUpdate = False
+		emit("observe", self.onesym)
 		Base.__init__(self, symbol, recommender)
 
 	def buysell(self, buysym, sellsym, size=10):
@@ -47,20 +47,17 @@ class Slosh(Base):
 			"amount": round(size / buyprice, 6)
 		})
 
-	def oneswap(self, size=10):
-		side = "buy"
-		if size < 0:
-			side = "sell"
-			size *= -1
-		denom = VOLATILITY_MULT * VOLATILITY_MULT / self.onequote # arbitrary
+	def oneswap(self, side, size=10):
+		price = ask("bestPrice", self.onesym, side)
+		denom = VOLATILITY_MULT * VOLATILITY_MULT / price # arbitrary
 		self.recommender({
 			"side": side,
+			"price": price,
 			"symbol": self.onesym,
-			"price": self.onequote,
 			"amount": round(size / denom, 5)
 		})
 
-	def shouldOneSwap(self):
+	def shouldOneSwap(self, side):
 		if ONESWAP != "auto":
 			return ONESWAP
 		bals = ask("balances")
@@ -74,15 +71,22 @@ class Slosh(Base):
 					usdval = ask("getUSD", sym, s[sym])
 					if usdval and ask("tooLow", usdval):
 						return False
-		return random.randint(0, 1)
+		bigone = ask("price", self.onesym) > ask("price", self.ratsym)
+		if side == "buy":
+			return not bigone
+		return bigone
 
 	def swap(self, size=10):
-		if self.shouldOneSwap():
-			self.oneswap(size)
-		elif size > 0:
+		side = "buy"
+		if size < 0:
+			size *= -1
+			side = "sell"
+		if self.shouldOneSwap(side):
+			self.oneswap(side, size)
+		elif side == "buy":
 			self.buysell(self.bottom, self.top, size)
 		else:
-			self.buysell(self.top, self.bottom, -size)
+			self.buysell(self.top, self.bottom, size)
 
 	def upStats(self):
 		mad = self.stats["mad"] = ask("mad", self.top, self.bottom)
@@ -103,8 +107,7 @@ class Slosh(Base):
 		rdata = ask("ratio", self.top, self.bottom, True)
 		if not rdata:
 			return self.log("skipping tick (waiting for history)")
-		self.onequote = round(rdata["current"], 5)
-		emit("quote", self.onesym, self.onequote, True)
+		emit("quote", self.ratsym, round(rdata["current"], 5), True)
 		if ask("hadEnough", self.top, self.bottom):
 			self.hilo()
 

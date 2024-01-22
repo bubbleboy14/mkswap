@@ -34,9 +34,9 @@ class Office(Worker):
 		self.trader = globalTrade and Trader(platform)
 		trec = self.trader and self.trader.recommend
 		strat = strategies[strategy]
+		stish and setStaging(False)
 		self.stratname = strategy
 		self.strategist = globalStrategy and strat(symbols, trec)
-		stish and setStaging(False)
 		self.managers = {}
 		for symbol in symbols:
 			self.managers[symbol] = Manager(platform, symbol, self.review,
