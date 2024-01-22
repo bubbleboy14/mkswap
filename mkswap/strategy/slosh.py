@@ -1,3 +1,4 @@
+import random
 from rel.util import ask, emit
 from ..backend import log
 from .base import Base
@@ -71,7 +72,10 @@ class Slosh(Base):
 					usdval = ask("getUSD", sym, s[sym])
 					if usdval and ask("tooLow", usdval):
 						return False
-		bigone = ask("price", self.onesym) > ask("price", self.ratsym)
+		diff = (ask("price", self.onesym) / ask("price", self.ratsym)) - 1
+		bigone = diff > 0
+		if abs(diff) < 0.005:
+			return random.randint(0, 1)
 		if side == "buy":
 			return not bigone
 		return bigone
