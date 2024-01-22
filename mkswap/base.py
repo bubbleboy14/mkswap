@@ -27,10 +27,7 @@ class Worker(object):
 
 	def error(self, *msg):
 		self.log("ERROR", *msg)
-		try:
-			traceback.print_last()
-		except:
-			print("(no last exception)")
+		traceback.print_exc()
 		stop()
 
 class Feeder(Worker):
