@@ -69,12 +69,12 @@ class NDX(Worker):
 	def observe(self, sym):
 		if sym in self.observers:
 			return self.log("observe(%s) already observing!"%(sym,))
-		self.observers[sym] = Observer(sym, observe=self.observed)
+		self.observers[sym] = Observer(sym,
+			observe=lambda e : self.observed(sym, float(e["price"])))
 
-	def observed(self, event):
-		s, p = event["symbol"], event["price"]
-		self.log("observed(%s@%s)"%(s, p))
-		self.quote(s, p, True)
+	def observed(self, sym, price):
+		self.log("observed(%s@%s)"%(sym, price))
+		self.quote(sym, price, True)
 
 	def hadEnough(self, top, bot, span="outer"):
 		return len(self.ratios[top][bot]["all"]) >= getSpan(span)
