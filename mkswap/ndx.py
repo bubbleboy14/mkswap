@@ -2,6 +2,7 @@ from math import sqrt
 from rel.util import listen
 from .backend import log
 from .base import Worker
+from .observer import Observer
 
 INNER = 8
 OUTER = 24
@@ -39,12 +40,14 @@ class NDX(Worker):
 		self.faves = {}
 		self.ratios = {}
 		self.histories = {}
+		self.observers = {}
 		listen("mad", self.mad)
 		listen("fave", self.fave)
 		listen("price", self.price)
 		listen("quote", self.quote)
 		listen("ratio", self.ratio)
 		listen("sigma", self.sigma)
+		listen("observe", self.observe)
 		listen("hadEnough", self.hadEnough)
 		listen("bestPrice", self.bestPrice)
 		listen("bestPrices", self.bestPrices)
@@ -62,6 +65,16 @@ class NDX(Worker):
 		for span in ["inner", "outer", "long"]:
 			d[span] = self.bestPrice(sym, side, span)
 		return d
+
+	def observe(self, sym):
+		if sym in self.observers:
+			return self.log("observe(%s) already observing!"%(sym,))
+		self.observers[sym] = Observer(sym, observe=self.observed)
+
+	def observed(self, event):
+		s, p = event["symbol"], event["price"]
+		self.log("observed(%s@%s)"%(s, p))
+		self.quote(s, p, True)
 
 	def hadEnough(self, top, bot, span="outer"):
 		return len(self.ratios[top][bot]["all"]) >= getSpan(span)
