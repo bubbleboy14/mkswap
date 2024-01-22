@@ -108,7 +108,7 @@ class Slosh(Base):
 	def hilo(self):
 		self.upStats()
 		volatility = self.stats["volatility"]
-		if abs(volatility) > VOLATILITY_CUTOFF:
+		if abs(volatility) + abs(self.stats["bias"]) > VOLATILITY_CUTOFF:
 			self.swap(volatility * VOLATILITY_MULT)
 
 	def tick(self, history=None):
