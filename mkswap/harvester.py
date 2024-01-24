@@ -151,6 +151,7 @@ class Harvester(Worker):
 				for balancer in balancers:
 					if balancer in fullSym:
 						prices = ask("bestPrices", fullSym, side)
+						fullSym = fullSym.replace("/", "") # for ratio-derived prices
 						for span in prices:
 							self.balTrade(fullSym, side, diff, prices[span])
 
