@@ -97,33 +97,30 @@ class Harvester(Worker):
 
 	def balance(self, balances):
 		abals = balances["actual"]
-		sellsym = None
-		ssbal = None
+		smalls = {}
+		bigs = []
 		for sym in abals:
-			if sym == "diff" or sym == "USD": # USD handled below
-				continue
-			fs = self.accountant.fullSym(sym)
-			bal = self.office.hasMan(fs) and self.getUSD(fs, abals[sym])
-			if bal in [False, None]:
-				self.log("no balance for", fs)
-				continue
-			self.log("balance(%s %s $%s %s) %s"%(sym,
-				fs, bal, abals[sym], balances))
-			if not sellsym or bal > ssbal:
-				sellsym = fs
-				ssbal = bal
-			self.maybeBalance(fs, bal)
-		self.maybeBalance(sellsym, abals["USD"], "sell")
+			bal = abals[sym]
+			if sym != "USD":
+				if sym == "diff":
+					continue
+				fs = self.accountant.fullSym(sym)
+				bal = self.office.hasMan(fs) and self.getUSD(fs, bal)
+				if bal in [False, None]:
+					self.log("no balance for", fs)
+					continue
+			self.log("balance(%s $%s)"%(sym, bal))
+			lowness = self.tooLow(bal)
+			if lowness:
+				smalls[sym] = lowness
+			else:
+				bigs.append(sym)
+		for sym in smalls:
+			self.refills += 1
+			self.orderBalance(sym, smalls[sym], bigs)
 
 	def tooLow(self, bal):
 		return max(0, BOTTOM - bal)
-
-	def maybeBalance(self, sym, bal, side="buy"):
-		lowness = self.tooLow(bal)
-		if lowness:
-			self.log("maybeBalance(%s, %s, %s) refilling!"%(sym, bal, side))
-			self.refills += 1
-			self.orderBalance(sym, side, lowness)
 
 	def getUSD(self, sym, bal):
 		iline = "getUSD(%s, %s) ->"%(sym, bal)
@@ -137,18 +134,25 @@ class Harvester(Worker):
 		self.log(iline, "$%s"%(bal,))
 		return bal
 
-	def orderBalance(self, sym, side, diff):
-		prices = ask("bestPrices", sym, side)
-		for span in prices:
-			price = prices[span]
-			order = {
-				"side": side,
-				"symbol": sym,
-				"price": price,
-				"amount": round(diff / price, 6)
-			}
-			self.log("orderBalance(%s, %s, %s) placing order: %s"%(sym, side, diff, order))
-			emit("balanceTrade", order)
+	def balTrade(self, sym, side, amount, price):
+		order = {
+			"side": side,
+			"symbol": sym,
+			"price": price,
+			"amount": round(amount / price, 6)
+		}
+		self.log("orderBalance(%s, %s, %s) placing order: %s"%(sym, side, amount, order))
+		emit("balanceTrade", order)
+
+	def orderBalance(self, sym, diff, balancers):
+		marks = ask("markets", sym)
+		for side in marks:
+			for fullSym in marks[side]:
+				for balancer in balancers:
+					if balancer in fullSym:
+						prices = ask("bestPrices", fullSym, side)
+						for span in prices:
+							self.balTrade(fullSym, side, diff, prices[span])
 
 	def skimmed(self, resp):
 		self.log("skimmed #%s:"%(self.hauls,), resp["message"])
