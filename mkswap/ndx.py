@@ -47,6 +47,7 @@ class NDX(Worker):
 		listen("quote", self.quote)
 		listen("ratio", self.ratio)
 		listen("sigma", self.sigma)
+		listen("markets", self.markets)
 		listen("observe", self.observe)
 		listen("hadEnough", self.hadEnough)
 		listen("bestPrice", self.bestPrice)
@@ -65,6 +66,23 @@ class NDX(Worker):
 		for span in ["inner", "outer", "long"]:
 			d[span] = self.bestPrice(sym, side, span)
 		return d
+
+	def markets(self, sym, side="buy"):
+		marks = {}
+		buyer = []
+		seller = []
+		for fullSym in self.histories:
+			if fullSym.startswith(sym):
+				buyer.append(fullSym)
+			elif fullSym.endswith(sym):
+				seller.append(fullSym)
+		if side == "buy":
+			marks["buy"] = buyer
+			marks["sell"] = seller
+		else:
+			marks["buy"] = seller
+			marks["sell"] = buyer
+		return marks
 
 	def observe(self, sym):
 		if sym in self.observers:
