@@ -81,7 +81,7 @@ class Slosh(Base):
 					if usdval and ask("tooLow", usdval):
 						return False
 		if abs(bias) < RANDLIM:
-			return random.randint(0, 1)
+			return "both"
 		if side == "buy":
 			return not bigone
 		return bigone
@@ -91,12 +91,13 @@ class Slosh(Base):
 		if size < 0:
 			size *= -1
 			side = "sell"
-		if self.shouldOneSwap(side):
-			self.oneswap(side, size)
-		elif side == "buy":
-			self.buysell(self.bottom, self.top, size)
-		else:
-			self.buysell(self.top, self.bottom, size)
+		shouldOne = self.shouldOneSwap(side)
+		shouldOne and self.oneswap(side, size)
+		if not shouldOne or shouldOne == "both":
+			if side == "buy":
+				self.buysell(self.bottom, self.top, size)
+			else:
+				self.buysell(self.top, self.bottom, size)
 
 	def upStats(self):
 		mad = self.stats["mad"] = ask("mad", self.top, self.bottom)
