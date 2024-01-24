@@ -72,14 +72,12 @@ class Office(Worker):
 		return symbol in self.managers
 
 	def price(self, symbol):
-		if symbol in self.managers:
-			return self.managers[symbol].latest["price"]
-		return self.ndx.faves.get(symbol, None)
+		return self.ndx.price(symbol) or self.ndx.faves.get(symbol, None)
 
 	def prices(self):
 		pz = {}
 		for sym in self.managers.keys():
-			pz[sym] = self.managers[sym].latest["price"]
+			pz[sym] = self.price(sym)
 		return pz
 
 	def stratuses(self):
