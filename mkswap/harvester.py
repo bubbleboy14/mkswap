@@ -107,12 +107,12 @@ class Harvester(Worker):
 				if sym == "diff":
 					continue
 				fs = self.accountant.fullSym(sym)
-				abal = self.office.hasMan(fs) and self.getUSD(fs, abal)
-				tbal = self.office.hasMan(fs) and self.getUSD(fs, tbal)
-				if abal in [False, None]:
+				abal = self.getUSD(fs, abal)
+				tbal = self.getUSD(fs, tbal)
+				if abal is None:
 					self.log("no balance for", fs)
 					continue
-			lowness = self.tooLow(abal) or self.tooLow(tbal)
+			lowness = self.tooLow(abal, True) or self.tooLow(tbal)
 			if lowness:
 				smalls[sym] = lowness
 			else:
@@ -121,8 +121,11 @@ class Harvester(Worker):
 			self.refills += 1
 			self.orderBalance(sym, smalls[sym], bigs)
 
-	def tooLow(self, bal):
-		return max(0, BOTTOM - bal)
+	def tooLow(self, bal, actual=False):
+		bot = BOTTOM
+		if actual:
+			bot *= 2
+		return max(0, bot - bal)
 
 	def getUSD(self, sym, bal):
 		iline = "getUSD(%s, %s) ->"%(sym, bal)
