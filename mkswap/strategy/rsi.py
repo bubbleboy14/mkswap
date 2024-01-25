@@ -41,11 +41,11 @@ class RSI(Base):
 		self.log(side, "weighted average (full):", hwa[-1])
 		lspan = getSpan("long")
 		ospan = getSpan("outer")
-		if len(hs) >= ospan:
-			w_far = self.weighted_average(hs[-lspan:])
-			w_near = self.weighted_average(hs[-ospan:])
-			self.log(side, "far average (last", lspan, "):", w_far)
-			self.log(side, "near average (last", ospan, "):", w_near)
+		if len(hs) >= lspan:
+			w_far = self.weighted_average(hs[-ospan:])
+			w_near = self.weighted_average(hs[-lspan:])
+			self.log(side, "far average (last", ospan, "):", w_far)
+			self.log(side, "near average (last", lspan, "):", w_near)
 			rec = False
 			if w_near > w_far:
 				self.log("near average > far average -> upswing!")

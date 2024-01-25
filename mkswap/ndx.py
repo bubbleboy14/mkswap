@@ -5,28 +5,35 @@ from .base import Worker
 from .observer import Observer
 
 INNER = 8
-OUTER = 24
-LONG = 48
+SHORT = 24
+LONG = 36
+OUTER = 72
 
 def setInner(inner):
 	log("setInner(%s)"%(inner,))
 	global INNER
 	INNER = inner
 
-def setOuter(outer):
-	log("setOuter(%s)"%(outer,))
-	global OUTER
-	OUTER = outer
+def setShort(short):
+	log("setShort(%s)"%(short,))
+	global SHORT
+	SHORT = short
 
 def setLong(howlong):
 	log("setLong(%s)"%(howlong,))
 	global LONG
 	LONG = howlong
 
+def setOuter(outer):
+	log("setOuter(%s)"%(outer,))
+	global OUTER
+	OUTER = outer
+
 def getSpan(span):
 	return {
-		"long": LONG,
 		"inner": INNER,
+		"short": SHORT,
+		"long": LONG,
 		"outer": OUTER
 	}[span]
 
@@ -63,7 +70,7 @@ class NDX(Worker):
 
 	def bestPrices(self, sym, side):
 		d = {}
-		for span in ["inner", "outer", "long"]:
+		for span in ["inner", "short", "long", "outer"]:
 			d[span] = self.bestPrice(sym, side, span)
 		return d
 
@@ -94,7 +101,7 @@ class NDX(Worker):
 		self.log("observed(%s@%s)"%(sym, price))
 		self.quote(sym, price, True)
 
-	def hadEnough(self, top, bot, span="outer"):
+	def hadEnough(self, top, bot, span="short"):
 		return len(self.ratios[top][bot]["all"]) >= getSpan(span)
 
 	def nowAndThen(self, top, bot):
