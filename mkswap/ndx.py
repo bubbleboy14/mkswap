@@ -69,9 +69,10 @@ class NDX(Worker):
 	def bestPrice(self, sym, side, span="inner"):
 		return round(self.histories[sym][span][side2height[side]], 6)
 
-	def bestPrices(self, sym, side):
+	def bestPrices(self, sym, side, spans=None):
 		d = {}
-		for span in SPANS:
+		spans = spans or SPANS
+		for span in spans:
 			d[span] = self.bestPrice(sym, side, span)
 		return d
 

@@ -159,7 +159,7 @@ class Harvester(Worker):
 		emit("balanceTrade", order)
 
 	def balTrades(self, sym, side, amountUSD):
-		prices = ask("bestPrices", sym, side)
+		prices = ask("bestPrices", sym, side, ["long", "outer"])
 		sym = sym.replace("/", "") # for ratio-derived prices
 		amount = self.fromUSD(sym, amountUSD)
 		self.log("balTrades(%s, %s, %s->%s)"%(sym, side, amountUSD, amount))
