@@ -109,26 +109,26 @@ class NDX(Worker):
 		rats = self.ratios[top][bot]
 		return rats["current"], rats["all"][:-1]
 
-	def mad(self, top, bot):
+	def mad(self, top, bot, span="short"):
 		adiffs = []
 		cur, rats = self.nowAndThen(top, bot)
-		for r in rats[-OUTER:]:
+		for r in rats[-getSpan(span):]:
 			adiffs.append(abs(r - cur))
 		return self.ave(adiffs)
 
-	def sigma(self, top, bot):
+	def sigma(self, top, bot, span="short"):
 		sqds = []
 		cur, rats = self.nowAndThen(top, bot)
-		for r in rats[-OUTER:]:
+		for r in rats[-getSpan(span):]:
 			d = r - cur
 			sqds.append(d * d)
 		return sqrt(self.ave(sqds))
 
-	def volatility(self, top, bot, sigma):
+	def volatility(self, top, bot, sigma, span="short"):
 		rstats = self.ratio(top, bot)
 		if not sigma:
 			return 0
-		return (rstats["current"] - rstats["outer"]) / sigma
+		return (rstats["current"] - rstats[span]) / sigma
 
 	def ave(self, symbol, limit=None, ratio=False):
 		if ratio:
