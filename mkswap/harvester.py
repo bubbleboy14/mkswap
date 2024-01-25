@@ -97,19 +97,22 @@ class Harvester(Worker):
 
 	def balance(self, balances):
 		abals = balances["actual"]
+		tbals = balances["theoretical"]
 		smalls = {}
 		bigs = []
 		for sym in abals:
-			bal = abals[sym]
+			abal = abals[sym]
+			tbal = tbals[sym]
 			if sym != "USD":
 				if sym == "diff":
 					continue
 				fs = self.accountant.fullSym(sym)
-				bal = self.office.hasMan(fs) and self.getUSD(fs, bal)
-				if bal in [False, None]:
+				abal = self.office.hasMan(fs) and self.getUSD(fs, abal)
+				tbal = self.office.hasMan(fs) and self.getUSD(fs, tbal)
+				if abal in [False, None]:
 					self.log("no balance for", fs)
 					continue
-			lowness = self.tooLow(bal)
+			lowness = self.tooLow(abal) or self.tooLow(tbal)
 			if lowness:
 				smalls[sym] = lowness
 			else:
