@@ -44,7 +44,8 @@ class Harvester(Worker):
 	def __init__(self, office):
 		self.hauls = 0
 		self.harvest = 0
-		self.refills = 0
+		self.refills = []
+		self.refillCount = 0
 		self.office = office
 		self.pricer = office.price
 		self.symbol = net2sym[NETWORK]
@@ -61,7 +62,7 @@ class Harvester(Worker):
 		return {
 			"hauls": self.hauls,
 			"harvest": self.harvest,
-			"refills": self.refills
+			"refills": self.refillCount
 		}
 
 	def setStorehouse(self, resp):
@@ -118,8 +119,13 @@ class Harvester(Worker):
 			else:
 				bigs.append(sym)
 		for sym in smalls:
-			self.refills += 1
-			self.orderBalance(sym, smalls[sym], bigs)
+			self.refillCount += 1
+			self.refills.append(self.orderBalance(sym, smalls[sym], bigs))
+
+	def getRefills(self):
+		refs = self.refills
+		self.refills = []
+		return refs
 
 	def tooLow(self, bal, actual=False):
 		bot = BOTTOM
@@ -159,15 +165,25 @@ class Harvester(Worker):
 		self.log("balTrades(%s, %s, %s->%s)"%(sym, side, amountUSD, amount))
 		for span in prices:
 			self.balTrade(sym, side, amount, prices[span])
+		return {
+			"amount": amount,
+			"prices": prices
+		}
 
 	def orderBalance(self, sym, diff, balancers):
+		bals = {}
 		markets = ask("markets", sym)
-		self.log("orderBalance(%s, %s, %s)"%(sym, diff, balancers), markets)
+		sig = "%s, %s, %s"%(sym, diff, balancers)
+		self.log("orderBalance(%s)"%(sig,), markets)
 		for side in markets:
 			for fullSym in markets[side]:
 				for balancer in balancers:
 					if balancer in fullSym:
-						self.balTrades(fullSym, side, diff)
+						bals[fullSym] = self.balTrades(fullSym, side, diff)
+		return {
+			"msg": "balance %s"%(sig,),
+			"data": bals
+		}
 
 	def skimmed(self, resp):
 		self.log("skimmed #%s:"%(self.hauls,), resp["message"])

@@ -92,6 +92,7 @@ class Office(Worker):
 	def status(self):
 		acc = self.accountant
 		com = self.comptroller
+		har = self.harvester
 		return {
 			"gem": gem.status(),
 			"orders": acc.counts,
@@ -100,10 +101,11 @@ class Office(Worker):
 			"backlog": com.backlog,
 			"fills": com.getFills(),
 			"prices": self.prices(),
+			"harvester": har.status(),
 			"cancels": com.getCancels(),
+			"refills": har.getRefills(),
 			"warnings": self.getWarnings(),
 			"strategists": self.stratuses(),
-			"harvester": self.harvester.status(),
 			"balances": acc.balances(self.price, "both")
 		}
 
