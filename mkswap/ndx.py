@@ -37,6 +37,7 @@ def getSpan(span):
 		"outer": OUTER
 	}[span]
 
+SPANS = ["inner", "short", "long", "outer"]
 side2height = {
 	"buy": "low",
 	"sell": "high"
@@ -70,7 +71,7 @@ class NDX(Worker):
 
 	def bestPrices(self, sym, side):
 		d = {}
-		for span in ["inner", "short", "long", "outer"]:
+		for span in SPANS:
 			d[span] = self.bestPrice(sym, side, span)
 		return d
 
@@ -165,7 +166,7 @@ class NDX(Worker):
 					rstats["low"] = rat
 			rstats["all"].append(rat)
 			rstats["total"] = self.ave(tb, ratio=True)
-			for span in ["inner", "outer", "long"]:
+			for span in SPANS:
 				rstats[span] = self.ave(tb, getSpan(span), True)
 		return rstats
 
@@ -176,16 +177,17 @@ class NDX(Worker):
 		if symbol not in self.histories:
 			self.histories[symbol] = {
 				"all": [],
+				"inner": {},
+				"short": {},
 				"long": {},
-				"outer": {},
-				"inner": {}
+				"outer": {}
 			}
 		fave and self.fave(symbol, price)
 		symhis = self.histories[symbol]
 		symhis["current"] = price
 		symhis["all"].append(price)
 		symhis["average"] = self.ave(symbol)
-		for span in ["inner", "outer", "long"]:
+		for span in SPANS:
 			stretch = symhis["all"][-getSpan(span):]
 			symhis[span]["high"] = max(stretch)
 			symhis[span]["low"] = min(stretch)
