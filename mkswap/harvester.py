@@ -133,27 +133,35 @@ class Harvester(Worker):
 		self.log(iline, "$%s"%(bal,))
 		return bal
 
+	def fromUSD(self, sym, amount):
+		return round(amount / self.pricer(self.accountant.fullSym(sym[:3])), 6)
+
 	def balTrade(self, sym, side, amount, price):
 		order = {
 			"side": side,
 			"symbol": sym,
 			"price": price,
-			"amount": round(amount / price, 6)
+			"amount": amount
 		}
 		self.log("balTrade(%s, %s, %s) placing order: %s"%(sym, side, amount, order))
 		emit("balanceTrade", order)
 
+	def balTrades(self, sym, side, amountUSD):
+		prices = ask("bestPrices", sym, side)
+		sym = sym.replace("/", "") # for ratio-derived prices
+		amount = self.fromUSD(sym, amountUSD)
+		self.log("balTrades(%s, %s, %s->%s)"%(sym, side, amountUSD, amount))
+		for span in prices:
+			self.balTrade(sym, side, amount, prices[span])
+
 	def orderBalance(self, sym, diff, balancers):
-		marks = ask("markets", sym)
-		self.log("orderBalance(%s, %s, %s)"%(sym, diff, balancers), marks)
-		for side in marks:
-			for fullSym in marks[side]:
+		markets = ask("markets", sym)
+		self.log("orderBalance(%s, %s, %s)"%(sym, diff, balancers), markets)
+		for side in markets:
+			for fullSym in markets[side]:
 				for balancer in balancers:
 					if balancer in fullSym:
-						prices = ask("bestPrices", fullSym, side)
-						fullSym = fullSym.replace("/", "") # for ratio-derived prices
-						for span in prices:
-							self.balTrade(fullSym, side, diff, prices[span])
+						self.balTrades(fullSym, side, diff)
 
 	def skimmed(self, resp):
 		self.log("skimmed #%s:"%(self.hauls,), resp["message"])
