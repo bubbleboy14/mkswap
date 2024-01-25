@@ -109,7 +109,6 @@ class Harvester(Worker):
 				if bal in [False, None]:
 					self.log("no balance for", fs)
 					continue
-			self.log("balance(%s $%s)"%(sym, bal))
 			lowness = self.tooLow(bal)
 			if lowness:
 				smalls[sym] = lowness
@@ -141,11 +140,12 @@ class Harvester(Worker):
 			"price": price,
 			"amount": round(amount / price, 6)
 		}
-		self.log("orderBalance(%s, %s, %s) placing order: %s"%(sym, side, amount, order))
+		self.log("balTrade(%s, %s, %s) placing order: %s"%(sym, side, amount, order))
 		emit("balanceTrade", order)
 
 	def orderBalance(self, sym, diff, balancers):
 		marks = ask("markets", sym)
+		self.log("orderBalance(%s, %s, %s)"%(sym, diff, balancers), marks)
 		for side in marks:
 			for fullSym in marks[side]:
 				for balancer in balancers:
