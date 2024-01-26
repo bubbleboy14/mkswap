@@ -45,8 +45,10 @@ class Accountant(Feeder):
 		listen("orderFilled", self.orderFilled)
 		listen("orderActive", self.orderActive)
 		listen("accountsReady", self.accountsReady)
-		listen("affordable", self.affordable)
 		listen("balances", self.fullBalances)
+		listen("affordable", self.affordable)
+		listen("realistic", self.realistic)
+		listen("fullSym", self.fullSym)
 
 	def getBalances(self):
 		self.log("getBalances!!!")
