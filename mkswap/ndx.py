@@ -1,5 +1,5 @@
 from math import sqrt
-from rel.util import listen
+from rel.util import ask, listen
 from .backend import log
 from .base import Worker
 from .observer import Observer
@@ -62,7 +62,9 @@ class NDX(Worker):
 		listen("bestPrices", self.bestPrices)
 		listen("volatility", self.volatility)
 
-	def price(self, symbol):
+	def price(self, symbol, fullSym=False):
+		if fullSym:
+			symbol = ask("fullSym", symbol)
 		if symbol in self.histories:
 			return self.histories[symbol]["current"]
 
