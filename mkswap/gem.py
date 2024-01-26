@@ -128,6 +128,9 @@ class Gem(Worker):
 		self.log("get(%s)"%(path,), client_order_id, params)
 		self.add(Req(path, params, cb, client_order_id))
 
+	def notional(self, cb=None):
+		self.get("/v1/notionalvolume", cb)
+
 	def accounts(self, network, cb=None):
 		self.get("/v1/addresses/%s"%(network,), cb)
 
