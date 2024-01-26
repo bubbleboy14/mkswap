@@ -4,10 +4,10 @@ from .backend import log
 from .base import Worker
 from .observer import Observer
 
-INNER = 8
-SHORT = 24
-LONG = 36
-OUTER = 72
+INNER = 16
+SHORT = 32
+LONG = 64
+OUTER = 128
 
 def setInner(inner):
 	log("setInner(%s)"%(inner,))
