@@ -1,5 +1,6 @@
 import json, random, rel
-from .backend import log, listen, emit
+from rel.util import ask, emit, listen
+from .backend import log
 from .base import Feeder
 from .gem import gem
 
@@ -30,6 +31,7 @@ class Comptroller(Feeder):
 		self.backlog = []
 		self.cancels = []
 		self.fills = []
+		self.fees = None
 		self.pricer = pricer
 		self.cancelling = set()
 		listen("rejected", self.rejected)
@@ -37,6 +39,14 @@ class Comptroller(Feeder):
 		listen("enqueueOrder", self.enqueue)
 		self.feed("gemorders")
 		rel.timeout(10, self.longPrune)
+		LIVE and gem.notional(self.setFees)
+
+	def setFees(self, fees):
+		self.fees = {
+			"maker": fees["api_maker_fee_bps"] / 10000,
+			"taker": fees["api_taker_fee_bps"] / 10000
+		}
+		self.log("setFees(%s)"%(self.fees,))
 
 	def proc(self, msg):
 		coi = msg.get("client_order_id", None)
@@ -128,14 +138,30 @@ class Comptroller(Feeder):
 			self.proc(msg)
 		self.refill()
 
-	def score(self, trade):
+	def score(self, trade, feeSide="taker"):
 		sym = trade["symbol"]
+		side = trade["side"]
+		sig = "score(%s %s %s)"%(sym, side, feeSide)
+		if not ask("realistic", trade):
+			trade["score"] = -1
+			self.log("%s unrealistic!"%(sig,), trade)
+			return trade["score"]
 		curprice = self.pricer(sym)
 		if not curprice:
 			return
-		trade["score"] = float(trade["price"]) - curprice
-		if trade["side"] == "buy":
+		price = float(trade["price"])
+		trade["score"] = price - curprice
+		if side == "buy":
 			trade["score"] *= -1
+		if self.fees:
+			if not sym.endswith("USD"):
+				price = ask("price", sym[:3], True)
+			amountUSD = price * float(trade["amount"])
+			fee = amountUSD * self.fees[feeSide]
+			trade["score"] *= amountUSD
+			trade["score"] -= fee
+			if trade["score"] < 0:
+				self.log("%s bad score:"%(sig,), trade["score"], "fee:", fee, trade)
 		return trade["score"]
 
 	def pruneActives(self, limit=None, undupe=False):
@@ -152,7 +178,7 @@ class Comptroller(Feeder):
 					dupes += 1
 				else:
 					prices.add(tp)
-					s = self.score(trade)
+					s = self.score(trade, "maker")
 					if not s:
 						skips += 1
 						continue
