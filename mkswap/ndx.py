@@ -38,6 +38,7 @@ def getSpan(span):
 	}[span]
 
 SPANS = ["inner", "short", "long", "outer"]
+BESTIES = ["short", "long", "outer"]
 side2height = {
 	"buy": "low",
 	"sell": "high"
@@ -73,7 +74,7 @@ class NDX(Worker):
 
 	def bestPrices(self, sym, side, spans=None):
 		d = {}
-		spans = spans or SPANS
+		spans = spans or BESTIES
 		for span in spans:
 			d[span] = self.bestPrice(sym, side, span)
 		return d
