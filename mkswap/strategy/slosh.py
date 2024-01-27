@@ -6,7 +6,7 @@ from .base import Base
 ONESWAP = False
 RANDLIM = 0.002
 VOLATILITY_MULT = 16
-VOLATILITY_CUTOFF = 0.5
+VOLATILITY_CUTOFF = 0.8
 
 def setOneSwap(s1):
 	log("setOneSwap(%s)"%(s1,))
