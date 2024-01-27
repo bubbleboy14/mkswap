@@ -6,7 +6,7 @@ from .base import Feeder
 from .gem import gem
 from .config import config
 
-CAPPED = True
+CAPPED = "auto"
 
 def setCapped(capped):
 	log("setCapped(%s)"%(capped,))
