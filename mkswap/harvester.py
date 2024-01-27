@@ -5,7 +5,7 @@ from .backend import log
 from .gem import gem
 
 BATCH = 10
-BOTTOM = 50
+BOTTOM = 40
 SKIM = False
 BALANCE = True
 NETWORK = "bitcoin" # ethereum available on production...
