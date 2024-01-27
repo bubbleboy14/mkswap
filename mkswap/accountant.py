@@ -4,6 +4,7 @@ from datetime import datetime
 from .backend import log, predefs
 from .base import Feeder
 from .gem import gem
+from .config import config
 
 CAPPED = True
 
@@ -35,6 +36,8 @@ class Accountant(Feeder):
 		self._usd = "USD"
 		if balcaps is None:
 			balcaps = CAPPED
+		if balcaps == "auto":
+			balcaps = config.get("backend", "staging")
 		if platform == "dydx":
 			rel.timeout(10, self.checkFilled)
 			self._usd = "-USD"
