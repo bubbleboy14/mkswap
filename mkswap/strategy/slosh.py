@@ -3,7 +3,7 @@ from rel.util import ask, emit
 from ..backend import log
 from .base import Base
 
-ONESWAP = False
+ONESWAP = "auto"
 RANDLIM = 0.002
 VOLATILITY_MULT = 16
 VOLATILITY_CUTOFF = 0.8
