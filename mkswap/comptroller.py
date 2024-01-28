@@ -160,7 +160,7 @@ class Comptroller(Feeder):
 		if side == "buy":
 			gain *= -1
 		if not sym.endswith("USD"):
-			gain *= ask("price", sym[:3], True)
+			gain *= ask("price", sym[3:], True)
 		return gain
 
 	def score(self, trade, feeSide="taker"):
