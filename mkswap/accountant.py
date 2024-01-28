@@ -211,7 +211,7 @@ class Accountant(Feeder):
 	def affordable(self, prop, force=False):
 		if prop["symbol"] not in self.syms:
 			self.syms.append(prop["symbol"])
-		if (force or self.realistic(prop)) and self.updateBalances(prop, force=True):
+		if (force or self.realistic(prop)) and self.updateBalances(prop, force=force):
 			self.counts["approved"] += 1
 			self.log("trade approved!")
 			return True
