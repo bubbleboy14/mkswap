@@ -37,6 +37,8 @@ class Comptroller(Feeder):
 		listen("rejected", self.rejected)
 		listen("priceChange", self.prune)
 		listen("enqueueOrder", self.enqueue)
+		listen("estimateFee", self.estimateFee)
+		listen("estimateGain", self.estimateGain)
 		self.feed("gemorders")
 		rel.timeout(10, self.longPrune)
 		LIVE and gem.notional(self.setFees)
@@ -138,30 +140,31 @@ class Comptroller(Feeder):
 			self.proc(msg)
 		self.refill()
 
-	def score(self, trade, feeSide="taker"):
+	def estimateFee(self, trade, feeSide="taker"):
+		if not self.fees:
+			return None
+		sym = trade["symbol"]
+		if sym.endswith("USD"):
+			price = float(trade["price"])
+		else:
+			price = ask("price", sym[:3], True)
+		amountUSD = price * float(trade["amount"])
+		return amountUSD * self.fees[feeSide]
+
+	def estimateGain(self, trade):
 		sym = trade["symbol"]
 		side = trade["side"]
-		sig = "score(%s %s %s)"%(sym, side, feeSide)
-		if not ask("realistic", trade):
-			trade["score"] = -1
-			self.log("%s unrealistic!"%(sig,), trade)
-			return trade["score"]
-		curprice = self.pricer(sym)
-		if not curprice:
-			return
 		price = float(trade["price"])
-		trade["score"] = price - curprice
+		curprice = self.pricer(sym)
+		gain = (price - curprice) * float(trade["amount"])
 		if side == "buy":
-			trade["score"] *= -1
-		if self.fees:
-			if not sym.endswith("USD"):
-				price = ask("price", sym[:3], True)
-			amountUSD = price * float(trade["amount"])
-			fee = amountUSD * self.fees[feeSide]
-			trade["score"] *= amountUSD
-			trade["score"] -= fee
-			if trade["score"] < 0:
-				self.log("%s bad score:"%(sig,), trade["score"], "fee:", fee, trade)
+			gain *= -1
+		if not sym.endswith("USD"):
+			gain *= ask("price", sym[3:], True)
+		return gain
+
+	def score(self, trade, feeSide="taker"):
+		trade["score"] = ask("realistic", trade, feeSide, True)
 		return trade["score"]
 
 	def pruneActives(self, limit=None, undupe=False):
@@ -178,13 +181,14 @@ class Comptroller(Feeder):
 					dupes += 1
 				else:
 					prices.add(tp)
-					s = self.score(trade, "maker")
-					if not s:
+					curprice = self.pricer(trade["symbol"])
+					if not curprice:
 						skips += 1
 						continue
+					s = self.score(trade, "maker")
 					toofar = False
 					if limit:
-						ratio = float(tp) / self.pricer(trade["symbol"])
+						ratio = float(tp) / curprice
 						toofar = abs(1 - ratio) > limit
 					if s < 0 or toofar:
 						cancels.append(tnum)

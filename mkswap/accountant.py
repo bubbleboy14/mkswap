@@ -180,8 +180,16 @@ class Accountant(Feeder):
 		self._theoretical[sym] -= amount
 		self._balances[sym] -= amount
 
-	def realistic(self, prop):
-		return self.updateBalances(prop, self._balances, test=True)
+	def realistic(self, trade, feeSide="taker", asScore=False):
+		if not self.updateBalances(trade, self._balances, test=True):
+			return asScore and -1
+		score = ask("estimateGain", trade)
+		fee = ask("estimateFee", trade, feeSide)
+		if fee:
+			score -= fee
+		if asScore:
+			return score
+		return score > 0
 
 	def updateBalances(self, prop, bz=None, revert=False, force=False, test=False):
 		bz = bz or self._theoretical
