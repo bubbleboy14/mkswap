@@ -33,7 +33,6 @@ class Comptroller(Feeder):
 		self.fills = []
 		self.fees = None
 		self.pricer = pricer
-		self.cancelling = set()
 		listen("rejected", self.rejected)
 		listen("priceChange", self.prune)
 		listen("enqueueOrder", self.enqueue)
@@ -73,7 +72,7 @@ class Comptroller(Feeder):
 			self.log("proc() cancellation", reason)
 			if reason != "Requested":
 				self.cancels.append({ "msg": reason, "data": msg })
-			self.cancelled(coi)
+			self.cancelled(coi, reason)
 		elif etype == "closed":
 			self.log("proc(): trade closed", order)
 			del self.actives[coi]
@@ -219,22 +218,21 @@ class Comptroller(Feeder):
 			"; skipped", skips, "uninitialized orders")
 
 	def cancel(self, tnum):
-		if tnum in self.cancelling:
-			return# self.log("cancel(%s) aborted (already cancelling)"%(tnum,))
-		self.cancelling.add(tnum)
 		trade = self.actives[tnum]
+		if trade["status"] == "cancelling":
+			return self.log("cancel(%s) aborted (already cancelling)"%(tnum,), trade)
 		self.log("cancel(%s)"%(tnum,), trade)
+		trade["status"] = "cancelling"
 		LIVE and gem.cancel(trade)
 
 	def cancelled(self, tnum, reason=None):
 		trade = self.actives[tnum]
 		msg = "cancelled(%s)"%(tnum,)
-		if tnum in self.cancelling:
-			self.cancelling.remove(tnum)
-		elif reason:
-			msg = "%s %s"%(msg, reason)
-		else:
-			msg = "%s unexpected!"%(msg,)
+		if trade["status"] != "cancelling":
+			if reason:
+				msg = "%s %s"%(msg, reason)
+			else:
+				msg = "%s unexpected!"%(msg,)
 		self.log(msg, trade)
 		emit("orderCancelled", trade)
 
