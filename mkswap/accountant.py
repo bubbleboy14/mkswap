@@ -199,7 +199,6 @@ class Accountant(Feeder):
 			rs *= -1
 			rv *= -1
 		sym1, sym2 = self.pair(prop["symbol"])
-		self.log("balances", bz)
 		if prop["side"] == "buy":
 			if v > bz[sym2] and not force:
 				self.log("not enough %s!"%(sym2,))
@@ -221,7 +220,5 @@ class Accountant(Feeder):
 			self.syms.append(prop["symbol"])
 		if (force or self.realistic(prop)) and self.updateBalances(prop, force=force):
 			self.counts["approved"] += 1
-			self.log("trade approved!")
+			self.log("trade approved!", prop)
 			return True
-		else:
-			self.log("balances not updated!")
