@@ -13,7 +13,7 @@ setup(
     ],
     zip_safe = False,
     install_requires = [
-        "fyg >= 0.1.1",
+        "fyg >= 0.1.2",
         "rel >= 0.4.9.5",
         "websocket-client >= 1.7.0"
     ],
