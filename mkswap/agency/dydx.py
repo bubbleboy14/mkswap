@@ -1,5 +1,8 @@
 import time
-from web3 import Web3
+try:
+	from web3 import Web3
+except:
+	print("web3 not installed!")
 try:
 	from dydx3 import Client, constants, epoch_seconds_to_iso
 	from dydx3.helpers.request_helpers import generate_now_iso
