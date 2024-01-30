@@ -24,7 +24,7 @@ class Accountant(Feeder):
 			"rejected": 0,
 			"cancelled": 0
 		}
-		self.syms = list(balances.keys())
+		self.syms = []
 		self._skimmed = {}
 		self._obals = {}
 		self._theoretical = {}
