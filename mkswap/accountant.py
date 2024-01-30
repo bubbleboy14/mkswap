@@ -14,7 +14,7 @@ def setCapped(capped):
 	CAPPED = capped
 
 class Accountant(Feeder):
-	def __init__(self, platform=predefs["platform"], balances=predefs["balances"], balcaps=None):
+	def __init__(self, platform=predefs["platform"], symbols=[], balances=predefs["balances"], balcaps=None):
 		self.counts = {
 			"fees": 0,
 			"fills": 0,
@@ -24,7 +24,7 @@ class Accountant(Feeder):
 			"rejected": 0,
 			"cancelled": 0
 		}
-		self.syms = []
+		self.syms = symbols
 		self._skimmed = {}
 		self._obals = {}
 		self._theoretical = {}
