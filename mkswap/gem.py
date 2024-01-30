@@ -48,7 +48,7 @@ class Req(Worker):
 		reason = res["reason"]
 		message = res.get("message", "no message")
 		self.log("receive(%s) %s error: %s"%(self.attempt, reason, message))
-		if reason not in ["RateLimit", "RateLimited", "InvalidNonce", "InsufficientFunds"]:
+		if reason not in ["RateLimit", "RateLimited", "InvalidNonce", "InsufficientFunds", "OrderNotFound"]:
 			return die(reason, res)
 		self.warn(reason)
 		if reason == "InsufficientFunds":
