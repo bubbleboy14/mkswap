@@ -203,6 +203,8 @@ class Comptroller(Feeder):
 		return True
 
 	def prune(self):
+		if not ask("accountsReady"):
+			return self.log("prune() waiting - accounts not ready")
 		icount = len(self.backlog)
 		# backlog: rate, filter, and sort
 		for trade in self.backlog:
