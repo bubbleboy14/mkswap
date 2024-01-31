@@ -38,9 +38,10 @@ class Comptroller(Feeder):
 		listen("enqueueOrder", self.enqueue)
 		listen("estimateFee", self.estimateFee)
 		listen("estimateGain", self.estimateGain)
-		self.feed("gemorders")
 		rel.timeout(10, self.longPrune)
-		LIVE and gem.notional(self.setFees)
+		if LIVE:
+			self.feed("gemorders")
+			gem.notional(self.setFees)
 
 	def setFees(self, fees):
 		self.fees = {
