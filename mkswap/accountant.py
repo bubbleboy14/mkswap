@@ -1,12 +1,19 @@
 import rel
 from rel.util import ask, listen
 from datetime import datetime
+from .comptroller import activesAllowed
 from .backend import log, predefs
 from .base import Feeder
 from .gem import gem
 from .config import config
 
+NUDGE = "auto"
 CAPPED = "auto"
+
+def setNudge(nudge):
+	log("setNudge(%s)"%(nudge,))
+	global NUDGE
+	NUDGE = nudge
 
 def setCapped(capped):
 	log("setCapped(%s)"%(capped,))
@@ -20,6 +27,7 @@ class Accountant(Feeder):
 			"fills": 0,
 			"active": 0,
 			"filled": 0,
+			"nudged": 0,
 			"approved": 0,
 			"rejected": 0,
 			"cancelled": 0
@@ -180,13 +188,29 @@ class Accountant(Feeder):
 		self._theoretical[sym] -= amount
 		self._balances[sym] -= amount
 
-	def realistic(self, trade, feeSide="taker", asScore=False):
+	def shouldNudge(self, nudge):
+		if nudge == "auto":
+			return self.counts["active"] / activesAllowed() < 0.5
+		return nudge
+
+	def nudge(self, trade):
+		self.counts["nudged"] += 1
+		oprice = trade["price"]
+		cprice = self.price(trade["symbol"])
+		pdiff = oprice - cprice
+		trade["price"] = round(oprice + pdiff, 5)
+		self.log("nudge(%s -> %s)"%(oprice, trade["price"]), trade)
+
+	def realistic(self, trade, feeSide="taker", asScore=False, nudge=False):
 		if not self.updateBalances(trade, self._balances, test=True):
 			return asScore and -1
-		score = ask("estimateGain", trade)
+		score = gain = ask("estimateGain", trade)
 		fee = ask("estimateFee", trade, feeSide)
 		if fee:
 			score -= fee
+		if score < 0 and gain > 0 and self.shouldNudge(nudge):
+			self.nudge(trade)
+			return self.realistic(trade, feeSide, asScore, nudge)
 		if asScore:
 			return score
 		return score > 0
@@ -218,7 +242,7 @@ class Accountant(Feeder):
 	def affordable(self, prop, force=False):
 		if prop["symbol"] not in self.syms:
 			self.syms.append(prop["symbol"])
-		if (force or self.realistic(prop)) and self.updateBalances(prop, force=force):
+		if (force or self.realistic(prop, nudge=NUDGE)) and self.updateBalances(prop, force=force):
 			self.counts["approved"] += 1
 			self.log("trade approved!", prop)
 			return True
