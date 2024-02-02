@@ -208,7 +208,7 @@ class Accountant(Feeder):
 		fee = ask("estimateFee", trade, feeSide)
 		if fee:
 			score -= fee
-		if score < 0 and gain > 0 and self.shouldNudge(nudge):
+		if score <= 0 and gain > 0 and self.shouldNudge(nudge):
 			self.nudge(trade)
 			return self.realistic(trade, feeSide, asScore, nudge)
 		if asScore:
