@@ -24,7 +24,7 @@ class Trader(Worker):
 			self.log("order is too small! increased amount from", size, "to", rec["amount"])
 		self.recommendations.append(rec)
 
-	def shouldTrade(self, recommendation): # TODO: actually evaluate
+	def shouldTrade(self, recommendation):
 		self.log("assessing recommendation:", recommendation)
 		return ask("affordable", recommendation)
 
