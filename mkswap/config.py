@@ -14,7 +14,7 @@ class Config(object):
 	def current(self):
 		from .comptroller import ACTIVES_ALLOWED, PRUNE_LIMIT, LIVE
 		from .office import VERBOSE, STAGISH
-		from .accountant import CAPPED
+		from .accountant import CAPPED, NUDGE
 		from .base import UNSPAMMED
 		from .ndx import INNER, SHORT, LONG, OUTER
 		from .strategy import base, rsi, slosh
@@ -29,6 +29,7 @@ class Config(object):
 				"network": NETWORK
 			},
 			"accountant": {
+				"nudge": NUDGE,
 				"capped": CAPPED
 			},
 			"comptroller": {
@@ -82,7 +83,7 @@ class Config(object):
 		from .comptroller import setPruneLimit, setActives, setLive
 		from .office import setVerbose, setStagish
 		from .backend import setStaging, setRealDie, setCredSet
-		from .accountant import setCapped
+		from .accountant import setCapped, setNudge
 		from .base import setUnspammed
 		from .strategy import base, rsi, slosh
 		from .ndx import setInner, setShort, setLong, setOuter
@@ -96,6 +97,7 @@ class Config(object):
 				"network": setNetwork
 			},
 			"accountant": {
+				"nudge": setNudge,
 				"capped": setCapped
 			},
 			"comptroller": {
