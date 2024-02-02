@@ -25,6 +25,9 @@ def setActives(actall):
 	global ACTIVES_ALLOWED
 	ACTIVES_ALLOWED = actall
 
+def activesAllowed():
+	return ACTIVES_ALLOWED
+
 class Comptroller(Feeder):
 	def __init__(self, pricer):
 		self.actives = {}
@@ -222,7 +225,7 @@ class Comptroller(Feeder):
 
 	def cancel(self, tnum):
 		trade = self.actives[tnum]
-		if trade["status"] == "cancelling":
+		if trade.get("status", None) == "cancelling":
 			return self.log("cancel(%s) aborted (already cancelling)"%(tnum,), trade)
 		self.log("cancel(%s)"%(tnum,), trade)
 		trade["status"] = "cancelling"
@@ -231,7 +234,7 @@ class Comptroller(Feeder):
 	def cancelled(self, tnum, reason=None):
 		trade = self.actives[tnum]
 		msg = "cancelled(%s)"%(tnum,)
-		if trade["status"] != "cancelling":
+		if trade.get("status", None) != "cancelling":
 			if reason:
 				msg = "%s %s"%(msg, reason)
 			else:
