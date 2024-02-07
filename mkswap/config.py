@@ -45,7 +45,7 @@ config = Config({
 		},
 		"slosh": {
 			"vmult": 16,
-			"vcutoff": 0.8
+			"vcutoff": 0.8,
 			"randlim": 0.002,
 			"oneswap": "auto"
 		}
