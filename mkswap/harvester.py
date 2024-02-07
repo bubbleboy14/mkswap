@@ -57,7 +57,7 @@ class Harvester(Worker):
 				actual = bals["actual"]["diff"]
 				msg = "%s: %s diff;"%(msg, actual)
 				if price:
-					target = config.harvester.batch + self.harvest * price
+					target = hcfg.batch + self.harvest * price
 					msg = "%s %s target"%(msg, target)
 					if actual > target:
 						self.log("full - skim!")
