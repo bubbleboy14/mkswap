@@ -1,5 +1,5 @@
 import pprint, atexit, rel
-from .backend import start, predefs, setStaging, listen
+from .backend import start, predefs, setStaging, listen, initConfig, selectPreset
 from .comptroller import Comptroller
 from .accountant import Accountant
 from .strategist import strategies
@@ -161,12 +161,12 @@ class Office(Worker):
 		return True
 
 def getOffice(**kwargs):
-	office = Office(**(kwargs or config.select()))
+	office = Office(**(kwargs or selectPreset()))
 	atexit.register(office.teardown)
 	return office
 
 def load():
-	config.init()
+	initConfig()
 	getOffice()
 	start()
 
