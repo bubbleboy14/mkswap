@@ -1,32 +1,11 @@
 import json, random, rel
 from rel.util import ask, emit, listen
-from .backend import log
 from .base import Feeder
 from .gem import gem
+from .config import config
 
-LIVE = False
-PRUNE_LIMIT = 0.1
-ACTIVES_ALLOWED = 10
 orderNumber = random.randint(0, 2000)
 SKIP_INITIAL = False
-
-def setLive(islive):
-	log("setLive(%s)"%(islive,))
-	global LIVE
-	LIVE = islive
-
-def setPruneLimit(pl):
-	log("setPruneLimit(%s)"%(pl,))
-	global PRUNE_LIMIT
-	PRUNE_LIMIT = pl
-
-def setActives(actall):
-	log("setActives(%s)"%(actall,))
-	global ACTIVES_ALLOWED
-	ACTIVES_ALLOWED = actall
-
-def activesAllowed():
-	return ACTIVES_ALLOWED
 
 class Comptroller(Feeder):
 	def __init__(self, pricer):
@@ -42,7 +21,7 @@ class Comptroller(Feeder):
 		listen("estimateFee", self.estimateFee)
 		listen("estimateGain", self.estimateGain)
 		rel.timeout(10, self.longPrune)
-		if LIVE:
+		if config.comptroller.live:
 			self.feed("gemorders")
 			gem.notional(self.setFees)
 
@@ -202,7 +181,7 @@ class Comptroller(Feeder):
 		return skips, cancels, dupes
 
 	def longPrune(self):
-		skips, cancels, dupes = self.pruneActives(PRUNE_LIMIT, True)
+		skips, cancels, dupes = self.pruneActives(config.comptroller.prunelimit, True)
 		self.log("longPrune():", len(cancels), "cancels;", dupes, "dupes;", skips, "skips")
 		return True
 
@@ -229,7 +208,7 @@ class Comptroller(Feeder):
 			return self.log("cancel(%s) aborted (already cancelling)"%(tnum,), trade)
 		self.log("cancel(%s)"%(tnum,), trade)
 		trade["status"] = "cancelling"
-		LIVE and gem.cancel(trade)
+		config.comptroller.live and gem.cancel(trade)
 
 	def cancelled(self, tnum, reason=None):
 		trade = self.actives[tnum]
@@ -261,11 +240,11 @@ class Comptroller(Feeder):
 			else:
 				emit("preventRetry", "new %s"%(tnum,))
 			del self.actives[tnum]
-		LIVE and gem.cancelAll() # TODO: get accepted/rejected cancels from return val
+		config.comptroller.live and gem.cancelAll() # TODO: get accepted/rejected cancels from return val
 
 	def refill(self):
 		self.log("refill(%s)"%(len(self.backlog),))
-		while self.backlog and (len(self.actives.keys()) < ACTIVES_ALLOWED):
+		while self.backlog and (len(self.actives.keys()) < config.comptroller.actives):
 			self.submit(self.backlog.pop(0))
 
 	def submit(self, trade):
@@ -274,7 +253,7 @@ class Comptroller(Feeder):
 		self.log("submit(%s)"%(orderNumber,), trade)
 		self.actives[str(orderNumber)] = trade
 		trade["client_order_id"] = str(orderNumber)
-		LIVE and gem.trade(trade)#, self.submitted)
+		config.comptroller.live and gem.trade(trade)#, self.submitted)
 
 	def submitted(self, resp):
 		coid = resp["client_order_id"]

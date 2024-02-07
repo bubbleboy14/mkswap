@@ -1,5 +1,5 @@
 import pprint, atexit, rel
-from .backend import log, start, predefs, setStaging, listen
+from .backend import start, predefs, setStaging, listen, initConfig, selectPreset
 from .comptroller import Comptroller
 from .accountant import Accountant
 from .strategist import strategies
@@ -11,22 +11,9 @@ from .ndx import NDX
 from .gem import gem
 from .config import config
 
-VERBOSE = False
-STAGISH = False
-
-def setVerbose(isverb):
-	log("setVerbose(%s)"%(isverb,))
-	global VERBOSE
-	VERBOSE = isverb
-
-def setStagish(stag):
-	log("setStagish(%s)"%(stag,))
-	global STAGISH
-	STAGISH = stag
-
 class Office(Worker):
 	def __init__(self, platform=predefs["platform"], symbols=[], strategy=predefs["strategy"], globalStrategy=False, globalTrade=False):
-		stish = config.get("office", "stagish") # necessary w/ -m for some reason...
+		stish = config.office.stagish
 		self.platform = platform
 		self.symbols = symbols
 		self.ndx = NDX()
@@ -122,7 +109,7 @@ class Office(Worker):
 			isgood = diff > 0
 		else: # sell
 			isgood = diff < 0
-		VERBOSE and self.log("%s %s at %s - %s trade!"%(action,
+		config.office.verbose and self.log("%s %s at %s - %s trade!"%(action,
 			symbol, price, isgood and "GOOD" or "BAD"))
 		direction = isgood and 1 or -1
 		return direction, abs(diff) * trade["amount"] * price * direction
@@ -156,7 +143,7 @@ class Office(Worker):
 			score += s
 		lstr.extend(["\n- trade score:", rate, "(", score, ")"])
 		lstr.append("\n- balances are:")
-		lstr.append(pprint.pformat(self.accountant.balances(self.price, nodph=not VERBOSE)))
+		lstr.append(pprint.pformat(self.accountant.balances(self.price, nodph=not config.office.verbose)))
 		self.log(*lstr)
 
 	def tick(self):
@@ -174,12 +161,12 @@ class Office(Worker):
 		return True
 
 def getOffice(**kwargs):
-	office = Office(**(kwargs or config.select()))
+	office = Office(**(kwargs or selectPreset()))
 	atexit.register(office.teardown)
 	return office
 
 def load():
-	config.init()
+	initConfig()
 	getOffice()
 	start()
 

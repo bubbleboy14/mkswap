@@ -2,7 +2,6 @@ import rel
 from .accountant import Accountant
 from .observer import Observer
 from .agent import agencies
-from .comptroller import setActives
 from .config import config
 from .backend import start, spew, predefs, hosts, echofeed, setStaging
 
@@ -82,7 +81,7 @@ def multi():
 def confy():
 	spew(config.current())
 	setStaging(False)
-	setActives(100)
+	config.comptroller.update("actives", 100)
 	spew(config.current())
 
 def observe(sym="BTCUSD"):

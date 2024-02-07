@@ -2,6 +2,7 @@ import rel, json, websocket
 from rel import start, stop
 from rel.util import emit, ask, listen
 from fyg import remember, recall, memget, setbank
+from .config import config
 
 predefs = {
 	"strategy": "rsi",
@@ -42,23 +43,39 @@ presets = [{
 	"symbols": ["BTC-USD"]
 }]
 
-CREDSET = "default"
-def setCredSet(cs):
-	global CREDSET
+def initConfig():
+	from cantools.util.io import selnum, confirm
+	cfg = {}
+	if confirm("live comptroller"):
+		cfg["comptroller"] = {
+			"live": True
+		}
+	print("\nselect mode")
+	mode = selnum(["staging", "stagish", "production"])
+	if mode == "production":
+		cfg["backend"] = {
+			"staging": False
+		}
+	elif mode == "stagish":
+		cfg["office"] = {
+			"stagish": True
+		}
+	cfg and config.set(cfg)
+
+def selectPreset():
+	from cantools.util.io import selnum
+	print("\nnoting Office defaults (%s), please select a configuration from the following presets.\n"%(predefs,))
+	return selnum(presets)
+
+def setCredSet(cs=config.backend.credset):
 	ll = "setCredSet(%s)"%(cs,)
 	if cs == "auto":
-		cs = STAGING and "sand" or "prod"
+		cs = config.backend.staging and "sand" or "prod"
 		log("%s picking %s"%(ll, cs))
 	else:
 		log(ll)
-	CREDSET = cs
+	config.backend.credset = cs
 	setbank(cs)
-
-REALDIE = True
-def setRealDie(rd):
-	log("setRealDie(%s)"%(rd,))
-	global REALDIE
-	REALDIE = rd
 
 def log(*msg):
 	print(*msg)
@@ -71,7 +88,7 @@ def spew(event):
 def die(m, j=None):
 	log("i die:", m)
 	j and spew(j)
-	REALDIE and stop()
+	config.backend.realdie and stop()
 
 def indexersub(streamname):
 	return {
@@ -127,7 +144,6 @@ def jsend(ws):
 		ws.send(msg)
 	return _jsend
 
-STAGING = True
 hosts = {
 	"gemini": "api.gemini.com",
 	"dydx": "api.dydx.exchange"
@@ -167,15 +183,14 @@ def dpost(path, headers={}, cb=spew, eb=None, host=predefs["platform"]):
 	post(getHost(host), path, port=443, secure=True,
 		headers=headers, cb=cb, timeout=60, json=True, eb=eb)
 
-def setStaging(stagflag=STAGING):
+def setStaging(stagflag=config.backend.staging):
 	log("setStaging(%s)"%(stagflag,))
-	global STAGING
 	h = hosts
 	p = platforms
-	STAGING = stagflag
+	config.backend.staging = stagflag
 	h["dydx"] = "api.dydx.exchange"
 	h["gemini"] = "api.gemini.com"
-	if STAGING:
+	if stagflag:
 		h["dydx"] = h["dydx"].replace("api.", "api.stage.")
 		h["gemini"] = h["gemini"].replace("api.", "api.sandbox.")
 	p["dacc"]["feed"] = p["dydx"]["feed"] = "wss://%s/v3/ws"%(h["dydx"],)

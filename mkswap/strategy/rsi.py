@@ -1,20 +1,8 @@
 from rel.util import emit
 from .base import Base
-from ..backend import log, predefs
+from ..backend import predefs
 from ..ndx import getSpan
-
-TRADE_SIZE = 10
-RSI_PERIOD = 14
-
-def setSize(size):
-	log("setSize(%s)"%(size,))
-	global TRADE_SIZE
-	TRADE_SIZE = size
-
-def setPeriod(period):
-	log("setPeriod(%s)"%(period,))
-	global RSI_PERIOD
-	RSI_PERIOD = period
+from ..config import config
 
 class RSI(Base):
 	def weighted_average(self, _history):
@@ -62,7 +50,7 @@ class RSI(Base):
 					"side": rec,
 					"price": price,
 					"symbol": symbol,
-					"amount": TRADE_SIZE * predefs["minimums"][symbol]
+					"amount": config.strategy.rsi.size * predefs["minimums"][symbol]
 				}
 				self.recommender(self.stats["lastrec"])
 		Base.compare(self, symbol, side, price, eobj, history)
@@ -80,16 +68,17 @@ class RSI(Base):
 				"relative_strength": []
 			}
 			self.log("tick", was[-1])
-			if lwas > (RSI_PERIOD + 1):
-				for i in range(RSI_PERIOD + 1):
-					start = 1 + RSI_PERIOD - i
+			period = config.strategy.rsi.period
+			if lwas > (period + 1):
+				for i in range(period + 1):
+					start = 1 + period - i
 					s = was[-(start - 1)] - was[-start]
 					if s >= 0:
 						changes['upward'].append(s)
 					else:
 						changes['downward'].append(abs(s))
-				up_mean = sum(changes['upward']) / RSI_PERIOD
-				down_mean = sum(changes['downward']) / RSI_PERIOD
+				up_mean = sum(changes['upward']) / period
+				down_mean = sum(changes['downward']) / period
 				if down_mean:
 					changes['relative_strength'].append(up_mean/down_mean)
 					rsi = 100 - (100 / (1 + changes['relative_strength'][-1]))

@@ -1,13 +1,6 @@
 from rel.util import emit
-from ..backend import log
 from ..base import Worker
-
-LOUD = False
-
-def setLoud(loud):
-	log("setLoud(%s)"%(loud,))
-	global LOUD
-	LOUD = loud
+from ..config import config
 
 class Base(Worker):
 	def __init__(self, symbol, recommender=None):
@@ -19,7 +12,7 @@ class Base(Worker):
 		return "Strategist[%s:%s]"%(self.__class__.__name__, self.symbol)
 
 	def log(self, *msg):
-		LOUD and Worker.log(self, *msg)
+		config.strategy.base.loud and Worker.log(self, *msg)
 
 	def setRecommender(self, recommender):
 		self.recommender = recommender
