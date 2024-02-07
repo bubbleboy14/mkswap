@@ -1,44 +1,13 @@
 import rel
 from rel.util import ask, emit, listen
 from .base import Worker
-from .backend import log
 from .gem import gem
-
-BATCH = 10
-BOTTOM = 40
-SKIM = False
-BALANCE = True
-NETWORK = "bitcoin" # ethereum available on production...
+from .config import config
 
 net2sym = {
 	"bitcoin": "btc",
 	"ethereum": "eth"
 }
-
-def setBatch(batch):
-	log("setBatch(%s)"%(batch,))
-	global BATCH
-	BATCH = batch
-
-def setBottom(bottom):
-	log("setBottom(%s)"%(bottom,))
-	global BOTTOM
-	BOTTOM = bottom
-
-def setSkim(skim):
-	log("setSkim(%s)"%(skim,))
-	global SKIM
-	SKIM = skim
-
-def setBalance(shouldBal):
-	log("setBalance(%s)"%(shouldBal,))
-	global BALANCE
-	BALANCE = shouldBal
-
-def setNetwork(network):
-	log("setNetwork(%s)"%(network,))
-	global NETWORK
-	NETWORK = network
 
 class Harvester(Worker):
 	def __init__(self, office):
@@ -48,11 +17,12 @@ class Harvester(Worker):
 		self.refillCount = 0
 		self.office = office
 		self.pricer = office.price
-		self.symbol = net2sym[NETWORK]
+		network = config.harvester.network
+		self.symbol = net2sym[network]
 		self.bigSym = self.symbol.upper()
 		self.accountant = office.accountant
 		self.fullSym = self.accountant.fullSym(self.bigSym)
-		gem.accounts(NETWORK, self.setStorehouse)
+		gem.accounts(network, self.setStorehouse)
 		listen("tooLow", self.tooLow)
 		listen("getUSD", self.getUSD)
 		rel.timeout(10, self.measure)
@@ -73,20 +43,21 @@ class Harvester(Worker):
 			self.warn("no storehouse!")
 
 	def measure(self):
-		if SKIM or BALANCE:
+		hcfg = config.harvester
+		if hcfg.skim or hcfg.balance:
 			if not ask("accountsReady"):
 				self.log("measure() waiting for accounts")
 				return True
 			bals = self.accountant.balances(self.pricer, "both", True)
 			self.log("measure(%s)"%(bals,))
 			msg = "measure() complete"
-			BALANCE and self.balance(bals)
-			if SKIM and self.office.hasMan(self.fullSym):
+			hcfg.balance and self.balance(bals)
+			if hcfg.skim and self.office.hasMan(self.fullSym):
 				price = self.pricer(self.fullSym)
 				actual = bals["actual"]["diff"]
 				msg = "%s: %s diff;"%(msg, actual)
 				if price:
-					target = BATCH + self.harvest * price
+					target = config.harvester.batch + self.harvest * price
 					msg = "%s %s target"%(msg, target)
 					if actual > target:
 						self.log("full - skim!")
@@ -128,7 +99,7 @@ class Harvester(Worker):
 		return refs
 
 	def tooLow(self, bal, actual=False):
-		bot = BOTTOM
+		bot = config.harvester.bottom
 		if actual:
 			bot *= 2
 		return max(0, bot - bal)
@@ -190,7 +161,7 @@ class Harvester(Worker):
 
 	def skim(self, bals):
 		price = self.pricer(self.fullSym)
-		amount = round(BATCH / price, 5)
+		amount = round(config.harvester.batch / price, 5)
 		bal = float(bals["actual"][self.bigSym].split(" ").pop(0))
 		if amount > bal:
 			self.log("balance (%s) < skim (%s)"%(bal, amount))

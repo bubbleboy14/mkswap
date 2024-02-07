@@ -1,41 +1,11 @@
 from math import sqrt
 from rel.util import ask, listen
-from .backend import log
 from .base import Worker
 from .observer import Observer
-
-INNER = 16
-SHORT = 32
-LONG = 64
-OUTER = 128
-
-def setInner(inner):
-	log("setInner(%s)"%(inner,))
-	global INNER
-	INNER = inner
-
-def setShort(short):
-	log("setShort(%s)"%(short,))
-	global SHORT
-	SHORT = short
-
-def setLong(howlong):
-	log("setLong(%s)"%(howlong,))
-	global LONG
-	LONG = howlong
-
-def setOuter(outer):
-	log("setOuter(%s)"%(outer,))
-	global OUTER
-	OUTER = outer
+from .config import config
 
 def getSpan(span):
-	return {
-		"inner": INNER,
-		"short": SHORT,
-		"long": LONG,
-		"outer": OUTER
-	}[span]
+	return config.ndx[span]
 
 SPANS = ["inner", "short", "long", "outer"]
 BESTIES = ["short", "long", "outer"]

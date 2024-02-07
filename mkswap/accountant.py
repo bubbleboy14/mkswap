@@ -1,24 +1,10 @@
 import rel
 from rel.util import ask, listen
 from datetime import datetime
-from .comptroller import activesAllowed
-from .backend import log, predefs
+from .backend import predefs
 from .base import Feeder
 from .gem import gem
 from .config import config
-
-NUDGE = "auto"
-CAPPED = "auto"
-
-def setNudge(nudge):
-	log("setNudge(%s)"%(nudge,))
-	global NUDGE
-	NUDGE = nudge
-
-def setCapped(capped):
-	log("setCapped(%s)"%(capped,))
-	global CAPPED
-	CAPPED = capped
 
 class Accountant(Feeder):
 	def __init__(self, platform=predefs["platform"], symbols=[], balances=predefs["balances"], balcaps=None):
@@ -43,9 +29,9 @@ class Accountant(Feeder):
 		self.platform = platform
 		self._usd = "USD"
 		if balcaps is None:
-			balcaps = CAPPED
+			balcaps = config.accountant.capped
 		if balcaps == "auto":
-			balcaps = config.get("backend", "staging")
+			balcaps = config.backend.staging
 		if platform == "dydx":
 			rel.timeout(10, self.checkFilled)
 			self._usd = "-USD"
@@ -190,7 +176,7 @@ class Accountant(Feeder):
 
 	def shouldNudge(self, nudge):
 		if nudge == "auto":
-			return self.counts["active"] / activesAllowed() < 0.5
+			return self.counts["active"] / config.comptroller.actives < 0.5
 		return nudge
 
 	def nudge(self, trade):
@@ -242,7 +228,7 @@ class Accountant(Feeder):
 	def affordable(self, prop, force=False):
 		if prop["symbol"] not in self.syms:
 			self.syms.append(prop["symbol"])
-		if (force or self.realistic(prop, nudge=NUDGE)) and self.updateBalances(prop, force=force):
+		if (force or self.realistic(prop, nudge=config.accountant.nudge)) and self.updateBalances(prop, force=force):
 			self.counts["approved"] += 1
 			self.log("trade approved!", prop)
 			return True

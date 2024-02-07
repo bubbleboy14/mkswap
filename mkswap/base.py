@@ -1,12 +1,6 @@
 import traceback, pprint
 from .backend import log, stop, feed, emit
-
-UNSPAMMED = True
-
-def setUnspammed(isunspammed):
-	log("setUnspammed(%s)"%(isunspammed,))
-	global UNSPAMMED
-	UNSPAMMED = isunspammed
+from .config import config
 
 class Worker(object):
 	def sig(self):
@@ -14,7 +8,7 @@ class Worker(object):
 
 	def log(self, *msg):
 		line = "\n%s %s"%(self.sig(), " ".join([str(m) for m in msg]))
-		if UNSPAMMED:
+		if config.base.unspammed:
 			if getattr(self, "_lastlog", None) == line:
 				return print(".", end="", flush=True)
 			self._lastlog = line

@@ -1,32 +1,6 @@
-import random
 from rel.util import ask, emit
-from ..backend import log
 from .base import Base
-
-ONESWAP = "auto"
-RANDLIM = 0.002
-VOLATILITY_MULT = 16
-VOLATILITY_CUTOFF = 0.8
-
-def setOneSwap(s1):
-	log("setOneSwap(%s)"%(s1,))
-	global ONESWAP
-	ONESWAP = s1
-
-def setRandLim(rlim):
-	log("setRandLim(%s)"%(rlim,))
-	global RANDLIM
-	RANDLIM = rlim
-
-def setVolatilityMult(vmult):
-	log("setVolatilityMult(%s)"%(vmult,))
-	global VOLATILITY_MULT
-	VOLATILITY_MULT = vmult
-
-def setVolatilityCutoff(cutoff):
-	log("setVolatilityCutoff(%s)"%(cutoff,))
-	global VOLATILITY_CUTOFF
-	VOLATILITY_CUTOFF = cutoff
+from ..config import config
 
 class Slosh(Base):
 	def __init__(self, symbol, recommender=None):
@@ -55,8 +29,9 @@ class Slosh(Base):
 		})
 
 	def oneswap(self, side, size=10):
+		vmult = config.strategy.slosh.vmult
 		price = ask("bestPrice", self.onesym, side)
-		denom = VOLATILITY_MULT * VOLATILITY_MULT / price # arbitrary
+		denom = vmult * vmult / price # arbitrary
 		self.recommender({
 			"side": side,
 			"price": price,
@@ -67,8 +42,9 @@ class Slosh(Base):
 	def shouldOneSwap(self, side):
 		bias = self.stats["bias"]
 		bigone = bias > 0
-		if ONESWAP != "auto":
-			return ONESWAP
+		scfg = config.strategy.slosh
+		if scfg.oneswap != "auto":
+			return scfg.oneswap
 		bals = ask("balances")
 		for sec in bals:
 			s = bals[sec]
@@ -80,7 +56,7 @@ class Slosh(Base):
 					usdval = ask("getUSD", sym, s[sym])
 					if usdval and ask("tooLow", usdval):
 						return False
-		if abs(bias) < RANDLIM:
+		if abs(bias) < scfg.randlim:
 			return "both"
 		if side == "buy":
 			return not bigone
@@ -108,9 +84,10 @@ class Slosh(Base):
 
 	def hilo(self):
 		self.upStats()
+		scfg = config.strategy.slosh
 		volatility = self.stats["volatility"]
-		if abs(volatility) + abs(self.stats["bias"]) > VOLATILITY_CUTOFF:
-			self.swap(volatility * VOLATILITY_MULT)
+		if abs(volatility) + abs(self.stats["bias"]) > scfg.vcutoff:
+			self.swap(volatility * scfg.vmult)
 
 	def tick(self, history=None):
 		if not self.shouldUpdate:
