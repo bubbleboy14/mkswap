@@ -67,7 +67,7 @@ def selectPreset():
 	print("\nnoting Office defaults (%s), please select a configuration from the following presets.\n"%(predefs,))
 	return selnum(presets)
 
-def setCredSet(cs):
+def setCredSet(cs=config.backend.credset):
 	ll = "setCredSet(%s)"%(cs,)
 	if cs == "auto":
 		cs = config.backend.staging and "sand" or "prod"
