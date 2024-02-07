@@ -43,6 +43,30 @@ presets = [{
 	"symbols": ["BTC-USD"]
 }]
 
+def initConfig():
+	from cantools.util.io import selnum, confirm
+	cfg = {}
+	if confirm("live comptroller"):
+		cfg["comptroller"] = {
+			"live": True
+		}
+	print("\nselect mode")
+	mode = selnum(["staging", "stagish", "production"])
+	if mode == "production":
+		cfg["backend"] = {
+			"staging": False
+		}
+	elif mode == "stagish":
+		cfg["office"] = {
+			"stagish": True
+		}
+	cfg and config.set(cfg)
+
+def selectPreset():
+	from cantools.util.io import selnum
+	print("\nnoting Office defaults (%s), please select a configuration from the following presets.\n"%(predefs,))
+	return selnum(presets)
+
 def setCredSet(cs):
 	ll = "setCredSet(%s)"%(cs,)
 	if cs == "auto":
