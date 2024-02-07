@@ -2,6 +2,7 @@ import rel, json, websocket
 from rel import start, stop
 from rel.util import emit, ask, listen
 from fyg import remember, recall, memget, setbank
+from fyg.util import selnum, confirm
 from .config import config
 
 predefs = {
@@ -44,7 +45,6 @@ presets = [{
 }]
 
 def initConfig():
-	from cantools.util.io import selnum, confirm
 	cfg = {}
 	if confirm("live comptroller"):
 		cfg["comptroller"] = {
@@ -63,7 +63,6 @@ def initConfig():
 	cfg and config.set(cfg)
 
 def selectPreset():
-	from cantools.util.io import selnum
 	print("\nnoting Office defaults (%s), please select a configuration from the following presets.\n"%(predefs,))
 	return selnum(presets)
 
