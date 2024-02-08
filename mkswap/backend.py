@@ -186,7 +186,7 @@ def setStaging(stagflag=config.backend.staging):
 	log("setStaging(%s)"%(stagflag,))
 	h = hosts
 	p = platforms
-	config.backend.staging = stagflag
+	config.backend.update("staging", stagflag)
 	h["dydx"] = "api.dydx.exchange"
 	h["gemini"] = "api.gemini.com"
 	if stagflag:
