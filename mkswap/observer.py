@@ -1,3 +1,4 @@
+from websocket import WebSocketBadStatusException
 from rel.util import emit
 from .backend import events, spew, predefs
 from .base import Feeder
@@ -27,12 +28,12 @@ class Observer(Feeder):
 			self.observe(event)
 		eventz and emit("priceChange")
 
-	def on_error(self, ws, msg):
-		if "503 Service Unavailable" in msg:
+	def on_error(self, ws, err):
+		if err is WebSocketBadStatusException:
 			self.warn("handshake failed - retrying")
 			self.start_feed()
 		else:
-			self.error(msg)
+			self.error(err)
 
 	def start_feed(self):
 		self.feed(self.platform, self.symbol)
