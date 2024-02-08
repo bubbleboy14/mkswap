@@ -170,7 +170,7 @@ class Comptroller(Feeder):
 						skips += 1
 						continue
 					if not sym.endswith("USD"):
-						if not (ask("price", sym[:3]) and ask("price", sym[3:])):
+						if not (ask("price", sym[:3], True) and ask("price", sym[3:], True)):
 							self.log("waiting for", sym, "prices")
 							skips += 1
 							continue
