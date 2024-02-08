@@ -73,7 +73,7 @@ def setCredSet(cs=config.backend.credset):
 		log("%s picking %s"%(ll, cs))
 	else:
 		log(ll)
-	config.backend.credset = cs
+	config.backend.update("credset", cs)
 	setbank(cs)
 
 def log(*msg):
