@@ -163,10 +163,17 @@ class Comptroller(Feeder):
 					dupes += 1
 				else:
 					prices.add(tp)
-					curprice = self.pricer(trade["symbol"])
+					sym = trade["symbol"]
+					curprice = self.pricer(sym)
 					if not curprice:
+						self.log("waiting for", sym, "prices")
 						skips += 1
 						continue
+					if not sym.endswith("USD"):
+						if not (ask("price", sym[:3]) and ask("price", sym[3:])):
+							self.log("waiting for", sym, "prices")
+							skips += 1
+							continue
 					s = self.score(trade, "maker")
 					toofar = False
 					if limit:
