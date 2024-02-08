@@ -27,7 +27,7 @@ class Worker(object):
 class Feeder(Worker):
 	def feed(self, platform, channel=None):
 		self.log("feed", platform, channel)
-		if hasattr(self, "ws"):
+		if getattr(self, "ws", None):
 			return self.log("feed already loaded!")
 		self.ws = feed(platform, channel,
 			on_message=self.on_message, on_error=self.on_error,

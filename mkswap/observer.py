@@ -31,7 +31,7 @@ class Observer(Feeder):
 	def on_error(self, ws, err):
 		if type(err) is WebSocketBadStatusException:
 			self.warn("handshake failed - retrying")
-			del self.ws
+			self.ws = None
 			self.start_feed()
 		else:
 			self.error(err)
