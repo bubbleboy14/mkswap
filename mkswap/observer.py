@@ -4,6 +4,7 @@ from .base import Feeder
 
 class Observer(Feeder):
 	def __init__(self, symbol, platform=predefs["platform"], observe=spew, use_initial=False):
+		self.platform = platform
 		self.symbol = symbol
 		self.observe = observe
 		self.use_initial = use_initial
@@ -15,7 +16,7 @@ class Observer(Feeder):
 			"w_average": [],
 			"1_w_average": []
 		}
-		self.feed(platform, symbol)
+		self.start_feed()
 
 	def sig(self):
 		return "Observer[%s]"%(self.symbol,)
@@ -25,3 +26,13 @@ class Observer(Feeder):
 		for event in eventz:
 			self.observe(event)
 		eventz and emit("priceChange")
+
+	def on_error(self, ws, msg):
+		if "503 Service Unavailable" in msg:
+			self.warn("handshake failed - retrying")
+			self.start_feed()
+		else:
+			self.error(msg)
+
+	def start_feed(self):
+		self.feed(self.platform, self.symbol)
