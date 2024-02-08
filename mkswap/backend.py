@@ -66,7 +66,9 @@ def selectPreset():
 	print("\nnoting Office defaults (%s), please select a configuration from the following presets.\n"%(predefs,))
 	return selnum(presets)
 
-def setCredSet(cs=config.backend.credset):
+def setCredSet(cs=None):
+	if cs is None:
+		cs = config.backend.credset
 	ll = "setCredSet(%s)"%(cs,)
 	if cs == "auto":
 		cs = config.backend.staging and "sand" or "prod"
@@ -182,7 +184,9 @@ def dpost(path, headers={}, cb=spew, eb=None, host=predefs["platform"]):
 	post(getHost(host), path, port=443, secure=True,
 		headers=headers, cb=cb, timeout=60, json=True, eb=eb)
 
-def setStaging(stagflag=config.backend.staging):
+def setStaging(stagflag=None):
+	if stagflag is None:
+		stagflag = config.backend.staging
 	log("setStaging(%s)"%(stagflag,))
 	h = hosts
 	p = platforms
