@@ -29,7 +29,7 @@ class Observer(Feeder):
 		eventz and emit("priceChange")
 
 	def on_error(self, ws, err):
-		if err is WebSocketBadStatusException:
+		if type(err) is WebSocketBadStatusException:
 			self.warn("handshake failed - retrying")
 			self.start_feed()
 		else:
