@@ -3,7 +3,7 @@ from .accountant import Accountant
 from .observer import Observer
 from .agent import agencies
 from .config import config
-from .backend import start, spew, predefs, hosts, echofeed, setStaging
+from .backend import start, spew, predefs, hosts, echofeed, setStaging, setCredSet
 
 plat = predefs["platform"]
 Agent = agencies[plat]
@@ -89,8 +89,12 @@ def observe(sym="BTCUSD"):
 	Observer(sym)
 	start()
 
+def credset():
+	setCredSet()
+
 if __name__ == "__main__":
-	multi()
+	credset()
+	#multi()
 	#observe()
 	#gemApprovedAddresses()
 	#gemAddresses()
