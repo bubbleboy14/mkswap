@@ -77,17 +77,19 @@ class Office(Worker):
 		return ds
 
 	def status(self):
-		acc = self.accountant
 		com = self.comptroller
+		acc = self.accountant
 		har = self.harvester
+		ndx = self.ndx
 		return {
+			"ndx": ndx.faves,
 			"gem": gem.status(),
 			"orders": acc.counts,
-			"ndx": self.ndx.faves,
 			"actives": com.actives,
 			"backlog": com.backlog,
 			"fills": com.getFills(),
 			"prices": self.prices(),
+			"volumes": ndx.volumes(),
 			"harvester": har.status(),
 			"cancels": com.getCancels(),
 			"refills": har.getRefills(),
