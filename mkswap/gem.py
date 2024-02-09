@@ -60,6 +60,8 @@ class Req(Worker):
 		if reason == "InsufficientFunds":
 			gem.unreg(self)
 			emit("rejected", self.client_order_id, res)
+		elif reason == "OrderNotFound":
+			gem.unreg(self) # this really shouldn't happen....
 		else:
 			if reason == "RateLimit":
 				gem.pause()
