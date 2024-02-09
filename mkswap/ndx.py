@@ -18,6 +18,7 @@ class NDX(Worker):
 	def __init__(self):
 		self.faves = {}
 		self.ratios = {}
+		self._volumes = {}
 		self.histories = {}
 		self.observers = {}
 		listen("mad", self.mad)
@@ -32,6 +33,12 @@ class NDX(Worker):
 		listen("bestPrice", self.bestPrice)
 		listen("bestPrices", self.bestPrices)
 		listen("volatility", self.volatility)
+
+	def volumes(self):
+		vols = self._volumes.copy()
+		for v in self._volumes:
+			self._volumes[v] = 0
+		return vols
 
 	def price(self, symbol, fullSym=False):
 		if fullSym:
@@ -146,7 +153,7 @@ class NDX(Worker):
 	def fave(self, key, val):
 		self.faves[key] = val
 
-	def quote(self, symbol, price, fave=False):
+	def quote(self, symbol, price, volume=None, fave=False):
 		if symbol not in self.histories:
 			self.histories[symbol] = {
 				"all": [],
@@ -155,6 +162,10 @@ class NDX(Worker):
 				"long": {},
 				"outer": {}
 			}
+		if volume:
+			if symbol not in self._volumes:
+				self._volumes[symbol] = 0
+			self._volumes[symbol] += volume
 		fave and self.fave(symbol, price)
 		symhis = self.histories[symbol]
 		symhis["current"] = price
