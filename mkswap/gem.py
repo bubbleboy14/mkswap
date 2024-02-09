@@ -8,8 +8,8 @@ class Req(Worker):
 		self.cb = cb
 		self.path = path
 		self.attempt = 0
+		self.abort = False
 		self.params = params
-		self.noretry = False
 		self.client_order_id = client_order_id
 		self.name = path.split("/").pop()
 		if client_order_id:
@@ -23,6 +23,9 @@ class Req(Worker):
 		return "Req[%s]"%(self.name,)
 
 	def get(self, sync=False):
+		if self.abort:
+			self.log("get() aborted!")
+			return gem.unreg(self)
 		self.attempt += 1
 		headers = ask("credHead", self.path, self.params)
 		self.log("get(%s)"%(self.attempt,), headers)
@@ -33,8 +36,11 @@ class Req(Worker):
 
 	def resubmit(self):
 		self.log("resubmit(%s)"%(self.attempt,),
-			self.noretry and "aborting retry!" or "passing self to gem")
-		self.noretry or gem.add(self, True)
+			self.abort and "aborting retry!" or "passing self to gem")
+		if self.abort:
+			gem.unreg(self)
+		else:
+			gem.add(self, True)
 
 	def retry(self, reason, timeout=None):
 		timeout = timeout or random.randint(2, 10)
@@ -73,7 +79,7 @@ class Gem(Worker):
 		self.paused = False
 		self.pauser = rel.timeout(None, self.unpause)
 		rel.timeout(0.2, self.churn)
-		listen("preventRetry", self.preventRetry)
+		listen("abort", self.abort)
 
 	def status(self):
 		return {
@@ -86,11 +92,11 @@ class Gem(Worker):
 	def inc(self, count):
 		self.counts[count] += 1
 
-	def preventRetry(self, rname):
+	def abort(self, rname):
 		if rname not in self.reqs:
-			self.log("preventRetry(%s) not found!"%(rname,))
+			self.log("abort(%s) not found!"%(rname,))
 		else:
-			self.reqs[rname].noretry = True
+			self.reqs[rname].abort = True
 
 	def reg(self, req):
 		self.reqs[req.name] = req

@@ -58,6 +58,7 @@ class Comptroller(Feeder):
 			self.cancelled(coi, reason)
 		elif etype == "closed":
 			self.log("proc(): trade closed", order)
+			emit("abort", "cancel %s"%(coi,))
 			del self.actives[coi]
 		else:
 			self.log("proc() unhandled event!")
@@ -243,9 +244,9 @@ class Comptroller(Feeder):
 			self.cancelled(tnum, "blanket cancel")
 			trade = self.actives[tnum]
 			if "order_id" in trade:
-				emit("preventRetry", "cancel %s"%(tnum,))
+				emit("abort", "cancel %s"%(tnum,))
 			else:
-				emit("preventRetry", "new %s"%(tnum,))
+				emit("abort", "new %s"%(tnum,))
 			del self.actives[tnum]
 		config.comptroller.live and gem.cancelAll() # TODO: get accepted/rejected cancels from return val
 
@@ -271,7 +272,7 @@ class Comptroller(Feeder):
 		trade = self.actives[coid]
 		if "order_id" in trade:
 			return self.warn("%s exists (%s)"%(msg, trade["status"]))
-		emit("preventRetry", "new %s"%(coid,))
+		emit("abort", "new %s"%(coid,))
 		trade["order_id"] = oid
 		self.log(msg, trade, resp)
 		emit("orderActive", trade)
