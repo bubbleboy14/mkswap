@@ -96,7 +96,7 @@ class Slosh(Base):
 		rdata = ask("ratio", self.top, self.bottom, True)
 		if not rdata:
 			return self.log("skipping tick (waiting for history)")
-		emit("quote", self.ratsym, round(rdata["current"], 5), True)
+		emit("quote", self.ratsym, round(rdata["current"], 5), fave=True)
 		if ask("hadEnough", self.top, self.bottom):
 			self.hilo()
 
