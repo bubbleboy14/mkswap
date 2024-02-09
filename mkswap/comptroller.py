@@ -58,7 +58,7 @@ class Comptroller(Feeder):
 			self.cancelled(coi, reason)
 		elif etype == "closed":
 			self.log("proc(): trade closed", order)
-			emit("abort", "cancel %s"%(coi,))
+			emit("abort", "cancel %s %s"%(coi, order["order_id"]))
 			del self.actives[coi]
 		else:
 			self.log("proc() unhandled event!")
@@ -244,7 +244,7 @@ class Comptroller(Feeder):
 			self.cancelled(tnum, "blanket cancel")
 			trade = self.actives[tnum]
 			if "order_id" in trade:
-				emit("abort", "cancel %s"%(tnum,))
+				emit("abort", "cancel %s %s"%(tnum, trade["order_id"]))
 			else:
 				emit("abort", "new %s"%(tnum,))
 			del self.actives[tnum]
