@@ -1,4 +1,3 @@
-from websocket import WebSocketBadStatusException
 from rel.util import emit
 from .backend import events, spew, predefs
 from .base import Feeder
@@ -27,14 +26,3 @@ class Observer(Feeder):
 		for event in eventz:
 			self.observe(event)
 		eventz and emit("priceChange")
-
-	def on_error(self, ws, err):
-		if type(err) is WebSocketBadStatusException:
-			self.warn("handshake failed - retrying")
-			self.ws = None
-			self.start_feed()
-		else:
-			self.error(err)
-
-	def start_feed(self):
-		self.feed(self.platform, self.symbol)

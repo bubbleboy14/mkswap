@@ -15,6 +15,7 @@ class Comptroller(Feeder):
 		self.fills = []
 		self.fees = None
 		self.pricer = pricer
+		self.platform = "gemorders"
 		listen("rejected", self.rejected)
 		listen("priceChange", self.prune)
 		listen("enqueueOrder", self.enqueue)
