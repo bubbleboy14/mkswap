@@ -80,7 +80,7 @@ class NDX(Worker):
 
 	def observed(self, sym, price):
 		self.log("observed(%s@%s)"%(sym, price))
-		self.quote(sym, price, True)
+		self.quote(sym, price, fave=True)
 
 	def hadEnough(self, top, bot, span="short"):
 		return len(self.ratios[top][bot]["all"]) >= getSpan(span)
