@@ -2,11 +2,11 @@ import rel
 from rel.util import ask, listen
 from datetime import datetime
 from .backend import predefs
-from .base import Feeder
+from .base import Worker
 from .gem import gem
 from .config import config
 
-class Accountant(Feeder):
+class Accountant(Worker):
 	def __init__(self, platform=predefs["platform"], symbols=[], balances=predefs["balances"], balcaps=None):
 		self.counts = {
 			"fees": 0,
