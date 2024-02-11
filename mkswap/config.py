@@ -40,8 +40,8 @@ config = Config({
 			"loud": False
 		},
 		"rsi": {
-			"size": 10,
-			"period": 14
+			"size": 8,
+			"period": 16
 		},
 		"slosh": {
 			"vmult": 16,
