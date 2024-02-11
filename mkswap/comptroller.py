@@ -42,7 +42,7 @@ class Comptroller(Feeder):
 				return self.log("proc() skipping initial")
 			return self.reactivate(msg)
 		if coi not in self.actives:
-			return self.warn("unlisted %s %s"%(etype, coi))
+			return self.warn("unlisted %s %s"%(etype, coi), msg)
 		order = self.actives[coi]
 		order["status"] = etype
 		if etype == "accepted":
@@ -59,7 +59,10 @@ class Comptroller(Feeder):
 			self.cancelled(coi, reason)
 		elif etype == "closed":
 			self.log("proc(): trade closed", order)
-			emit("abort", "cancel %s %s"%(coi, order["order_id"]))
+			if "order_id" in order:
+				emit("abort", "cancel %s %s"%(coi, order["order_id"]))
+			else:
+				self.warn("%s closed w/o order_id"%(coi,), order)
 			del self.actives[coi]
 		else:
 			self.log("proc() unhandled event!")
