@@ -89,6 +89,7 @@ def spew(event):
 def die(m, j=None):
 	log("i die:", m)
 	j and spew(j)
+	emit("warning", m, j)
 	config.backend.realdie and stop()
 
 def indexersub(streamname):
