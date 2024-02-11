@@ -54,9 +54,13 @@ class Req(Worker):
 		reason = res["reason"]
 		message = res.get("message", "no message")
 		self.log("receive(%s) %s error: %s"%(self.attempt, reason, message))
+		warams = {
+			"response": res,
+			"order": self.params
+		}
 		if reason not in ["RateLimit", "RateLimited", "InvalidNonce", "InsufficientFunds", "OrderNotFound"]:
-			return die("%s failed: %s"%(self.sig(), reason), res)
-		self.warn(reason)
+			return die("%s failed: %s"%(self.sig(), reason), warams)
+		self.warn(reason, warams)
 		if reason == "InsufficientFunds":
 			gem.unreg(self)
 			emit("rejected", self.client_order_id, res)
