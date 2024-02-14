@@ -12,7 +12,7 @@ class RSI(Base):
 			price_remaining += hist['price'] * hist['remaining']
 			remaining_total += hist['remaining']
 		wa = remaining_total and price_remaining / remaining_total or 0 # TODO: actual fix
-		emit("fave", "WA%s"%(self.symbol,), wa)
+		emit("fave", "W%s"%(self.symbol,), wa)
 		return wa
 
 	def compare(self, symbol, side, price, eobj, history):
