@@ -65,10 +65,12 @@ def gemApprovedAddresses(network="bitcoin"):
 #
 # general
 #
-def reqsWithAgent(ag):
+def reqsWithAgent(ag=None, dostart=False):
+	ag = ag or Agent()
 	get("/v1/notionalvolume", ag, False)
 	get("/v1/account", ag, False)
 	get("/v1/balances", ag, False)
+	dostart and start()
 
 def multi():
 	ag = Agent()
@@ -93,7 +95,8 @@ def credset():
 	setCredSet()
 
 if __name__ == "__main__":
-	credset()
+	reqsWithAgent(dostart=True)
+	#credset()
 	#multi()
 	#observe()
 	#gemApprovedAddresses()
