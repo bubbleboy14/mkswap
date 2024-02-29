@@ -11,9 +11,10 @@ class Accountant(Worker):
 		self.counts = {
 			"fees": 0,
 			"fills": 0,
-			"active": 0,
 			"filled": 0,
+			"nudges": 0,
 			"nudged": 0,
+			"active": 0,
 			"approved": 0,
 			"rejected": 0,
 			"cancelled": 0
@@ -180,14 +181,14 @@ class Accountant(Worker):
 		return nudge
 
 	def nudge(self, trade):
-		self.counts["nudged"] += 1
+		self.counts["nudges"] += 1
 		oprice = trade["price"]
 		cprice = self.price(trade["symbol"])
 		pdiff = oprice - cprice
 		trade["price"] = round(oprice + pdiff, 5)
 		self.log("nudge(%s -> %s)"%(oprice, trade["price"]), trade)
 
-	def realistic(self, trade, feeSide="taker", asScore=False, nudge=False):
+	def realistic(self, trade, feeSide="taker", asScore=False, nudge=False, nudged=False):
 		if not self.updateBalances(trade, self._balances, test=True):
 			return asScore and -1
 		score = gain = ask("estimateGain", trade)
@@ -196,7 +197,9 @@ class Accountant(Worker):
 			score -= fee
 		if score <= 0 and gain > 0 and self.shouldNudge(nudge):
 			self.nudge(trade)
-			return self.realistic(trade, feeSide, asScore, nudge)
+			if not nudged:
+				self.counts["nudged"] += 1
+			return self.realistic(trade, feeSide, asScore, nudge, True)
 		if asScore:
 			return score
 		return score > 0
