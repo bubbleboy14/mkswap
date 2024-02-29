@@ -62,8 +62,8 @@ class Req(Worker):
 			return die("%s failed: %s"%(self.sig(), reason), warams)
 		self.warn(reason, warams)
 		if reason == "InsufficientFunds":
-			gem.unreg(self)
-			emit("rejected", self.client_order_id, res)
+			gem.unreg(self) # Comptroller will process rejection...
+#			emit("rejected", self.client_order_id, res)
 		elif reason == "OrderNotFound":
 			gem.unreg(self) # this really shouldn't happen....
 		else:
