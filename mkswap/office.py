@@ -117,6 +117,8 @@ class Office(Worker):
 		return direction, abs(diff) * trade["amount"] * price * direction
 
 	def review(self, symbol=None, trader=None, curprice=None):
+		if not config.office.verbose:
+			return
 		mans = self.managers
 		if symbol:
 			man = mans[symbol]
@@ -145,7 +147,7 @@ class Office(Worker):
 			score += s
 		lstr.extend(["\n- trade score:", rate, "(", score, ")"])
 		lstr.append("\n- balances are:")
-		lstr.append(pprint.pformat(self.accountant.balances(self.price, nodph=not config.office.verbose)))
+		lstr.append(pprint.pformat(self.accountant.balances(self.price, nodph=config.base.unspammed)))
 		self.log(*lstr)
 
 	def tick(self):
