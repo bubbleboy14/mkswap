@@ -1,5 +1,5 @@
 import rel
-from rel.util import ask, listen
+from rel.util import ask, emit, listen
 from datetime import datetime
 from .backend import predefs
 from .base import Worker
