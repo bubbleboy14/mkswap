@@ -203,7 +203,7 @@ def setStaging(stagflag=None):
 
 setStaging()
 
-def feed(platname, streamname=None, **cbs): # {on_message,on_error,on_open,on_close}
+def feed(platname, streamname=None, **cbs): # {on_open,on_reconnect,on_message,on_error,on_close}
 	plat = platforms[platname]
 	feed = "feed" in plat and plat["feed"] or plat["feeder"](streamname)
 	if "subber" in plat:
