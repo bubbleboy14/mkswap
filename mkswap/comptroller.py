@@ -23,8 +23,12 @@ class Comptroller(Feeder):
 		listen("estimateGain", self.estimateGain)
 		rel.timeout(10, self.longPrune)
 		if config.comptroller.live:
-			self.feed("gemorders")
 			gem.notional(self.setFees)
+			listen("balancesReady", self.startListen)
+
+	def startListen(self):
+		self.log("startListen")
+		self.feed("gemorders")
 
 	def setFees(self, fees):
 		self.fees = {

@@ -61,6 +61,7 @@ class Accountant(Worker):
 		self._obals.update(self._balances)
 		self._theoretical.update(self._balances)
 		self.log("setBalances", self._balances)
+		emit("balancesReady")
 
 	def pair(self, syms):
 		if self.platform == "dydx":
