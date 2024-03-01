@@ -79,7 +79,7 @@ class NDX(Worker):
 			observe=lambda e : self.observed(sym, float(e["price"]), float(e["delta"])))
 
 	def observed(self, sym, price, volume):
-		self.log("observed(%s %s @ %s)"%(volume, sym, price))
+		config.base.unspammed or self.log("observed(%s %s @ %s)"%(volume, sym, price))
 		self.quote(sym, price, volume=volume, fave=True)
 
 	def hadEnough(self, top, bot, span="short"):
