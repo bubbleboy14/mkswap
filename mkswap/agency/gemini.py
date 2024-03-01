@@ -1,6 +1,7 @@
 import base64, json, time, hmac, hashlib
+from rel.util import emit, listen, transpire
+from fyg import memget
 from ..base import Worker
-from ..backend import emit, listen, memget
 
 class Gemini(Worker):
 	def __init__(self):
@@ -8,7 +9,7 @@ class Gemini(Worker):
 		self.account = memget("gemini account")
 		self.secret = memget("gemini secret").encode()
 		listen("credHead", self.credHead)
-		emit("clientReady")
+		transpire("clientReady")
 
 	def credHead(self, path, params={}):
 		self.log("credHead(%s) %s"%(path, params))

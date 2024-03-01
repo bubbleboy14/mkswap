@@ -8,7 +8,8 @@ try:
 	from dydx3.helpers.request_helpers import generate_now_iso
 except:
 	print("dydx not installed!")
-from ..backend import remember, recall, memget, listen, emit
+from rel.util import listen, emit, transpire
+from fyg import remember, recall, memget
 from ..base import Worker
 
 LIVE = False
@@ -29,7 +30,7 @@ class DYDX(Worker):
 		listen("credHead", self.credHead)
 		listen("signature", self.signature)
 		listen("fills", self.fills)
-		emit("clientReady")
+		transpire("clientReady")
 
 	def fills(self, market):
 		return self.client.private.get_fills(market).data["fills"]

@@ -1,5 +1,5 @@
 import rel
-from rel.util import ask, emit, listen
+from rel.util import ask, emit, listen, when, transpire
 from datetime import datetime
 from .backend import predefs
 from .base import Worker
@@ -37,9 +37,9 @@ class Accountant(Worker):
 			rel.timeout(10, self.checkFilled)
 			self._usd = "-USD"
 		elif balcaps:
-			emit("balancesReady")
+			transpire("balancesReady")
 		else:
-			listen("clientReady", self.getBalances)
+			when("clientReady", self.getBalances)
 		listen("orderCancelled", self.orderCancelled)
 		listen("orderRejected", self.orderRejected)
 		listen("orderFilled", self.orderFilled)
@@ -63,7 +63,7 @@ class Accountant(Worker):
 		self._obals.update(self._balances)
 		self._theoretical.update(self._balances)
 		self.log("setBalances", self._balances)
-		emit("balancesReady")
+		transpire("balancesReady")
 
 	def pair(self, syms):
 		if self.platform == "dydx":

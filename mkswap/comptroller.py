@@ -1,5 +1,5 @@
 import json, random, rel
-from rel.util import ask, emit, listen
+from rel.util import ask, emit, listen, when
 from .base import Feeder
 from .gem import gem
 from .config import config
@@ -23,8 +23,8 @@ class Comptroller(Feeder):
 		listen("estimateGain", self.estimateGain)
 		rel.timeout(10, self.longPrune)
 		if config.comptroller.live:
-			gem.notional(self.setFees)
-			listen("balancesReady", self.startListen)
+			when("clientReady", gem.notional, self.setFees)
+			when("balancesReady", self.startListen)
 
 	def startListen(self):
 		self.log("startListen")
