@@ -30,9 +30,9 @@ class Feeder(Worker):
 		self.log("feed", platform, channel)
 		if getattr(self, "ws", None):
 			return self.log("feed already loaded!")
-		self.ws = feed(platform, channel,
-			on_message=self.on_message, on_error=self.on_error,
-			on_open=self.on_open, on_close=self.on_close)
+		self.ws = feed(platform, channel, on_open=self.on_open,
+			on_reconnect=self.on_reconnect, on_message=self.on_message,
+			on_error=self.on_error, on_close=self.on_close)
 
 	def start_feed(self):
 		self.feed(self.platform, getattr(self, "symbol", None))
@@ -50,7 +50,10 @@ class Feeder(Worker):
 		pprint.pprint(msg)
 
 	def on_close(self, ws, code, message):
-		self.log("closed!!", code, message)
+		self.warn("closed %s"%(code,), message)
 
 	def on_open(self, ws):
 		self.log("opened!!")
+
+	def on_reconnect(self, ws):
+		self.warn("reconnected")
