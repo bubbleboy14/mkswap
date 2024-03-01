@@ -36,7 +36,9 @@ class Accountant(Worker):
 		if platform == "dydx":
 			rel.timeout(10, self.checkFilled)
 			self._usd = "-USD"
-		elif not balcaps:
+		elif balcaps:
+			emit("balancesReady")
+		else:
 			listen("clientReady", self.getBalances)
 		listen("orderCancelled", self.orderCancelled)
 		listen("orderRejected", self.orderRejected)

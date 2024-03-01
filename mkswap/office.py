@@ -17,8 +17,10 @@ class Office(Worker):
 		self.platform = platform
 		self.symbols = symbols
 		self.ndx = NDX()
-		self.accountant = Accountant(platform, symbols)
 		self.trader = globalTrade and Trader(platform)
+		self.comptroller = Comptroller(self.price)
+		self.accountant = Accountant(platform, symbols)
+		self.harvester = Harvester(self)
 		trec = self.trader and self.trader.recommend
 		strat = strategies[strategy]
 		stish and setStaging(False)
@@ -30,8 +32,6 @@ class Office(Worker):
 				self.strategist or strat(symbol, trec), self.trader)
 		self.log("initialized %s managers"%(len(symbols),))
 		stish and setStaging(True)
-		self.comptroller = Comptroller(self.price)
-		self.harvester = Harvester(self)
 		rel.timeout(1, self.tick)
 		self.warnings = []
 		listen("warning", self.warning)
