@@ -126,7 +126,7 @@ class Comptroller(Feeder):
 		msgs = json.loads(msgs)
 		self.log("message:", msgs)
 		if type(msgs) is not list:
-			return self.log("skipping non-list")
+			return config.base.unspammed or self.log("skipping non-list")
 		for msg in msgs:
 			self.proc(msg)
 		self.refill()
