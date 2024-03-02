@@ -157,6 +157,7 @@ class Accountant(Worker):
 	def orderRejected(self, trade):
 		self.log("order rejected!")
 		self.counts["rejected"] += 1
+		self.updateBalances(trade, revert=True, force=True)
 
 	def fee(self, sym, amount):
 		self.log("paying", amount, "fee from", sym)
