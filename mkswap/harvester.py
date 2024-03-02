@@ -113,7 +113,7 @@ class Harvester(Worker):
 			bal *= price
 		else:
 			bal = float(bal[:-1].split(" ($").pop())
-		self.log(iline, "$%s"%(bal,))
+		config.base.unspammed or self.log(iline, "$%s"%(bal,))
 		return bal
 
 	def fromUSD(self, sym, amount):
