@@ -188,7 +188,7 @@ class Accountant(Worker):
 		self.counts["nudges"] += 1
 		oprice = trade["price"]
 		cprice = self.price(trade["symbol"])
-		pdiff = oprice - cprice
+		pdiff = (oprice - cprice) * config.accountant.nmult
 		trade["price"] = round(oprice + pdiff, 5)
 		self.log("nudge(%s -> %s)"%(oprice, trade["price"]), trade)
 

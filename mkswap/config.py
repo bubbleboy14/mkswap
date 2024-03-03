@@ -2,6 +2,7 @@ from fyg import Config
 
 config = Config({
 	"accountant": {
+		"nmult": 1.0,
 		"nudge": "auto",
 		"capped": "auto"
 	},
