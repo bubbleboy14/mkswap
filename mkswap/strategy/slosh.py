@@ -53,7 +53,7 @@ class Slosh(Base):
 					if ask("tooLow", s[sym]):
 						return True
 				else:
-					usdval = ask("getUSD", sym, s[sym])
+					usdval = ask("getUSD", ask("fullSym", sym), s[sym])
 					if usdval and ask("tooLow", usdval):
 						return False
 		if abs(bias) < scfg.randlim:

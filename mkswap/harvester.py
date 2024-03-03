@@ -109,7 +109,7 @@ class Harvester(Worker):
 		if type(bal) in [float, int]:
 			price = self.pricer(sym)
 			if not price:
-				return self.log("%s -> no price yet!"%(iline,))
+				return self.log("%s no price yet!"%(iline,))
 			bal *= price
 		else:
 			bal = float(bal[:-1].split(" ($").pop())
