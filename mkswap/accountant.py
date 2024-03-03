@@ -186,10 +186,10 @@ class Accountant(Worker):
 
 	def nudge(self, trade):
 		self.counts["nudges"] += 1
-		oprice = trade["price"]
+		oprice = float(trade["price"])
 		cprice = self.price(trade["symbol"])
 		pdiff = (oprice - cprice) * config.accountant.nmult
-		trade["price"] = round(oprice + pdiff, 5)
+		trade["price"] = str(round(oprice + pdiff, 5))
 		self.log("nudge(%s -> %s)"%(oprice, trade["price"]), trade)
 
 	def realistic(self, trade, feeSide="taker", asScore=False, nudge=False, nudged=False):
