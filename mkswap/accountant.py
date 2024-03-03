@@ -193,18 +193,18 @@ class Accountant(Worker):
 		trade["price"] = round(oprice + pdiff, predefs["sigfigs"].get(sym, 2))
 		self.log("nudge(%s -> %s)"%(oprice, trade["price"]), trade)
 
-	def realistic(self, trade, feeSide="taker", asScore=False, nudge=False, nudged=False):
+	def realistic(self, trade, feeSide="taker", asScore=False, nudge=False, nudged=0):
 		if not self.updateBalances(trade, self._balances, test=True):
 			return asScore and -1
 		score = gain = ask("estimateGain", trade)
 		fee = ask("estimateFee", trade, feeSide)
 		if fee:
 			score -= fee
-		if score <= 0 and gain > 0 and self.shouldNudge(nudge):
+		if score <= 0 and gain > 0 and self.shouldNudge(nudge) and nudged < 10:
 			self.nudge(trade)
 			if not nudged:
 				self.counts["nudged"] += 1
-			return self.realistic(trade, feeSide, asScore, nudge, True)
+			return self.realistic(trade, feeSide, asScore, nudge, nudged + 1)
 		if asScore:
 			return score
 		return score > 0
