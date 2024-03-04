@@ -33,6 +33,7 @@ class NDX(Worker):
 		listen("bestPrice", self.bestPrice)
 		listen("bestPrices", self.bestPrices)
 		listen("volatility", self.volatility)
+		listen("observersReady", self.observersReady)
 
 	def volumes(self):
 		vols = self._volumes.copy()
@@ -81,6 +82,13 @@ class NDX(Worker):
 	def observed(self, sym, price, volume):
 		config.base.unspammed or self.log("observed(%s %s @ %s)"%(volume, sym, price))
 		self.quote(sym, price, volume=volume, fave=True)
+
+	def observersReady(self):
+		for sym in self.observers:
+			if sym not in self.histories:
+				self.log("no history for", sym, "!!!!!")
+				return False
+		return True
 
 	def hadEnough(self, top, bot, span="short"):
 		return len(self.ratios[top][bot]["all"]) >= getSpan(span)
