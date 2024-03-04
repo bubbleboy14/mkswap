@@ -36,6 +36,8 @@ class Trader(Worker):
 	def tick(self):
 		if not ask("accountsReady"):
 			return self.log("tick() waiting for acccounts!")
+		if not ask("observersReady"):
+			return self.log("tick() waiting for observer histories!")
 		# first rank in terms of payout
 		for recommendation in self.recommendations:
 			self.shouldTrade(recommendation) and self.trade(recommendation)
