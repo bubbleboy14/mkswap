@@ -104,8 +104,8 @@ class Accountant(Worker):
 			return {
 				"theoretical": self.balances(pricer, nodph=nodph),
 				"actual": self.balances(pricer, self._balances, nodph),
-				"ask": self.balances(pricer, self._balances, nodph, "ask"),
-				"bid": self.balances(pricer, self._balances, nodph, "bid")
+				"ask": self.balances(pricer, nodph=nodph, history="ask"),
+				"bid": self.balances(pricer, nodph=nodph, history="bid")
 			}
 		pricer = pricer or self.price
 		total = 0
