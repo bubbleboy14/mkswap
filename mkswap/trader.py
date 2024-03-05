@@ -35,7 +35,7 @@ class Trader(Worker):
 
 	def tick(self):
 		if not ask("accountsReady"):
-			return self.log("tick() waiting for acccounts!")
+			return self.log("tick() waiting for accounts!")
 		if not ask("observersReady"):
 			return self.log("tick() waiting for observer histories!")
 		# first rank in terms of payout
