@@ -18,9 +18,11 @@ class NDX(Worker):
 	def __init__(self):
 		self.faves = {}
 		self.ratios = {}
+		self.orders = {}
 		self._volumes = {}
 		self.histories = {}
 		self.observers = {}
+		self.orderBook = {}
 		listen("mad", self.mad)
 		listen("fave", self.fave)
 		listen("price", self.price)
@@ -34,6 +36,14 @@ class NDX(Worker):
 		listen("bestPrices", self.bestPrices)
 		listen("volatility", self.volatility)
 		listen("observersReady", self.observersReady)
+		listen("updateOrderBook", self.updateOrderBook)
+
+	def updateOrderBook(self, symbol, side, price, remaining):
+		if symbol not in self.orders:
+			self.orders[symbol] = {}
+			self.orderBook[symbol] = { "bid": {}, "ask": {} }
+		self.orderBook[symbol][side][price] = remaining
+		self.orders[symbol][side] = price
 
 	def volumes(self):
 		vols = self._volumes.copy()
@@ -77,7 +87,7 @@ class NDX(Worker):
 		if sym in self.observers:
 			return self.log("observe(%s) already observing!"%(sym,))
 		self.observers[sym] = Observer(sym,
-			observe=lambda e : self.observed(sym, float(e["price"]), float(e["delta"])))
+			observe=lambda e : self.observed(sym, float(e["price"]), float(e["amount"])))
 
 	def observed(self, sym, price, volume):
 		config.base.unspammed or self.log("observed(%s %s @ %s)"%(volume, sym, price))
