@@ -1,5 +1,6 @@
 import pprint, atexit, rel
-from .backend import start, predefs, setStaging, listen, initConfig, selectPreset
+from rel.util import ask, listen
+from .backend import start, predefs, setStaging, initConfig, selectPreset
 from .comptroller import Comptroller
 from .accountant import Accountant
 from .strategist import strategies
@@ -152,17 +153,22 @@ class Office(Worker):
 		self.log(*lstr)
 
 	def tick(self):
-		manStrat = manTrad = True
-		if self.strategist:
-			self.strategist.tick()
-			manStrat = False
-		if self.trader:
-			self.trader.tick()
-			self.review()
-			manTrad = False
-		if manStrat or manTrad:
-			for manager in self.managers:
-				self.managers[manager].tick(manStrat, manTrad)
+		if not ask("accountsReady"):
+			self.log("tick() waiting for accounts!")
+		elif not ask("observersReady"):
+			self.log("tick() waiting for observer histories!")
+		else:
+			manStrat = manTrad = True
+			if self.strategist:
+				self.strategist.tick()
+				manStrat = False
+			if self.trader:
+				self.trader.tick()
+				self.review()
+				manTrad = False
+			if manStrat or manTrad:
+				for manager in self.managers:
+					self.managers[manager].tick(manStrat, manTrad)
 		return True
 
 def getOffice(**kwargs):
