@@ -115,7 +115,7 @@ class Accountant(Worker):
 		for sym in bz:
 			amount = bz[sym] - obz[sym]
 			v = vz[sym] = bz[sym]
-			if amount and sym != "USD":
+			if sym != "USD":
 				if sym in self._skimmed:
 					amount += self._skimmed[sym]
 				price = pricer(self.fullSym(sym), history=history)
