@@ -58,8 +58,8 @@ class Office(Worker):
 	def hasMan(self, symbol):
 		return symbol in self.managers
 
-	def price(self, symbol):
-		return self.ndx.price(symbol) or self.ndx.faves.get(symbol, None)
+	def price(self, symbol, history="trade"):
+		return self.ndx.price(symbol, history=history) or self.ndx.faves.get(symbol, None)
 
 	def prices(self):
 		pz = {}
@@ -96,7 +96,7 @@ class Office(Worker):
 			"refills": har.getRefills(),
 			"warnings": self.getWarnings(),
 			"strategists": self.stratuses(),
-			"balances": acc.balances(self.price, "both")
+			"balances": acc.balances(self.price, "all")
 		}
 
 	def assess(self, trade, curprice=None):
