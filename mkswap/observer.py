@@ -29,6 +29,5 @@ class Observer(Feeder):
 				self.observe(event)
 				trades = True
 			else:
-				emit("updateOrderBook", self.symbol, event["side"],
-					float(event["price"]), float(event["remaining"]))
+				emit("updateOrderBook", self.symbol, event)
 		trades and emit("priceChange")
