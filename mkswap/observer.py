@@ -3,11 +3,10 @@ from .backend import events, spew, predefs
 from .base import Feeder
 
 class Observer(Feeder):
-	def __init__(self, symbol, platform=predefs["platform"], observe=spew, use_initial=False):
+	def __init__(self, symbol, platform=predefs["platform"], observe=spew):
 		self.platform = platform
 		self.symbol = symbol
 		self.observe = observe
-		self.use_initial = use_initial
 		self.history = {
 			"ask": [],
 			"bid": [],
@@ -22,7 +21,14 @@ class Observer(Feeder):
 		return "Observer[%s]"%(self.symbol,)
 
 	def on_message(self, ws, message):
-		eventz = events(message, self.use_initial)
+		eventz = events(message)
+		trades = False
 		for event in eventz:
-			self.observe(event)
-		eventz and emit("priceChange")
+			if event["type"] == "trade":
+				event["side"] = event["makerSide"]
+				self.observe(event)
+				trades = True
+			else:
+				emit("updateOrderBook", self.symbol, event["side"],
+					float(event["price"]), float(event["remaining"]))
+		trades and emit("priceChange")
