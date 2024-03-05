@@ -46,7 +46,7 @@ class NDX(Worker):
 		price = float(event["price"])
 		self.orderBook[symbol][side][price] = float(event["remaining"])
 		self.orders[symbol][side] = price
-		self.incVol(symbol, float(event["delta"]))
+		self.quote(symbol, price, volume=float(event["delta"]), history=side)
 
 	def volumes(self):
 		vols = self._volumes.copy()
