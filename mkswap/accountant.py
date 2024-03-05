@@ -79,8 +79,8 @@ class Accountant(Worker):
 	def fullSym(self, sym):
 		return sym + self._usd
 
-	def price(self, sym):
-		return ask("price", sym)
+	def price(self, sym, history="trade"):
+		return ask("price", sym, history=history)
 
 	def accountsReady(self):
 		for sym in self.syms:
@@ -92,13 +92,20 @@ class Accountant(Worker):
 	def fullBalances(self, nodph=True, pricer=None):
 		return self.balances(pricer, "both", nodph)
 
-	def balances(self, pricer=None, bz=None, nodph=False):
+	def balances(self, pricer=None, bz=None, nodph=False, history="trade"):
 		if not self.accountsReady():
 			return { "waiting": "balances not ready" }
 		if bz == "both":
 			return {
 				"actual": self.balances(pricer, self._balances, nodph),
 				"theoretical": self.balances(pricer, nodph=nodph)
+			}
+		elif bz == "all":
+			return {
+				"theoretical": self.balances(pricer, nodph=nodph),
+				"actual": self.balances(pricer, self._balances, nodph),
+				"ask": self.balances(pricer, self._balances, nodph, "ask"),
+				"bid": self.balances(pricer, self._balances, nodph, "bid")
 			}
 		pricer = pricer or self.price
 		total = 0
@@ -111,7 +118,7 @@ class Accountant(Worker):
 			if amount and sym != "USD":
 				if sym in self._skimmed:
 					amount += self._skimmed[sym]
-				price = pricer(self.fullSym(sym))
+				price = pricer(self.fullSym(sym), history=history)
 				amount *= price
 				vz[sym] = "%s ($%s)"%(v, v * price)
 			total += amount
