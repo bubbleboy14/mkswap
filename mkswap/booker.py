@@ -3,7 +3,7 @@ from .base import Worker
 
 class Booker(Worker):
 	def __init__(self):
-		self.totals = {}
+		self.totes = {}
 		self.orders = {}
 		self.orderBook = {}
 		listen("updateOrderBook", self.updateOrderBook)
@@ -20,11 +20,11 @@ class Booker(Worker):
 
 	def totals(self):
 		for sym in self.orderBook:
-			self.totals[sym] = {}
+			self.totes[sym] = {}
 			symhist = self.orderBook[sym]
 			for side in symhist:
-				self.totals[sym][side] = 0
+				self.totes[sym][side] = 0
 				sidehist = symhist[side]
 				for price in sidehist:
-					self.totals[sym][side] += price * sidehist[price]
-		return tz
+					self.totes[sym][side] += price * sidehist[price]
+		return self.totes
