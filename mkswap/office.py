@@ -7,6 +7,7 @@ from .strategist import strategies
 from .harvester import Harvester
 from .manager import Manager
 from .trader import Trader
+from .booker import Booker
 from .base import Worker
 from .ndx import NDX
 from .gem import gem
@@ -33,6 +34,7 @@ class Office(Worker):
 		stish and setStaging(True)
 		self.comptroller = Comptroller(self.price)
 		self.harvester = Harvester(self)
+		self.booker = Booker()
 		rel.timeout(1, self.tick)
 		self.warnings = []
 		listen("warning", self.warning)
@@ -85,7 +87,6 @@ class Office(Worker):
 		return {
 			"ndx": ndx.faves,
 			"gem": gem.status(),
-			"orders": ndx.orders,
 			"actives": com.actives,
 			"backlog": com.backlog,
 			"fills": com.getFills(),
@@ -95,6 +96,7 @@ class Office(Worker):
 			"harvester": har.status(),
 			"cancels": com.getCancels(),
 			"refills": har.getRefills(),
+			"orders": self.booker.orders,
 			"warnings": self.getWarnings(),
 			"strategists": self.stratuses(),
 			"balances": acc.balances(self.price, "all")

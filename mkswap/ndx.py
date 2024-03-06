@@ -18,10 +18,8 @@ class NDX(Worker):
 	def __init__(self):
 		self.faves = {}
 		self.ratios = {}
-		self.orders = {}
 		self._volumes = {}
 		self.observers = {}
-		self.orderBook = {}
 		self.histories = { "trade": {}, "ask": {}, "bid": {} }
 		listen("mad", self.mad)
 		listen("fave", self.fave)
@@ -36,17 +34,6 @@ class NDX(Worker):
 		listen("bestPrices", self.bestPrices)
 		listen("volatility", self.volatility)
 		listen("observersReady", self.observersReady)
-		listen("updateOrderBook", self.updateOrderBook)
-
-	def updateOrderBook(self, symbol, event):
-		if symbol not in self.orders:
-			self.orders[symbol] = {}
-			self.orderBook[symbol] = { "bid": {}, "ask": {} }
-		side = event["side"]
-		price = float(event["price"])
-		self.orderBook[symbol][side][price] = float(event["remaining"])
-		self.orders[symbol][side] = price
-		self.quote(symbol, price, volume=float(event["delta"]), history=side)
 
 	def volumes(self):
 		vols = self._volumes.copy()
