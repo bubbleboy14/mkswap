@@ -83,12 +83,15 @@ class Office(Worker):
 		com = self.comptroller
 		acc = self.accountant
 		har = self.harvester
+		boo = self.booker
 		ndx = self.ndx
 		return {
 			"ndx": ndx.faves,
 			"gem": gem.status(),
+			"orders": boo.orders,
 			"actives": com.actives,
 			"backlog": com.backlog,
+			"totals": boo.totals(),
 			"fills": com.getFills(),
 			"prices": self.prices(),
 			"volumes": ndx.volumes(),
@@ -96,7 +99,6 @@ class Office(Worker):
 			"harvester": har.status(),
 			"cancels": com.getCancels(),
 			"refills": har.getRefills(),
-			"orders": self.booker.orders,
 			"warnings": self.getWarnings(),
 			"strategists": self.stratuses(),
 			"balances": acc.balances(self.price, "all")
