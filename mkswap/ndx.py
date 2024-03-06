@@ -173,7 +173,11 @@ class NDX(Worker):
 		for hist in self.histories:
 			weighteds[hist] = {}
 			for sym in self.histories[hist]:
-				weighteds[hist][sym] = self.histories[hist][sym]["weighted"]
+				waves = self.histories[hist][sym]["weighted"]
+				weighteds[hist][sym] = {
+					"inner": waves["inner"],
+					"outer": waves["outer"]
+				}
 		return weighteds
 
 	def waverage(self, symbol, span, history="trade"):
