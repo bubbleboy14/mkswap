@@ -16,7 +16,7 @@ class RSI(Base):
 		return wa
 
 	def compare(self, symbol, side, price, eobj, history):
-		remaining = float("remaining" in eobj and eobj["remaining"] or eobj["size"])
+		remaining = float(eobj["amount"])
 		self.log("compare", side, price, remaining)
 		hs = history[side]
 		hwa = history["w_average"]
