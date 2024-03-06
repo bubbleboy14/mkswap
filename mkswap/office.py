@@ -97,6 +97,7 @@ class Office(Worker):
 			"volumes": ndx.volumes(),
 			"accountant": acc.counts,
 			"harvester": har.status(),
+			"weighted": ndx.weighted(),
 			"cancels": com.getCancels(),
 			"refills": har.getRefills(),
 			"warnings": self.getWarnings(),

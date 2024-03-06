@@ -168,6 +168,14 @@ class NDX(Worker):
 			self._volumes[symbol] = 0
 		self._volumes[symbol] += volume
 
+	def weighted(self):
+		weighteds = {}
+		for hist in self.histories:
+			weighteds[hist] = {}
+			for sym in self.histories[hist]:
+				weighteds[hist][sym] = self.histories[hist]["weighted"]
+		return weighteds
+
 	def waverage(self, symbol, span, history="trade"):
 		stretch = self.histories[history][symbol]["events"][-getSpan(span):]
 		volume = 0
