@@ -27,6 +27,7 @@ class NDX(Worker):
 		listen("quote", self.quote)
 		listen("ratio", self.ratio)
 		listen("sigma", self.sigma)
+		listen("histUp", self.histUp)
 		listen("markets", self.markets)
 		listen("observe", self.observe)
 		listen("hadEnough", self.hadEnough)
@@ -167,15 +168,43 @@ class NDX(Worker):
 			self._volumes[symbol] = 0
 		self._volumes[symbol] += volume
 
+	def waverage(self, symbol, span, history="trade"):
+		stretch = self.histories[history][symbol]["hist"][-getSpan(span):]
+		volume = 0
+		total = 0
+		volprop = (history == "trade") and "amount" or "delta"
+		for event in stretch:
+			vol = float(event[volprop])
+			if vol < 0:
+				continue
+			volume += vol
+			total += float(event["price"]) * vol
+		return total / volume
+
+	def histUp(self, symbol, event, history=None):
+		if not history:
+			if event["type"] == "trade":
+				history = "trade"
+			else:
+				history = event["side"]
+		hist = self.histories[history][symbol]
+		hist["hist"].append(event)
+		waves = hist["weighted"]
+		for span in SPANS:
+			waves[span] = self.waverage(symbol, span, history)
+		self.log("histUp", symbol, waves)
+
 	def quote(self, symbol, price, volume=None, fave=False, history="trade"):
 		hists = self.histories[history]
 		if symbol not in hists:
 			hists[symbol] = {
 				"all": [],
+				"hist": [],
 				"inner": {},
 				"short": {},
 				"long": {},
-				"outer": {}
+				"outer": {},
+				"weighted": {}
 			}
 		volume and self.incVol(symbol, volume)
 		fave and self.fave(symbol, price)

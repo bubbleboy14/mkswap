@@ -30,4 +30,5 @@ class Observer(Feeder):
 				trades = True
 			else:
 				emit("updateOrderBook", self.symbol, event)
+			emit("histUp", self.symbol, event)
 		trades and emit("priceChange")
