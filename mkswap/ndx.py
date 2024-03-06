@@ -192,7 +192,7 @@ class NDX(Worker):
 		waves = hist["weighted"]
 		for span in SPANS:
 			waves[span] = self.waverage(symbol, span, history)
-		self.log("histUp", symbol, waves)
+#		self.log("histUp", symbol, waves)
 
 	def quote(self, symbol, price, volume=None, fave=False, history="trade"):
 		hists = self.histories[history]
