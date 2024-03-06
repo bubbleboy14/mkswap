@@ -173,7 +173,7 @@ class NDX(Worker):
 		for hist in self.histories:
 			weighteds[hist] = {}
 			for sym in self.histories[hist]:
-				weighteds[hist][sym] = self.histories[hist]["weighted"]
+				weighteds[hist][sym] = self.histories[hist][sym]["weighted"]
 		return weighteds
 
 	def waverage(self, symbol, span, history="trade"):
