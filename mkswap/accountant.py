@@ -79,8 +79,8 @@ class Accountant(Worker):
 	def fullSym(self, sym):
 		return sym + self._usd
 
-	def price(self, sym, history="trade"):
-		return ask("price", sym, history=history)
+	def price(self, sym, history="trade", fallback=None):
+		return ask("price", sym, history=history, fallback=fallback)
 
 	def accountsReady(self):
 		for sym in self.syms:
@@ -170,7 +170,7 @@ class Accountant(Worker):
 		self.log("paying", amount, "fee from", sym)
 		self.deduct(sym, amount)
 		if sym != "USD":
-			amount *= self.price(self.fullSym(sym))
+			amount *= self.price(self.fullSym(sym), fallback="both")
 		self.counts["fees"] += amount
 
 	def skim(self, sym, amount):
