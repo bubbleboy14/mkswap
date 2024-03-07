@@ -86,7 +86,7 @@ class Harvester(Worker):
 					continue
 			lowness = self.tooLow(abal, True) or self.tooLow(tbal)
 			if lowness:
-				if not self.tooHigh(abal, True) or self.tooHigh(tbal):
+				if not self.tooHigh(abal, True) and not self.tooHigh(tbal):
 					smalls[sym] = lowness
 			else:
 				bigs.append(sym)
