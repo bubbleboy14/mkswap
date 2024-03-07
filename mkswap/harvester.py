@@ -107,8 +107,6 @@ class Harvester(Worker):
 
 	def tooHigh(self, bal, actual=False):
 		bot = config.harvester.bottom * 2
-		if actual:
-			bot *= 2
 		return max(0, bal - bot)
 
 	def getUSD(self, sym, bal):
