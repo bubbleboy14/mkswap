@@ -42,11 +42,21 @@ class NDX(Worker):
 			self._volumes[v] = 0
 		return vols
 
-	def price(self, symbol, fullSym=False, history="trade"):
+	def cur(self, symbol, history="trade"):
+		return self.histories[history][symbol]["current"]
+
+	def weighted(self, symbol, history="trade", span="inner"):
+		return self.histories[history][symbol]["weighted"][span]
+
+	def price(self, symbol, fullSym=False, history="trade", fallback=None):
 		if fullSym:
 			symbol = ask("fullSym", symbol)
 		if symbol in self.histories[history]:
-			return self.histories[history][symbol]["current"]
+			return self.cur(symbol, history)
+		if fallback == "both":
+			return (self.weighted(symbol, "ask") + self.weighted(symbol, "bid")) / 2
+		if fallback:
+			return self.weighted(symbol, fallback)
 
 	def bestPrice(self, sym, side, span="inner", history="trade"):
 		return round(self.histories[history][sym][span][side2height[side]], 6)
@@ -168,7 +178,7 @@ class NDX(Worker):
 			self._volumes[symbol] = 0
 		self._volumes[symbol] += volume
 
-	def weighted(self):
+	def weighteds(self):
 		weighteds = {}
 		for hist in self.histories:
 			weighteds[hist] = {}
