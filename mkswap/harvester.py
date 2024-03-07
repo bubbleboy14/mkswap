@@ -86,7 +86,8 @@ class Harvester(Worker):
 					continue
 			lowness = self.tooLow(abal, True) or self.tooLow(tbal)
 			if lowness:
-				smalls[sym] = lowness
+				if not self.tooHigh(abal, True) or self.tooHigh(tbal):
+					smalls[sym] = lowness
 			else:
 				bigs.append(sym)
 		for sym in smalls:
@@ -103,6 +104,12 @@ class Harvester(Worker):
 		if actual:
 			bot *= 2
 		return max(0, bot - bal)
+
+	def tooHigh(self, bal, actual=False):
+		bot = config.harvester.bottom * 2
+		if actual:
+			bot *= 2
+		return max(0, bal - bot)
 
 	def getUSD(self, sym, bal):
 		iline = "getUSD(%s, %s) ->"%(sym, bal)
