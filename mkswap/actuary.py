@@ -19,6 +19,13 @@ class Actuary(Worker):
 		rdata = self.ratios[symbol]
 		return (cur - ask("ave", rdata["history"])) / rdata["sigma"]
 
+	def volatilities(self):
+		vols = {}
+		for sym in self.ratios:
+			if "volatility" in self.ratios[sym]:
+				vols[sym] = self.ratios[sym]["volatility"]
+		return vols
+
 	def hints(self, vscores):
 		for sym in vscores:
 			if sym not in self.ratios:
