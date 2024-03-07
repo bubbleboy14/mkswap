@@ -85,10 +85,13 @@ class Office(Worker):
 		com = self.comptroller
 		acc = self.accountant
 		har = self.harvester
+		act = self.actuary
 		boo = self.booker
 		ndx = self.ndx
 		totes = boo.totals()
+		hints = act.hints(totes)
 		return {
+			"hints": hints,
 			"totals": totes,
 			"ndx": ndx.faves,
 			"gem": gem.status(),
@@ -103,9 +106,9 @@ class Office(Worker):
 			"refills": har.getRefills(),
 			"weighted": ndx.weighteds(),
 			"cancels": com.getCancels(),
+			"volvols": act.volatilities(),
 			"warnings": self.getWarnings(),
 			"strategists": self.stratuses(),
-			"hints": self.actuary.hints(totes),
 			"balances": acc.balances(self.price, "all")
 		}
 
