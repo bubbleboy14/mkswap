@@ -30,10 +30,10 @@ class Actuary(Worker):
 				self.ratios[sym]["sigma"] = self.sigma(sym, rat)
 				vol = self.ratios[sym]["volatility"] = self.volatility(sym, rat)
 				if vol > 0.5:
-					self.prediction[sym] = "buy"
+					self.predictions[sym] = "buy"
 				elif vol < -0.5:
-					self.prediction[sym] = "sell"
+					self.predictions[sym] = "sell"
 				else:
-					self.prediction[sym] = "chill"
+					self.predictions[sym] = "chill"
 			self.ratios[sym]["history"].append(rat)
 		return self.predictions
