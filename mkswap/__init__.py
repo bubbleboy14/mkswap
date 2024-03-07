@@ -7,6 +7,7 @@ from .comptroller import Comptroller
 from .accountant import Accountant
 from .strategist import strategies
 from .manager import Manager
+from .actuary import Actuary
 from .booker import Booker
 from .ndx import NDX
 from .office import getOffice, Office
