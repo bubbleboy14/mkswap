@@ -5,6 +5,7 @@ from .comptroller import Comptroller
 from .accountant import Accountant
 from .strategist import strategies
 from .harvester import Harvester
+from .actuary import Actuary
 from .manager import Manager
 from .trader import Trader
 from .booker import Booker
@@ -34,6 +35,7 @@ class Office(Worker):
 		stish and setStaging(True)
 		self.comptroller = Comptroller(self.price)
 		self.harvester = Harvester(self)
+		self.actuary = Actuary()
 		self.booker = Booker()
 		rel.timeout(1, self.tick)
 		self.warnings = []
@@ -85,13 +87,14 @@ class Office(Worker):
 		har = self.harvester
 		boo = self.booker
 		ndx = self.ndx
+		totes = boo.totals()
 		return {
+			"totals": totes,
 			"ndx": ndx.faves,
 			"gem": gem.status(),
 			"orders": boo.orders,
 			"actives": com.actives,
 			"backlog": com.backlog,
-			"totals": boo.totals(),
 			"fills": com.getFills(),
 			"prices": self.prices(),
 			"volumes": ndx.volumes(),
@@ -102,6 +105,7 @@ class Office(Worker):
 			"cancels": com.getCancels(),
 			"warnings": self.getWarnings(),
 			"strategists": self.stratuses(),
+			"hints": self.actuary.hints(totes),
 			"balances": acc.balances(self.price, "all")
 		}
 
