@@ -1,3 +1,4 @@
+from math import sqrt
 from rel.util import ask
 from .base import Worker
 
