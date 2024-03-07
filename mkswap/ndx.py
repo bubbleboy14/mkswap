@@ -22,6 +22,7 @@ class NDX(Worker):
 		self.observers = {}
 		self.histories = { "trade": {}, "ask": {}, "bid": {} }
 		listen("mad", self.mad)
+		listen("ave", self.ave)
 		listen("fave", self.fave)
 		listen("price", self.price)
 		listen("quote", self.quote)
