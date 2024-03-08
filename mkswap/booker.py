@@ -26,5 +26,5 @@ class Booker(Worker):
 				self.totes[sym][side] = 0
 				sidehist = symhist[side]
 				for price in sidehist:
-					self.totes[sym][side] += price * sidehist[price]
+					self.totes[sym][side] += sidehist[price]
 		return self.totes
