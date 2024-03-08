@@ -32,6 +32,8 @@ class Actuary(Worker):
 				self.ratios[sym] = {
 					"history": []
 				}
+			if not vscores[sym]["bid"]:
+				continue
 			rat = vscores[sym]["ask"] / vscores[sym]["bid"]
 			if self.ratios[sym]["history"]:
 				self.ratios[sym]["sigma"] = self.sigma(sym, rat)
