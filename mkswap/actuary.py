@@ -35,12 +35,13 @@ class Actuary(Worker):
 			rat = vscores[sym]["ask"] / vscores[sym]["bid"]
 			if self.ratios[sym]["history"]:
 				self.ratios[sym]["sigma"] = self.sigma(sym, rat)
-				vol = self.ratios[sym]["volatility"] = self.volatility(sym, rat)
-				if vol > 0.5:
-					self.predictions[sym] = "buy"
-				elif vol < -0.5:
-					self.predictions[sym] = "sell"
-				else:
-					self.predictions[sym] = "chill"
+				if self.ratios[sym]["sigma"]:
+					vol = self.ratios[sym]["volatility"] = self.volatility(sym, rat)
+					if vol > 0.5:
+						self.predictions[sym] = "buy"
+					elif vol < -0.5:
+						self.predictions[sym] = "sell"
+					else:
+						self.predictions[sym] = "chill"
 			self.ratios[sym]["history"].append(rat)
 		return self.predictions
