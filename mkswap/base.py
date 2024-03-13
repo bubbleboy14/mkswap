@@ -1,4 +1,4 @@
-import traceback, pprint
+import traceback, pprint, rel
 from websocket import WebSocketBadStatusException
 from .backend import log, stop, feed, emit
 from .config import config
@@ -39,9 +39,9 @@ class Feeder(Worker):
 
 	def on_error(self, ws, err):
 		if type(err) is WebSocketBadStatusException:
-			self.warn("handshake failed - retrying")
+			self.warn("handshake failed - retrying in 5 seconds")
+			rel.timeout(5, self.start_feed)
 			self.ws = None
-			self.start_feed()
 		else:
 			self.error(err)
 

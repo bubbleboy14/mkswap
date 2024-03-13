@@ -21,4 +21,4 @@ class Base(Worker):
 		self.compare(symbol, event["side"], float(event["price"]), event, history)
 
 	def compare(self, symbol, side, price, eobj, history):
-		emit("quote", symbol, price, volume=float(eobj["delta"])) # anything else?
+		emit("quote", symbol, price, volume=float(eobj["amount"])) # anything else?

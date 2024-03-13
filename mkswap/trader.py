@@ -34,8 +34,6 @@ class Trader(Worker):
 		self.live and self.agent.trade(recommendation)
 
 	def tick(self):
-		if not ask("accountsReady"):
-			return self.log("tick() waiting for acccounts!")
 		# first rank in terms of payout
 		for recommendation in self.recommendations:
 			self.shouldTrade(recommendation) and self.trade(recommendation)

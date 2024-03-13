@@ -1,11 +1,14 @@
 import pprint, atexit, rel
-from .backend import start, predefs, setStaging, listen, initConfig, selectPreset
+from rel.util import ask, listen
+from .backend import start, predefs, setStaging, initConfig, selectPreset
 from .comptroller import Comptroller
 from .accountant import Accountant
 from .strategist import strategies
 from .harvester import Harvester
+from .actuary import Actuary
 from .manager import Manager
 from .trader import Trader
+from .booker import Booker
 from .base import Worker
 from .ndx import NDX
 from .gem import gem
@@ -32,6 +35,8 @@ class Office(Worker):
 		stish and setStaging(True)
 		self.comptroller = Comptroller(self.price)
 		self.harvester = Harvester(self)
+		self.actuary = Actuary()
+		self.booker = Booker()
 		rel.timeout(1, self.tick)
 		self.warnings = []
 		listen("warning", self.warning)
@@ -58,8 +63,8 @@ class Office(Worker):
 	def hasMan(self, symbol):
 		return symbol in self.managers
 
-	def price(self, symbol):
-		return self.ndx.price(symbol) or self.ndx.faves.get(symbol, None)
+	def price(self, symbol, history="trade", fallback=None):
+		return self.ndx.price(symbol, history=history, fallback=fallback) or self.ndx.faves.get(symbol, None)
 
 	def prices(self):
 		pz = {}
@@ -80,22 +85,31 @@ class Office(Worker):
 		com = self.comptroller
 		acc = self.accountant
 		har = self.harvester
+		act = self.actuary
+		boo = self.booker
 		ndx = self.ndx
+		totes = boo.totals()
+		hints = act.hints(totes)
 		return {
+			"hints": hints,
+			"totals": totes,
 			"ndx": ndx.faves,
 			"gem": gem.status(),
-			"orders": acc.counts,
+			"orders": boo.orders,
 			"actives": com.actives,
 			"backlog": com.backlog,
 			"fills": com.getFills(),
 			"prices": self.prices(),
 			"volumes": ndx.volumes(),
+			"accountant": acc.counts,
 			"harvester": har.status(),
-			"cancels": com.getCancels(),
 			"refills": har.getRefills(),
+			"weighted": ndx.weighteds(),
+			"cancels": com.getCancels(),
+			"volvols": act.volatilities(),
 			"warnings": self.getWarnings(),
 			"strategists": self.stratuses(),
-			"balances": acc.balances(self.price, "both")
+			"balances": acc.balances(self.price, "all")
 		}
 
 	def assess(self, trade, curprice=None):
@@ -151,17 +165,22 @@ class Office(Worker):
 		self.log(*lstr)
 
 	def tick(self):
-		manStrat = manTrad = True
-		if self.strategist:
-			self.strategist.tick()
-			manStrat = False
-		if self.trader:
-			self.trader.tick()
-			self.review()
-			manTrad = False
-		if manStrat or manTrad:
-			for manager in self.managers:
-				self.managers[manager].tick(manStrat, manTrad)
+		if not ask("accountsReady"):
+			self.log("tick() waiting for accounts!")
+		elif not ask("observersReady"):
+			self.log("tick() waiting for observer histories!")
+		else:
+			manStrat = manTrad = True
+			if self.strategist:
+				self.strategist.tick()
+				manStrat = False
+			if self.trader:
+				self.trader.tick()
+				self.review()
+				manTrad = False
+			if manStrat or manTrad:
+				for manager in self.managers:
+					self.managers[manager].tick(manStrat, manTrad)
 		return True
 
 def getOffice(**kwargs):
