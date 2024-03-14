@@ -49,6 +49,10 @@ class Office(Worker):
 		self.warnings = []
 		return warns
 
+	def cancel(self, token):
+		self.log("cancel(%s)"%(token,))
+		self.comptroller.cancel(token)
+
 	def cancelAll(self):
 		self.log("cancelAll()")
 		self.comptroller.cancelAll()
