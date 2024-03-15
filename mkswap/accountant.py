@@ -135,8 +135,9 @@ class Accountant(Worker):
 			self.counts["active"] -= 1
 		self.log("order cancelled!")
 
-	def orderFilled(self, trade, complete=False):
+	def orderFilled(self, trade):
 		self.updateBalances(trade, self._balances, force=True)
+		complete = not trade["remaining"]
 		side = trade["side"]
 		price = trade["price"]
 		amount = trade["amount"]
