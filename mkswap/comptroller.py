@@ -104,8 +104,12 @@ class Comptroller(Feeder):
 			"symbol": sym,
 			"price": price,
 			"amount": amount,
-			"oprice": float(order["price"])
-		}, not remaining)
+			"remaining": remaining,
+			"score": order["score"],
+			"order_id": order["order_id"],
+			"oprice": float(order["price"]),
+			"client_order_id": order["client_order_id"]
+		})
 
 	def reactivate(self, msg):
 		self.actives[msg["client_order_id"]] = order = {
