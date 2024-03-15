@@ -27,10 +27,10 @@ config = Config({
 		"network": "bitcoin"
 	},
 	"ndx": {
-		"inner": 16,
-		"short": 32,
-		"long": 64,
-		"outer": 128
+		"inner": 32,
+		"short": 64,
+		"long": 128,
+		"outer": 256
 	},
 	"office": {
 		"verbose": False,
