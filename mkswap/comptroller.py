@@ -105,10 +105,10 @@ class Comptroller(Feeder):
 			"price": price,
 			"amount": amount,
 			"remaining": remaining,
-			"score": order["score"],
 			"order_id": order["order_id"],
 			"oprice": float(order["price"]),
-			"client_order_id": order["client_order_id"]
+			"client_order_id": order["client_order_id"],
+			"score": order.get("score", 0) # sensible fallback right?
 		})
 
 	def reactivate(self, msg):
