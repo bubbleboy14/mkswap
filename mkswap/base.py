@@ -37,11 +37,18 @@ class Feeder(Worker):
 	def start_feed(self):
 		self.feed(self.platform, getattr(self, "symbol", None))
 
+	def get_wait(self):
+		self._wait = getattr(self, "_wait", 1)
+		if self._wait < 16:
+			self._wait *= 2
+		return self._wait
+
 	def on_error(self, ws, err):
 		if type(err) is WebSocketBadStatusException:
-			self.warn("handshake failed - retrying in 5 seconds")
-			rel.timeout(5, self.start_feed)
 			self.ws = None
+			wait = self.get_wait()
+			rel.timeout(wait, self.start_feed)
+			self.warn("handshake failed - retrying in %s seconds"%(wait,))
 		else:
 			self.error(err)
 
