@@ -235,8 +235,10 @@ class NDX(Worker):
 		symhis = hists[symbol]
 		symhis["current"] = price
 		symhis["all"].append(price)
+		symhis["all"] = symhis["all"][-getSpan("outer"):]
 		symhis["average"] = self.ave(symbol, history=history)
 		for span in SPANS:
 			stretch = symhis["all"][-getSpan(span):]
+			symhis[span]["average"] = self.ave(stretch)
 			symhis[span]["high"] = max(stretch)
 			symhis[span]["low"] = min(stretch)
