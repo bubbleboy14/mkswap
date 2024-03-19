@@ -6,6 +6,7 @@ from .harvester import Harvester
 from .comptroller import Comptroller
 from .accountant import Accountant
 from .strategist import strategies
+from .multifeed import MultiFeed
 from .manager import Manager
 from .actuary import Actuary
 from .booker import Booker
