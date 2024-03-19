@@ -269,5 +269,5 @@ def events_old(message, use_initial=False): # too complicated
 			log("skipping event!!!")
 			return []
 
-def events(message):
+def extractEvents(message):
 	return json.loads(message).get("events", [])
