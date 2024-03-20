@@ -102,6 +102,7 @@ class Accountant(Worker):
 			}
 		elif bz == "all":
 			return {
+				"initial": self._obals,
 				"theoretical": self.balances(pricer, nodph=nodph),
 				"actual": self.balances(pricer, self._balances, nodph),
 				"ask": self.balances(pricer, nodph=nodph, history="ask"),
