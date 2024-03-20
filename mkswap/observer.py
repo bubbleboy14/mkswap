@@ -31,7 +31,6 @@ class Observer(Feeder):
 		trades = False
 		for event in events:
 			if event["type"] == "trade":
-				event["side"] = event["makerSide"]
 				self.observe(event)
 				trades = True
 			else:
