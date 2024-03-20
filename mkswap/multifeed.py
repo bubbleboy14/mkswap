@@ -34,7 +34,7 @@ class MultiFeed(Feeder):
 		data = json.loads(message)
 		mode = data["type"]
 		if mode == "heartbeat":
-			return
+			return self.log(message)
 		events = []
 		sym = data["symbol"]
 		if mode == "trade":
