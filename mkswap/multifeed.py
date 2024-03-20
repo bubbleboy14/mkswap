@@ -1,7 +1,6 @@
 import json
 from rel.util import listen
 from .base import Feeder
-from .backend import extractEvents
 
 class MultiFeed(Feeder):
 	def __init__(self):
