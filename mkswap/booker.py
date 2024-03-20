@@ -16,7 +16,7 @@ class Booker(Worker):
 		price = float(event["price"])
 		self.orderBook[symbol][side][price] = float(event["remaining"])
 		self.orders[symbol][side] = price
-		emit("quote", symbol, price, volume=float(event["delta"]), history=side)
+		emit("quote", symbol, price, volume=float(event["remaining"]), history=side)
 
 	def totals(self):
 		for sym in self.orderBook:

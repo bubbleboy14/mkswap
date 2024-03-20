@@ -196,7 +196,7 @@ class NDX(Worker):
 		stretch = self.histories[history][symbol]["events"][-getSpan(span):]
 		volume = 0
 		total = 0
-		volprop = (history == "trade") and "amount" or "delta"
+		volprop = (history == "trade") and "amount" or "remaining"
 		for event in stretch:
 			vol = float(event[volprop])
 			if vol < 0:
