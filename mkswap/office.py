@@ -27,8 +27,8 @@ class Office(Worker):
 		strat = strategies[strategy]
 		stish and setStaging(False)
 		self.stratname = strategy
-		self.strategist = globalStrategy and strat(symbols, trec)
 		self.multifeed = config.backend.mdv2 and MultiFeed()
+		self.strategist = globalStrategy and strat(symbols, trec)
 		self.managers = {}
 		for symbol in symbols:
 			self.managers[symbol] = Manager(platform, symbol, self.review,
