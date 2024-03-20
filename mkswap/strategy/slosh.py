@@ -93,11 +93,6 @@ class Slosh(Base):
 		if not self.shouldUpdate:
 			return
 		self.shouldUpdate = False
-		rdata = ask("ratio", self.top, self.bottom, True)
-		if not rdata:
-			return self.log("skipping tick (waiting for history)")
-		ratcur = round(rdata["current"], 5) # occasionally rounds to 0...
-		ratcur and emit("quote", self.ratsym, ratcur, fave=True)
 		if ask("hadEnough", self.top, self.bottom):
 			self.hilo()
 
@@ -105,3 +100,8 @@ class Slosh(Base):
 		self.shouldUpdate = True
 		self.log("compare", symbol, side, price, eobj)
 		Base.compare(self, symbol, side, price, eobj, history)
+		rdata = ask("ratio", self.top, self.bottom, True)
+		if not rdata:
+			return self.log("skipping ratio (waiting for history)")
+		ratcur = round(rdata["current"], 5) # occasionally rounds to 0...
+		ratcur and emit("quote", self.ratsym, ratcur, fave=True)
