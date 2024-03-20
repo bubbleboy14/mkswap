@@ -1,5 +1,7 @@
+import json
 from rel.util import listen
 from .base import Feeder
+from .backend import extractEvents
 
 class MultiFeed(Feeder):
 	def __init__(self):
@@ -8,9 +10,36 @@ class MultiFeed(Feeder):
 		self.start_feed()
 		listen("mfsub", self.subscribe)
 
+	def l2(self, change, sym):
+		return {
+			"symbol": sym,
+			"side": change[0],
+			"price": change[1],
+			"remaining": change[2]
+		}
+
+	def trade(self, trade):
+		trade["amount"] = trade["quantity"]
+		return trade
+
 	def on_message(self, ws, message):
-		symsubs = self.subscriptions[message["symbol"]]
-		# pass updates to cb()s
+		data = json.loads(message)
+		sym = data["symbol"]
+		mode = data["type"]
+		events = []
+		if mode == "trade":
+			mode = "l2"
+			events.append(self.trade(data))
+		else:
+			changes = data["changes"]
+			mode = mode[:-8]
+			if mode == "l2":
+				events += [self.l2(change, sym) for change in changes]
+				events += [self.trade(t) for t in data.get("trades", [])]
+			else: # candles
+				events = changes
+		for sub in self.subs(sym, mode):
+			sub(events)
 
 	def subs(self, symbol, mode="l2"):
 		if symbol not in self.subscriptions:
