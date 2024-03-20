@@ -15,7 +15,7 @@ class MultiFeed(Feeder):
 		self.start_feed()
 		listen("mfsub", self.subscribe)
 
-	def on_open(self):
+	def on_open(self, ws):
 		self.log("opened")
 		for sym in self.subscriptions:
 			for mode in self.subscriptions[sym]:
