@@ -1,6 +1,7 @@
 import json
 from rel.util import listen
 from .base import Feeder
+from .config import config
 
 sidetrans = {
 	"buy": "bid",
@@ -29,6 +30,7 @@ class MultiFeed(Feeder):
 		return trade
 
 	def on_message(self, ws, message):
+		config.base.unspammed or self.log(message)
 		data = json.loads(message)
 		mode = data["type"]
 		if mode == "heartbeat":
