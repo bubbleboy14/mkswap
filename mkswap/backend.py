@@ -269,5 +269,10 @@ def events_old(message, use_initial=False): # too complicated
 			log("skipping event!!!")
 			return []
 
+def transEvent(event):
+	if "makerSide" in event:
+		event["side"] = event["makerSide"]
+	return event
+
 def extractEvents(message):
-	return json.loads(message).get("events", [])
+	return map(transEvent, json.loads(message).get("events", []))
