@@ -12,7 +12,7 @@ class MultiFeed(Feeder):
 		symsubs = self.subscriptions[message["symbol"]]
 		# pass updates to cb()s
 
-	def initChan(self, symbol, mode="l2"):
+	def subs(self, symbol, mode="l2"):
 		if symbol not in self.subscriptions:
 			self.subscriptions[symbol] = {}
 		if mode not in self.subscriptions[symbol]:
@@ -24,7 +24,7 @@ class MultiFeed(Feeder):
 					"symbols": [symbol]
 				}]
 			})
+		return self.subscriptions[symbol][mode]
 
 	def subscribe(self, symbol, cb, mode="l2"):
-		self.initChan(symbol, mode)
-		self.subscriptions[symbol][mode].append(cb)
+		self.subs(symbol, mode).append(cb)
