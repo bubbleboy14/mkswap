@@ -2,6 +2,11 @@ import json
 from rel.util import listen
 from .base import Feeder
 
+sidetrans = {
+	"buy": "bid",
+	"sell": "ask"
+}
+
 class MultiFeed(Feeder):
 	def __init__(self):
 		self.platform = "geminiv2"
@@ -12,9 +17,9 @@ class MultiFeed(Feeder):
 	def l2(self, change, sym):
 		return {
 			"symbol": sym,
-			"side": change[0],
 			"price": change[1],
-			"remaining": change[2]
+			"remaining": change[2],
+			"side": sidetrans[change[0]]
 		}
 
 	def trade(self, trade):
