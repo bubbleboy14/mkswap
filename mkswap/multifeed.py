@@ -24,6 +24,7 @@ class MultiFeed(Feeder):
 		}
 
 	def trade(self, trade):
+		trade["side"] = sidetrans[trade["side"]]
 		trade["amount"] = trade["quantity"]
 		return trade
 
