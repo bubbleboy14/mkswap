@@ -166,6 +166,7 @@ platforms = { # setStaging() sets dacc/dydx/gemorders feeds, gemini feeder
 		"subber": crsub
 	},
 	"gemini": {},
+	"geminiv2": {},
 	"gemorders": {
 		"credHead": "/v1/order/events"
 	},
@@ -202,6 +203,7 @@ def setStaging(stagflag=None):
 		h["gemini"] = h["gemini"].replace("api.", "api.sandbox.")
 	p["dacc"]["feed"] = p["dydx"]["feed"] = "wss://%s/v3/ws"%(h["dydx"],)
 	p["gemini"]["feeder"] = lambda sname : "wss://%s/v1/marketdata/%s"%(h["gemini"], sname)
+	p["geminiv2"]["feed"] = "wss://%s/v2/marketdata"%(h["gemini"],)
 	p["gemorders"]["feed"] = "wss://%s/v1/order/events"%(h["gemini"],)
 
 setStaging()
@@ -267,5 +269,10 @@ def events_old(message, use_initial=False): # too complicated
 			log("skipping event!!!")
 			return []
 
-def events(message):
-	return json.loads(message).get("events", [])
+def transEvent(event):
+	if "makerSide" in event:
+		event["side"] = event["makerSide"]
+	return event
+
+def extractEvents(message):
+	return map(transEvent, json.loads(message).get("events", []))

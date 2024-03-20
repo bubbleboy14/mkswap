@@ -4,6 +4,7 @@ from .backend import start, predefs, setStaging, initConfig, selectPreset
 from .comptroller import Comptroller
 from .accountant import Accountant
 from .strategist import strategies
+from .multifeed import MultiFeed
 from .harvester import Harvester
 from .actuary import Actuary
 from .manager import Manager
@@ -26,6 +27,7 @@ class Office(Worker):
 		strat = strategies[strategy]
 		stish and setStaging(False)
 		self.stratname = strategy
+		self.multifeed = config.backend.mdv2 and MultiFeed()
 		self.strategist = globalStrategy and strat(symbols, trec)
 		self.managers = {}
 		for symbol in symbols:

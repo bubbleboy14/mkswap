@@ -1,6 +1,7 @@
 from rel.util import emit
-from .backend import events, spew, predefs
+from .backend import extractEvents, spew, predefs
 from .base import Feeder
+from .config import config
 
 class Observer(Feeder):
 	def __init__(self, symbol, platform=predefs["platform"], observe=spew):
@@ -15,17 +16,21 @@ class Observer(Feeder):
 			"w_average": [],
 			"1_w_average": []
 		}
-		self.start_feed()
+		if config.backend.mdv2:
+			emit("mfsub", symbol, self.ingest)
+		else:
+			self.start_feed()
 
 	def sig(self):
 		return "Observer[%s]"%(self.symbol,)
 
 	def on_message(self, ws, message):
-		eventz = events(message)
+		self.ingest(extractEvents(message))
+
+	def ingest(self, events):
 		trades = False
-		for event in eventz:
+		for event in events:
 			if event["type"] == "trade":
-				event["side"] = event["makerSide"]
 				self.observe(event)
 				trades = True
 			else:

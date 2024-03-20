@@ -7,6 +7,7 @@ config = Config({
 		"capped": "auto"
 	},
 	"backend": {
+		"mdv2": True,
 		"staging": True,
 		"realdie": True,
 		"credset": "default"
