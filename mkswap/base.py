@@ -28,8 +28,12 @@ class Worker(object):
 class Feeder(Worker):
 	def feed(self, platform, channel=None):
 		self.log("feed", platform, channel)
-		if getattr(self, "ws", None):
-			return self.log("feed already loaded!")
+		ws = getattr(self, "ws", None)
+		if ws:
+			if ws.has_done_teardown:
+				ws.run_forever(dispatcher=rel, reconnect=1)
+				return self.warn("refreshing feed!")
+			return self.warn("feed already loaded!")
 		self.ws = feed(platform, channel, on_open=self.on_open,
 			on_reconnect=self.on_reconnect, on_message=self.on_message,
 			on_error=self.on_error, on_close=self.on_close)
@@ -45,7 +49,7 @@ class Feeder(Worker):
 
 	def on_error(self, ws, err):
 		if type(err) is WebSocketBadStatusException:
-			self.ws = None
+#			self.ws = None
 			wait = self.get_wait()
 			rel.timeout(wait, self.start_feed)
 			self.warn("handshake failed - retrying in %s seconds"%(wait,))
