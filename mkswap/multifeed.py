@@ -18,6 +18,7 @@ class MultiFeed(Feeder):
 		return {
 			"symbol": sym,
 			"price": change[1],
+			"type": "orderbook",
 			"remaining": change[2],
 			"side": sidetrans[change[0]]
 		}
@@ -28,9 +29,11 @@ class MultiFeed(Feeder):
 
 	def on_message(self, ws, message):
 		data = json.loads(message)
-		sym = data["symbol"]
 		mode = data["type"]
+		if mode == "heartbeat":
+			return
 		events = []
+		sym = data["symbol"]
 		if mode == "trade":
 			mode = "l2"
 			events.append(self.trade(data))
