@@ -11,8 +11,8 @@ class Actuary(Worker):
 	def candle(self, candles, sym):
 		clen = len(candles)
 		self.log("CANDLES!", sym, clen)
-		clen == 1 and self.log("candle:", candles)
 		cans = list(map(self.fixcan, candles))
+		clen == 1 and self.log("candle:", cans)
 		if sym not in self.candles:
 			self.candles[sym] = cans
 		else:
