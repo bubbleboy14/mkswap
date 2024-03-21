@@ -102,6 +102,7 @@ class Office(Worker):
 			"ndx": ndx.faves,
 			"gem": gem.status(),
 			"orders": boo.orders,
+			"candles": act.candles,
 			"actives": com.actives,
 			"backlog": com.backlog,
 			"fills": com.getFills(),
