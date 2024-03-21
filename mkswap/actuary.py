@@ -6,6 +6,7 @@ class Actuary(Worker):
 	def __init__(self):
 		self.ratios = {}
 		self.candles = {}
+		self.fcans = {}
 		self.predictions = {}
 
 	def candle(self, candles, sym):
@@ -13,10 +14,26 @@ class Actuary(Worker):
 		self.log("CANDLES!", sym, clen)
 		cans = list(map(self.fixcan, candles))
 		clen == 1 and self.log("candle:", cans)
+		cans.reverse()
 		if sym not in self.candles:
 			self.candles[sym] = cans
+			self.fcans[sym] = []
 		else:
 			self.candles[sym] += cans
+			self.fcans[sym] += cans
+
+	def oldCandles(self):
+		cans = {}
+		for sym in self.candles:
+			cans[sym] = self.candles[sym][-10:]
+		return cans
+
+	def freshCandles(self):
+		cans = {}
+		for sym in self.fcans:
+			cans[sym] = self.fcans[sym]
+			self.fcans[sym] = []
+		return cans
 
 	def fixcan(self, candle):
 		return {
