@@ -82,9 +82,9 @@ class Accountant(Worker):
 	def price(self, sym, history="trade", fallback=None):
 		return ask("price", sym, history=history, fallback=fallback)
 
-	def accountsReady(self):
+	def accountsReady(self, history="trade"):
 		for sym in self.syms:
-			if self.price(sym) == None:
+			if self.price(sym, history) == None:
 				self.log("no price for", sym, "!!!!!!")
 				return False
 		return True
@@ -93,7 +93,7 @@ class Accountant(Worker):
 		return self.balances(pricer, "both", nodph)
 
 	def balances(self, pricer=None, bz=None, nodph=False, history="trade"):
-		if not self.accountsReady():
+		if not self.accountsReady(history):
 			return { "waiting": "balances not ready" }
 		if bz == "both":
 			return {
