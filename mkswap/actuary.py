@@ -1,11 +1,49 @@
 from math import sqrt
-from rel.util import ask
+from rel.util import ask, emit
 from .base import Worker
 
 class Actuary(Worker):
 	def __init__(self):
 		self.ratios = {}
+		self.candles = {}
+		self.fcans = {}
 		self.predictions = {}
+
+	def candle(self, candles, sym):
+		clen = len(candles)
+		self.log("CANDLES!", sym, clen)
+		cans = list(map(self.fixcan, candles))
+		clen == 1 and self.log("candle:", cans)
+		cans.reverse()
+		if sym not in self.candles:
+			self.candles[sym] = cans
+			self.fcans[sym] = []
+		else:
+			self.candles[sym] += cans
+			self.fcans[sym] += cans
+
+	def oldCandles(self):
+		cans = {}
+		for sym in self.candles:
+			cans[sym] = self.candles[sym][-10:]
+		return cans
+
+	def freshCandles(self):
+		cans = {}
+		for sym in self.fcans:
+			cans[sym] = self.fcans[sym]
+			self.fcans[sym] = []
+		return cans
+
+	def fixcan(self, candle):
+		return {
+			"timestamp": candle[0],
+			"open": candle[1],
+			"high": candle[2],
+			"low": candle[3],
+			"close": candle[4],
+			"volume": candle[5]
+		}
 
 	def sigma(self, symbol, cur):
 		hist = self.ratios[symbol]["history"]
@@ -32,6 +70,7 @@ class Actuary(Worker):
 				self.ratios[sym] = {
 					"history": []
 				}
+				emit("mfsub", sym, lambda c : self.candle(c, sym), "candles_1m")
 			if not vscores[sym]["bid"]:
 				continue
 			rat = vscores[sym]["ask"] / vscores[sym]["bid"]

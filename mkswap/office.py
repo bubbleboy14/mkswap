@@ -112,6 +112,7 @@ class Office(Worker):
 			"refills": har.getRefills(),
 			"weighted": ndx.weighteds(),
 			"cancels": com.getCancels(),
+			"candles": act.freshCandles(),
 			"volvols": act.volatilities(),
 			"warnings": self.getWarnings(),
 			"strategists": self.stratuses(),
