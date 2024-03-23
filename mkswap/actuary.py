@@ -52,7 +52,7 @@ class Actuary(Worker):
 	def freshCandles(self):
 		cans = {}
 		for sym in self.fcans:
-			cans[sym] = self.fcans[sym]
+			cans[sym] = self.fcans[sym][-10:]
 			self.fcans[sym] = []
 		return cans
 
