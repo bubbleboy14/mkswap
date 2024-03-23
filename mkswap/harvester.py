@@ -25,6 +25,7 @@ class Harvester(Worker):
 		gem.accounts(network, self.setStorehouse)
 		listen("tooLow", self.tooLow)
 		listen("getUSD", self.getUSD)
+		listen("balTrades", self.balTrades)
 		rel.timeout(10, self.measure)
 		self.log("starting to measure")
 
@@ -134,7 +135,7 @@ class Harvester(Worker):
 		self.log("balTrade(%s, %s, %s) placing order: %s"%(sym, side, amount, order))
 		emit("balanceTrade", order)
 
-	def balTrades(self, sym, side, amountUSD):
+	def balTrades(self, sym, side, amountUSD=10):
 		prices = ask("bestPrices", sym, side)
 		sym = sym.replace("/", "") # for ratio-derived prices
 		amount = self.fromUSD(sym, amountUSD)
