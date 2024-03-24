@@ -16,12 +16,27 @@ class Actuary(Worker):
 		clen == 1 and self.log("candle:", cans)
 		cans.reverse()
 		self.updateOBV(sym, cans)
+		self.updateAD(sym, cans)
 		if sym not in self.candles:
 			self.candles[sym] = cans
 			self.fcans[sym] = []
 		else:
 			self.candles[sym] += cans
 			self.fcans[sym] += cans
+
+	def updateAD(self, sym, cans):
+		ad = sym in self.candles and self.candles[sym][-1]["ad"] or 0
+		for can in cans:
+			low = can["low"]
+			high = can["high"]
+			close = can["close"]
+			volume = can["volume"]
+			hldiff = high - low
+			if hldiff:
+				mult = ((close - low) - (high - close)) / hldiff
+				mfv = mult * volume
+				ad += mfv
+			can["ad"] = ad
 
 	def updateOBV(self, sym, cans):
 		if sym in self.candles:
