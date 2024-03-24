@@ -30,7 +30,7 @@ class Actuary(Worker):
 			obv = last["obv"]
 		else:
 			oprice = cans[0]["close"]
-			obv = cans[0]["volume"]
+			obv = 0#cans[0]["volume"]
 		for can in cans:
 			volume = can["volume"]
 			price = can["close"]
