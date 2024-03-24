@@ -10,13 +10,15 @@ sidetrans = {
 
 class MultiFeed(Feeder):
 	def __init__(self):
+		listen("mfsub", self.subscribe)
 		self.platform = "geminiv2"
 		self.subscriptions = {}
+		self._ready = False
 		self.start_feed()
-		listen("mfsub", self.subscribe)
 
 	def on_open(self, ws):
 		self.log("opened")
+		self._ready = True
 		for sym in self.subscriptions:
 			for mode in self.subscriptions[sym]:
 				self.sub(sym, mode)
@@ -71,7 +73,7 @@ class MultiFeed(Feeder):
 			self.subscriptions[symbol] = {}
 		if mode not in self.subscriptions[symbol]:
 			self.subscriptions[symbol][mode] = []
-			self.sub(symbol, mode)
+			self._ready and self.sub(symbol, mode)
 		return self.subscriptions[symbol][mode]
 
 	def subscribe(self, symbol, cb, mode="l2"):
