@@ -16,6 +16,7 @@ class Actuary(Worker):
 		clen == 1 and self.log("candle:", cans)
 		cans.reverse()
 		self.updateOBV(sym, cans)
+		self.updateVPT(sym, cans)
 		self.updateAD(sym, cans)
 		if sym not in self.candles:
 			self.candles[sym] = cans
@@ -23,6 +24,20 @@ class Actuary(Worker):
 		else:
 			self.candles[sym] += cans
 			self.fcans[sym] += cans
+
+	def updateVPT(self, sym, cans):
+		if sym in self.candles:
+			last = self.candles[sym][-1]
+			oprice = last["close"]
+			vpt = last["vpt"]
+		else:
+			oprice = cans[0]["close"]
+			vpt = 0#cans[0]["volume"]
+		for can in cans:
+			volume = can["volume"]
+			price = can["close"]
+			vpt = can["vpt"] = vpt + volume * (price - oprice) / oprice
+			oprice = price
 
 	def updateAD(self, sym, cans):
 		ad = sym in self.candles and self.candles[sym][-1]["ad"] or 0
@@ -50,13 +65,11 @@ class Actuary(Worker):
 			volume = can["volume"]
 			price = can["close"]
 			if price > oprice:
-				can["obv"] = obv + volume
+				obv += volume
 			elif price < oprice:
-				can["obv"] = obv - volume
-			else: # price == oprice:
-				can["obv"] = obv
-			oprice = can["close"]
-			obv = can["obv"]
+				obv -= volume
+			can["obv"] = obv
+			oprice = price
 
 	def oldCandles(self):
 		cans = {}
