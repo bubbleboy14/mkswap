@@ -113,13 +113,16 @@ class Actuary(Worker):
 				vols[sym] = self.ratios[sym]["volatility"]
 		return vols
 
+	def initRatios(self, sym):
+		if sym not in self.ratios:
+			self.ratios[sym] = {
+				"history": []
+			}
+			emit("mfsub", sym, lambda c : self.candle(c, sym), "candles_1m")
+
 	def hints(self, vscores):
 		for sym in vscores:
-			if sym not in self.ratios:
-				self.ratios[sym] = {
-					"history": []
-				}
-				emit("mfsub", sym, lambda c : self.candle(c, sym), "candles_1m")
+			self.initRatios(sym)
 			if not vscores[sym]["bid"]:
 				continue
 			rat = vscores[sym]["ask"] / vscores[sym]["bid"]
