@@ -31,8 +31,10 @@ class NDX(Worker):
 		listen("histUp", self.histUp)
 		listen("markets", self.markets)
 		listen("observe", self.observe)
+		listen("perSpan", self.perSpan)
 		listen("hadEnough", self.hadEnough)
 		listen("bestPrice", self.bestPrice)
+		listen("perStretch", self.perStretch)
 		listen("bestPrices", self.bestPrices)
 		listen("volatility", self.volatility)
 		listen("observersReady", self.observersReady)
@@ -218,6 +220,23 @@ class NDX(Worker):
 			waves[span] = self.waverage(symbol, span, history)
 #		self.log("histUp", symbol, waves)
 
+	def perSpan(self, cb):
+		for span in SPANS:
+			cb(span, getSpan(span))
+
+	def perStretch(self, hist, cb):
+		self.perSpan(lambda sname, snum : cb(sname, hist[-snum:]))
+
+	def moving(self, span, stretch, symhis):
+		symhis[span]["average"] = self.ave(stretch)
+		symhis[span]["high"] = max(stretch)
+		symhis[span]["low"] = min(stretch)
+
+	def movings(self, sym, history="trade"):
+		symhis = self.histories[history][sym]
+		self.perStretch(symhis["all"],
+			lambda span, stretch : self.moving(span, stretch, symhis))
+
 	def quote(self, symbol, price, volume=None, fave=False, history="trade"):
 		hists = self.histories[history]
 		if symbol not in hists:
@@ -237,8 +256,4 @@ class NDX(Worker):
 		symhis["all"].append(price)
 		symhis["all"] = symhis["all"][-getSpan("outer"):]
 		symhis["average"] = self.ave(symbol, history=history)
-		for span in SPANS:
-			stretch = symhis["all"][-getSpan(span):]
-			symhis[span]["average"] = self.ave(stretch)
-			symhis[span]["high"] = max(stretch)
-			symhis[span]["low"] = min(stretch)
+		self.movings(symbol, history)
