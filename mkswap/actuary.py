@@ -1,6 +1,9 @@
 from math import sqrt
 from rel.util import ask, emit
 from .base import Worker
+from .config import config
+
+TERMS = ["small", "medium", "large"]
 
 class Actuary(Worker):
 	def __init__(self):
@@ -28,11 +31,18 @@ class Actuary(Worker):
 		self.fcans[sym].append(candle)
 		canhist = self.candles[sym]
 		canhist.append(candle)
-		emit("perStretch", canhist,
-			lambda span, hist : self.updateMovings(candle, span, hist))
+		self.perStretch(canhist,
+			lambda term, hist : self.updateMovings(candle, term, hist))
 
-	def updateMovings(self, candle, span, hist):
-		candle[span] = ask("ave", list(map(lambda h : h["close"], hist)))
+	def updateMovings(self, candle, term, hist):
+		candle[term] = ask("ave", list(map(lambda h : h["close"], hist)))
+
+	def perTerm(self, cb):
+		for term in TERMS:
+			cb(term, config.actuary[term])
+
+	def perStretch(self, hist, cb):
+		self.perTerm(lambda tname, tnum : cb(tname, hist[-tnum:]))
 
 	def updateVPT(self, sym, cans):
 		if sym in self.candles:

@@ -1,6 +1,11 @@
 from fyg import Config
 
 config = Config({
+	"actuary": {
+		"small": 10,
+		"medium": 60,
+		"large": 360
+	},
 	"accountant": {
 		"nmult": 1.0,
 		"nudge": "auto",
