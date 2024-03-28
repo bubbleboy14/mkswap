@@ -74,7 +74,8 @@ class Office(Worker):
 
 	def prices(self):
 		pz = {}
-		for sym in self.managers.keys():
+		syms = self.multifeed and self.multifeed.subscriptions or self.managers
+		for sym in syms:
 			pz[sym] = self.price(sym)
 		return pz
 

@@ -16,12 +16,51 @@ class Actuary(Worker):
 		clen == 1 and self.log("candle:", cans)
 		cans.reverse()
 		self.updateOBV(sym, cans)
+		self.updateVPT(sym, cans)
+		self.updateAD(sym, cans)
 		if sym not in self.candles:
-			self.candles[sym] = cans
+			self.candles[sym] = []
 			self.fcans[sym] = []
+		for can in cans:
+			self.addCan(can, sym)
+
+	def addCan(self, candle, sym):
+		self.fcans[sym].append(candle)
+		canhist = self.candles[sym]
+		canhist.append(candle)
+		emit("perStretch", canhist,
+			lambda span, hist : self.updateMovings(candle, span, hist))
+
+	def updateMovings(self, candle, span, hist):
+		candle[span] = ask("ave", list(map(lambda h : h["close"], hist)))
+
+	def updateVPT(self, sym, cans):
+		if sym in self.candles:
+			last = self.candles[sym][-1]
+			oprice = last["close"]
+			vpt = last["vpt"]
 		else:
-			self.candles[sym] += cans
-			self.fcans[sym] += cans
+			oprice = cans[0]["close"]
+			vpt = 0#cans[0]["volume"]
+		for can in cans:
+			volume = can["volume"]
+			price = can["close"]
+			vpt = can["vpt"] = vpt + volume * (price - oprice) / oprice
+			oprice = price
+
+	def updateAD(self, sym, cans):
+		ad = sym in self.candles and self.candles[sym][-1]["ad"] or 0
+		for can in cans:
+			low = can["low"]
+			high = can["high"]
+			close = can["close"]
+			volume = can["volume"]
+			hldiff = high - low
+			if hldiff:
+				mult = ((close - low) - (high - close)) / hldiff
+				mfv = mult * volume
+				ad += mfv
+			can["ad"] = ad
 
 	def updateOBV(self, sym, cans):
 		if sym in self.candles:
@@ -35,13 +74,11 @@ class Actuary(Worker):
 			volume = can["volume"]
 			price = can["close"]
 			if price > oprice:
-				can["obv"] = obv + volume
+				obv += volume
 			elif price < oprice:
-				can["obv"] = obv - volume
-			else: # price == oprice:
-				can["obv"] = obv
-			oprice = can["close"]
-			obv = can["obv"]
+				obv -= volume
+			can["obv"] = obv
+			oprice = price
 
 	def oldCandles(self):
 		cans = {}
@@ -85,13 +122,16 @@ class Actuary(Worker):
 				vols[sym] = self.ratios[sym]["volatility"]
 		return vols
 
+	def initRatios(self, sym):
+		if sym not in self.ratios:
+			self.ratios[sym] = {
+				"history": []
+			}
+			emit("mfsub", sym, lambda c : self.candle(c, sym), "candles_1m")
+
 	def hints(self, vscores):
 		for sym in vscores:
-			if sym not in self.ratios:
-				self.ratios[sym] = {
-					"history": []
-				}
-				emit("mfsub", sym, lambda c : self.candle(c, sym), "candles_1m")
+			self.initRatios(sym)
 			if not vscores[sym]["bid"]:
 				continue
 			rat = vscores[sym]["ask"] / vscores[sym]["bid"]
