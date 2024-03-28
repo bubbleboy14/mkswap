@@ -93,7 +93,7 @@ class NDX(Worker):
 
 	def observed(self, sym, price, volume, history="trade"):
 		config.base.unspammed or self.log("observed(%s %s %s @ %s)"%(volume, sym, history, price))
-		self.quote(sym, price, volume=volume, fave=True, history=history)
+		self.quote(sym, price, volume=volume, history=history)
 
 	def observersReady(self, history="trade"):
 		for sym in self.observers:
