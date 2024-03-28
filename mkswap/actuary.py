@@ -19,11 +19,20 @@ class Actuary(Worker):
 		self.updateVPT(sym, cans)
 		self.updateAD(sym, cans)
 		if sym not in self.candles:
-			self.candles[sym] = cans
+			self.candles[sym] = []
 			self.fcans[sym] = []
-		else:
-			self.candles[sym] += cans
-			self.fcans[sym] += cans
+		for can in cans:
+			self.addCan(can, sym)
+
+	def addCan(self, candle, sym):
+		self.fcans[sym].append(candle)
+		canhist = self.candles[sym]
+		canhist.append(candle)
+		emit("perStretch", canhist,
+			lambda span, hist : self.updateMovings(candle, span, hist))
+
+	def updateMovings(self, candle, span, hist):
+		candle[span] = ask("ave", list(map(lambda h : h["close"], hist)))
 
 	def updateVPT(self, sym, cans):
 		if sym in self.candles:
