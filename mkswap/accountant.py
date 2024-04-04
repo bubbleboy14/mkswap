@@ -89,8 +89,12 @@ class Accountant(Worker):
 				return False
 		return True
 
-	def fullBalances(self, nodph=True, pricer=None):
-		return self.balances(pricer, "both", nodph)
+	def fullBalances(self, nodph=True, pricer=None, mode="both", history="trade"):
+		if mode == "actual":
+			mode = self._balances
+		elif mode == "theoretical":
+			mode = self._theoretical
+		return self.balances(pricer, mode, nodph, history)
 
 	def balances(self, pricer=None, bz=None, nodph=False, history="trade"):
 		if not self.accountsReady(history):
