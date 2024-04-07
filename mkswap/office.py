@@ -41,7 +41,24 @@ class Office(Worker):
 		self.booker = Booker()
 		rel.timeout(1, self.tick)
 		self.warnings = []
+		self.crosses = []
 		listen("warning", self.warning)
+		listen("cross", self.cross)
+
+	def cross(self, sym, variety, reason):
+		self.crosses.append({
+			"msg": "%s %s cross"%(sym, variety),
+			"data": {
+				"market": sym,
+				"reason": reason,
+				"variety": variety
+			}
+		})
+
+	def getCrosses(self):
+		crox = self.crosses
+		self.crosses = []
+		return crox
 
 	def warning(self, msg, data=None):
 		self.warnings.append({ "msg": msg, "data": data })
@@ -115,6 +132,7 @@ class Office(Worker):
 			"cancels": com.getCancels(),
 			"candles": act.freshCandles(),
 			"volvols": act.volatilities(),
+			"crosses": self.getCrosses(),
 			"warnings": self.getWarnings(),
 			"strategists": self.stratuses(),
 			"balances": acc.balances(self.price, "all")
