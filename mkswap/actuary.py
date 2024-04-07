@@ -21,10 +21,12 @@ class Actuary(Worker):
 		self.updateOBV(sym, cans)
 		self.updateVPT(sym, cans)
 		self.updateAD(sym, cans)
-		if sym not in self.candles:
+		prev = None
+		if sym in self.candles:
+			prev = self.candles[sym][-1]
+		else:
 			self.candles[sym] = []
 			self.fcans[sym] = []
-		prev = None
 		for can in cans:
 			self.addCan(can, sym, prev)
 			prev = can
