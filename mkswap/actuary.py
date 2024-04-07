@@ -24,15 +24,29 @@ class Actuary(Worker):
 		if sym not in self.candles:
 			self.candles[sym] = []
 			self.fcans[sym] = []
+		prev = None
 		for can in cans:
-			self.addCan(can, sym)
+			self.addCan(can, sym, prev)
+			prev = can
 
-	def addCan(self, candle, sym):
+	def addCan(self, candle, sym, prev=None):
 		self.fcans[sym].append(candle)
 		canhist = self.candles[sym]
 		canhist.append(candle)
 		self.perStretch(canhist,
 			lambda term, hist : self.updateMovings(candle, term, hist))
+		prev and self.compare(prev, candle, sym)
+
+	def compare(self, c1, c2, sym):
+		terms = list(TERMS)
+		t1 = terms.pop(0)
+		while terms:
+			for t2 in terms:
+				if c1[t1] < c1[t2] and c2[t1] > c2[t2]:
+					emit("cross", sym, "golden", "%s above %s"%(t1, t2))
+				elif c1[t1] > c1[t2] and c2[t1] < c2[t2]:
+					emit("cross", sym, "death", "%s below %s"%(t1, t2))
+			t1 = terms.pop(0)
 
 	def updateMovings(self, candle, term, hist):
 		candle[term] = ask("ave", list(map(lambda h : h["close"], hist)))
