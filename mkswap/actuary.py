@@ -52,6 +52,7 @@ class Actuary(Worker):
 
 	def updateMovings(self, candle, term, hist):
 		candle[term] = ask("ave", list(map(lambda h : h["close"], hist)))
+		candle["VPT" + term] = ask("ave", list(map(lambda h : h["vpt"], hist)))
 
 	def perTerm(self, cb):
 		for term in TERMS:
