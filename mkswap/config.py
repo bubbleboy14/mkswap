@@ -23,7 +23,8 @@ config = Config({
 	"comptroller": {
 		"live": False,
 		"actives": 20,
-		"prunelimit": 0.1
+		"prunelimit": 0.1,
+		"canceleach": False
 	},
 	"harvester": {
 		"batch": 10,
