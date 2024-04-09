@@ -102,6 +102,7 @@ class Actuary(Worker):
 		for can in cans:
 			volume = can["volume"]
 			price = can["close"]
+			slope = 0
 			if price > oprice:
 				slope = volume
 			elif price < oprice:
