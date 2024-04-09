@@ -85,11 +85,13 @@ class Actuary(Worker):
 			close = can["close"]
 			volume = can["volume"]
 			hldiff = high - low
+			slope = 0
 			if hldiff:
 				mult = ((close - low) - (high - close)) / hldiff
-				mfv = mult * volume
-				ad += mfv
+				slope = mult * volume
+				ad += slope
 			can["ad"] = ad
+			can["ADslope"] = slope
 
 	def updateOBV(self, sym, cans):
 		if sym in self.candles:
