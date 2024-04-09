@@ -103,11 +103,13 @@ class Actuary(Worker):
 			volume = can["volume"]
 			price = can["close"]
 			if price > oprice:
-				obv += volume
+				slope = volume
 			elif price < oprice:
-				obv -= volume
-			can["obv"] = obv
+				slope = -volume
+			obv += slope
 			oprice = price
+			can["obv"] = obv
+			can["OBVslope"] = slope
 
 	def oldCandles(self):
 		cans = {}
