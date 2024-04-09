@@ -37,17 +37,19 @@ class Actuary(Worker):
 		canhist.append(candle)
 		self.perStretch(canhist,
 			lambda term, hist : self.updateMovings(candle, term, hist))
-		prev and self.compare(prev, candle, sym)
+		if prev:
+			self.compare(prev, candle, sym)
+			self.compare(prev, candle, sym, "VPT")
 
-	def compare(self, c1, c2, sym):
-		terms = list(TERMS)
+	def compare(self, c1, c2, sym, pref=None):
+		terms = list(pref and map(lambda t : pref + t, TERMS) or TERMS)
 		t1 = terms.pop(0)
 		while terms:
 			for t2 in terms:
 				if c1[t1] < c1[t2] and c2[t1] > c2[t2]:
-					emit("cross", sym, "golden", "%s above %s"%(t1, t2))
+					emit("cross", sym, "golden", "%s above %s"%(t1, t2), pref)
 				elif c1[t1] > c1[t2] and c2[t1] < c2[t2]:
-					emit("cross", sym, "death", "%s below %s"%(t1, t2))
+					emit("cross", sym, "death", "%s below %s"%(t1, t2), pref)
 			t1 = terms.pop(0)
 
 	def updateMovings(self, candle, term, hist):
