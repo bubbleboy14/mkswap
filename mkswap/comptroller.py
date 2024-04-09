@@ -250,17 +250,22 @@ class Comptroller(Feeder):
 			self.log(coi, "already removed!")
 
 	def cancelAll(self):
+		cfg = config.comptroller
 		akeys = list(self.actives.keys())
 		self.log("cancelAll() cancelling", len(akeys), "active orders")
 		for tnum in akeys:
-			self.cancelled(tnum, "blanket cancel")
-			trade = self.actives[tnum]
-			if "order_id" in trade:
-				emit("abort", "cancel %s %s"%(tnum, trade["order_id"]))
+			if cfg.canceleach:
+				self.cancel(tnum)
 			else:
-				emit("abort", "new %s"%(tnum,))
-			del self.actives[tnum]
-		config.comptroller.live and gem.cancelAll() # TODO: get accepted/rejected cancels from return val
+				self.cancelled(tnum, "blanket cancel")
+				trade = self.actives[tnum]
+				if "order_id" in trade:
+					emit("abort", "cancel %s %s"%(tnum, trade["order_id"]))
+				else:
+					emit("abort", "new %s"%(tnum,))
+				del self.actives[tnum]
+		if cfg.live and not cfg.canceleach:
+			gem.cancelAll() # TODO: get accepted/rejected cancels from return val
 
 	def refill(self):
 		self.log("refill(%s)"%(len(self.backlog),))
