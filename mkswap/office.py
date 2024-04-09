@@ -45,13 +45,15 @@ class Office(Worker):
 		listen("warning", self.warning)
 		listen("cross", self.cross)
 
-	def cross(self, sym, variety, reason):
+	def cross(self, sym, variety, reason, dimension=None):
+		dimension = dimension or "price"
 		self.crosses.append({
-			"msg": "%s %s cross"%(sym, variety),
+			"msg": "%s %s %s cross"%(sym, dimension, variety),
 			"data": {
 				"market": sym,
 				"reason": reason,
-				"variety": variety
+				"variety": variety,
+				"dimension": dimension
 			}
 		})
 
