@@ -25,12 +25,15 @@ class Worker(object):
 		traceback.print_exc()
 		stop()
 
+MAX_WAIT = 16
+
 class Feeder(Worker):
 	def feed(self, platform, channel=None):
 		self.log("feed", platform, channel)
 		ws = getattr(self, "ws", None)
 		if ws:
-			if ws.has_done_teardown:
+			if ws.has_done_teardown or self.waited_enough():
+				self._wait = 1
 				ws.run_forever(dispatcher=rel, reconnect=1)
 				return self.warn("refreshing feed!")
 			return self.warn("feed already loaded!")
@@ -41,9 +44,12 @@ class Feeder(Worker):
 	def start_feed(self):
 		self.feed(self.platform, getattr(self, "symbol", None))
 
-	def get_wait(self):
+	def waited_enough(self):
+		return self.get_wait(False) == MAX_WAIT
+
+	def get_wait(self, double=True):
 		self._wait = getattr(self, "_wait", 1)
-		if self._wait < 16:
+		if double and self._wait < MAX_WAIT:
 			self._wait *= 2
 		return self._wait
 
