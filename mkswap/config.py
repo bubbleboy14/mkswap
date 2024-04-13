@@ -31,6 +31,7 @@ config = Config({
 		"bottom": 40,
 		"skim": False,
 		"balance": True,
+		"bookbalance": True,
 		"network": "bitcoin"
 	},
 	"ndx": {
