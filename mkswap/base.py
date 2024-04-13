@@ -32,11 +32,13 @@ class Feeder(Worker):
 		self.log("feed", platform, channel)
 		ws = getattr(self, "ws", None)
 		if ws:
-			if ws.has_done_teardown or self.waited_enough():
-				self._wait = 1
+			if ws.has_done_teardown:
 				ws.run_forever(dispatcher=rel, reconnect=1)
-				return self.warn("refreshing feed!")
-			return self.warn("feed already loaded!")
+				return self.reset_wait("refreshing feed!")
+			if not self.waited_enough():
+				return self.warn("feed already loaded!")
+			self.reset_wait("recreating feed!")
+			ws.close()
 		self.ws = feed(platform, channel, on_open=self.on_open,
 			on_reconnect=self.on_reconnect, on_message=self.on_message,
 			on_error=self.on_error, on_close=self.on_close)
@@ -46,6 +48,10 @@ class Feeder(Worker):
 
 	def waited_enough(self):
 		return self.get_wait(False) == MAX_WAIT
+
+	def reset_wait(self, msg):
+		self._wait = 1
+		self.warn(msg)
 
 	def get_wait(self, double=True):
 		self._wait = getattr(self, "_wait", 1)
