@@ -121,6 +121,7 @@ class Office(Worker):
 			"totals": totes,
 			"ndx": ndx.faves,
 			"gem": gem.status(),
+			"bests": boo.bests,
 			"orders": boo.orders,
 			"actives": com.actives,
 			"backlog": com.backlog,
