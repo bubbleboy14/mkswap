@@ -1,6 +1,11 @@
 from rel.util import emit, listen
 from .base import Worker
 
+request2order = {
+	"buy": "ask",
+	"sell": "bid"
+}
+
 class Booker(Worker):
 	def __init__(self):
 		self.bests = {}
@@ -11,7 +16,7 @@ class Booker(Worker):
 		listen("updateOrderBook", self.updateOrderBook)
 
 	def bestOrder(self, symbol, side):
-		return self.bests[symbol][side]
+		return self.bests[symbol][request2order[side]]
 
 	def updateOrderBook(self, symbol, event):
 		if symbol not in self.orders:
