@@ -16,7 +16,10 @@ class Booker(Worker):
 		listen("updateOrderBook", self.updateOrderBook)
 
 	def bestOrder(self, symbol, side):
-		return self.bests[symbol][request2order[side]]
+		oside = request2order[side]
+		bo = self.bests[symbol][oside]
+		self.log("bestOrder(%s, %s->%s)"%(symbol, side, oside), bo)
+		return bo
 
 	def updateOrderBook(self, symbol, event):
 		if symbol not in self.orders:
