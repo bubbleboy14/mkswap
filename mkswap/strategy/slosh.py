@@ -63,14 +63,14 @@ class Slosh(Base):
 		return bigone
 
 	def swap(self, size=10):
-		side = "buy"
+		side = "sell"
 		if size < 0:
 			size *= -1
-			side = "sell"
+			side = "buy"
 		shouldOne = self.shouldOneSwap(side)
 		shouldOne and self.oneswap(side, size)
 		if not shouldOne or shouldOne == "both":
-			if side == "buy":
+			if side == "sell":
 				self.buysell(self.bottom, self.top, size)
 			else:
 				self.buysell(self.top, self.bottom, size)
