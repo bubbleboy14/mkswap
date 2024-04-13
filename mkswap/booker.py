@@ -35,7 +35,9 @@ class Booker(Worker):
 		price = float(event["price"])
 		self.orderBook[symbol][side][price] = float(event["remaining"])
 		self.orders[symbol][side] = price
-		self.bests[symbol][side] = (isask and min or max)(self.pricePoints(symbol, side))
+		prices = self.pricePoints(symbol, side)
+		if prices:
+			self.bests[symbol][side] = (isask and min or max)(prices)
 		emit("quote", symbol, price, volume=float(event["remaining"]), history=side)
 
 	def totals(self):
