@@ -20,6 +20,9 @@ config = Config({
 	"base": {
 		"unspammed": True
 	},
+	"trader": {
+		"force": False
+	},
 	"comptroller": {
 		"live": False,
 		"actives": 20,

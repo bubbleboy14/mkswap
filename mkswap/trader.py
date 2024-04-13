@@ -1,6 +1,8 @@
-from .backend import ask, listen, predefs
+from rel.util import ask, listen
+from .backend import predefs
 from .agent import agencies
 from .base import Worker
+from .config import config
 
 class Trader(Worker):
 	def __init__(self, platform=predefs["platform"], live=True):
@@ -26,7 +28,7 @@ class Trader(Worker):
 
 	def shouldTrade(self, recommendation):
 		self.log("assessing recommendation:", recommendation)
-		return ask("affordable", recommendation)
+		return ask("affordable", recommendation, config.trader.force)
 
 	def trade(self, recommendation):
 		self.log("TRADING", recommendation, "\n\n\n")
