@@ -114,10 +114,10 @@ class Actuary(Worker):
 			can["obv"] = obv
 			can["OBVslope"] = slope
 
-	def oldCandles(self):
+	def oldCandles(self, limit=10):
 		cans = {}
 		for sym in self.candles:
-			cans[sym] = self.candles[sym][-10:]
+			cans[sym] = self.candles[sym][-limit:]
 		return cans
 
 	def freshCandles(self):
