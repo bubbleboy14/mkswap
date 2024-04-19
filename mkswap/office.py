@@ -123,6 +123,7 @@ class Office(Worker):
 			"gem": gem.status(),
 			"bests": boo.bests,
 			"orders": boo.orders,
+			"scores": act.scores(),
 			"actives": com.actives,
 			"backlog": com.backlog,
 			"fills": com.getFills(),

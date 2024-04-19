@@ -124,6 +124,12 @@ class Actuary(Worker):
 			score += self.latest(sym, prop)
 		return score
 
+	def scores(self):
+		scores = {}
+		for sym in self.candles:
+			scores[sym] = self.score(sym)
+		return scores
+
 	def oldCandles(self, limit=10):
 		cans = {}
 		for sym in self.candles:
