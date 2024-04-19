@@ -116,10 +116,12 @@ class Office(Worker):
 		ndx = self.ndx
 		totes = boo.totals()
 		hints = act.hints(totes)
+		volvols = act.volatilities()
 		return {
 			"hints": hints,
 			"totals": totes,
 			"ndx": ndx.faves,
+			"volvols": volvols,
 			"gem": gem.status(),
 			"bests": boo.bests,
 			"orders": boo.orders,
@@ -135,7 +137,6 @@ class Office(Worker):
 			"weighted": ndx.weighteds(),
 			"cancels": com.getCancels(),
 			"candles": act.freshCandles(),
-			"volvols": act.volatilities(),
 			"crosses": self.getCrosses(),
 			"warnings": self.getWarnings(),
 			"strategists": self.stratuses(),
