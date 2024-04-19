@@ -119,7 +119,7 @@ class Actuary(Worker):
 		return sym in self.candles and self.candles[sym][-1][prop] or 0
 
 	def score(self, sym):
-		score = self.ratios[sym]["volatility"]
+		score = self.ratios[sym].get("volatility", 0)
 		for prop in SVALS:
 			score += self.latest(sym, prop)
 		return score
@@ -168,8 +168,7 @@ class Actuary(Worker):
 	def volatilities(self):
 		vols = {}
 		for sym in self.ratios:
-			if "volatility" in self.ratios[sym]:
-				vols[sym] = self.ratios[sym]["volatility"]
+			vols[sym] = self.ratios[sym].get("volatility", 0)
 		return vols
 
 	def initRatios(self, sym):
