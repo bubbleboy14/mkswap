@@ -4,6 +4,7 @@ from .base import Worker
 from .config import config
 
 TERMS = ["small", "medium", "large"]
+SVALS = ["vpt", "OBVslope", "ADslope"]
 
 class Actuary(Worker):
 	def __init__(self):
@@ -114,6 +115,16 @@ class Actuary(Worker):
 			can["obv"] = obv
 			can["OBVslope"] = slope
 
+	def latest(self, sym, prop):
+		symcans = self.candles[sym]
+		return symcans and symcans[-1][prop] or 0
+
+	def score(self, sym):
+		score = self.ratios[sym]["volatility"]
+		for prop in SVALS:
+			score += self.latest(sym, prop)
+		return score
+
 	def oldCandles(self, limit=10):
 		cans = {}
 		for sym in self.candles:
@@ -172,10 +183,11 @@ class Actuary(Worker):
 			if self.ratios[sym]["history"]:
 				self.ratios[sym]["sigma"] = self.sigma(sym, rat)
 				if self.ratios[sym]["sigma"]:
-					vol = self.ratios[sym]["volatility"] = self.volatility(sym, rat)
-					if vol > 0.5:
+					self.ratios[sym]["volatility"] = self.volatility(sym, rat)
+					score = self.score(sym)
+					if score > 0.5:
 						self.predictions[sym] = "buy"
-					elif vol < -0.5:
+					elif score < -0.5:
 						self.predictions[sym] = "sell"
 					else:
 						self.predictions[sym] = "chill"
