@@ -1,4 +1,4 @@
-import pprint, atexit, rel
+import pprint, atexit, rel, websocket
 from rel.util import ask, listen
 from .backend import start, predefs, setStaging, initConfig, selectPreset
 from .comptroller import Comptroller
@@ -17,7 +17,9 @@ from .config import config
 
 class Office(Worker):
 	def __init__(self, platform=predefs["platform"], symbols=[], strategy=predefs["strategy"], globalStrategy=False, globalTrade=False):
-		stish = config.office.stagish
+		cfg = config.office
+		cfg.wsdebug and websocket.enableTrace(True)
+		stish = cfg.stagish
 		self.platform = platform
 		self.symbols = symbols
 		self.ndx = NDX()

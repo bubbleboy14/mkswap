@@ -45,7 +45,8 @@ config = Config({
 	},
 	"office": {
 		"verbose": False,
-		"stagish": False
+		"stagish": False,
+		"wsdebug": False
 	},
 	"strategy": {
 		"base": {
