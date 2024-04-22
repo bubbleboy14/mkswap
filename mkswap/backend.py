@@ -208,6 +208,10 @@ def setStaging(stagflag=None):
 
 setStaging()
 
+def wsdebug(verbose):
+	if verbose != "auto":
+		websocket.enableTrace(verbose)
+
 def feed(platname, streamname=None, **cbs): # {on_open,on_reconnect,on_message,on_error,on_close}
 	plat = platforms[platname]
 	feed = "feed" in plat and plat["feed"] or plat["feeder"](streamname)

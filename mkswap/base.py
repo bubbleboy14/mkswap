@@ -1,6 +1,6 @@
 import traceback, pprint, rel
 from websocket import WebSocketBadStatusException
-from .backend import log, stop, feed, emit
+from .backend import log, stop, feed, emit, wsdebug
 from .config import config
 
 class Worker(object):
@@ -61,6 +61,8 @@ class Feeder(Worker):
 		return self._wait
 
 	def on_error(self, ws, err):
+		if config.base.wsdebug == "auto":
+			wsdebug(True)
 		if type(err) is WebSocketBadStatusException:
 #			self.ws = None
 			wait = self.get_wait()
@@ -77,6 +79,8 @@ class Feeder(Worker):
 		self.warn("closed %s"%(code,), message)
 
 	def on_open(self, ws):
+		if config.base.wsdebug == "auto":
+			wsdebug(False)
 		self.log("opened!!")
 
 	def on_reconnect(self, ws):

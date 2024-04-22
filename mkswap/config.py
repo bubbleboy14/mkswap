@@ -18,6 +18,7 @@ config = Config({
 		"credset": "default"
 	},
 	"base": {
+		"wsdebug": "auto",
 		"unspammed": True
 	},
 	"trader": {
@@ -45,8 +46,7 @@ config = Config({
 	},
 	"office": {
 		"verbose": False,
-		"stagish": False,
-		"wsdebug": False
+		"stagish": False
 	},
 	"strategy": {
 		"base": {
