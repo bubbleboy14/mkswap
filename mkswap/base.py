@@ -36,7 +36,8 @@ class Feeder(Worker):
 				ws.run_forever(dispatcher=rel, reconnect=1)
 				return self.reset_wait("refreshing feed!")
 			if not self.waited_enough():
-				return self.warn("feed already loaded!")
+				self.warn("feed already loaded!")
+				return True
 			self.reset_wait("recreating feed!")
 			ws.close()
 		self.ws = feed(platform, channel, on_open=self.on_open,

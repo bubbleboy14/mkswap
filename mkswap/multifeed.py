@@ -23,6 +23,13 @@ class MultiFeed(Feeder):
 			for mode in self.subscriptions[sym]:
 				self.sub(sym, mode)
 
+	def on_error(self, ws, err):
+		self._ready = False
+		Feeder.on_error(self, ws, err)
+
+	def start_feed(self):
+		self._ready = self.feed(self.platform, getattr(self, "symbol", None))
+
 	def l2(self, change, sym):
 		return {
 			"symbol": sym,
