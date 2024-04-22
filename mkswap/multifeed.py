@@ -17,11 +17,12 @@ class MultiFeed(Feeder):
 		self.start_feed()
 
 	def on_open(self, ws):
-		self._ready = True
-		for sym in self.subscriptions:
-			for mode in self.subscriptions[sym]:
-				self.sub(sym, mode)
-		Feeder.on_open(self, ws)
+		self.log("opened!!")
+		self.send_subs()
+
+	def on_reconnect(self, ws):
+		Feeder.on_reconnect(self, ws)
+		self.send_subs()
 
 	def on_error(self, ws, err):
 		self._ready = False
@@ -29,6 +30,12 @@ class MultiFeed(Feeder):
 
 	def start_feed(self):
 		self._ready = self.feed(self.platform)
+
+	def send_subs(self):
+		self._ready = True
+		for sym in self.subscriptions:
+			for mode in self.subscriptions[sym]:
+				self.sub(sym, mode)
 
 	def l2(self, change, sym):
 		return {

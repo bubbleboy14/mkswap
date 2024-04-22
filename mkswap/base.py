@@ -79,9 +79,9 @@ class Feeder(Worker):
 		self.warn("closed %s"%(code,), message)
 
 	def on_open(self, ws):
-		if config.base.wsdebug == "auto":
-			wsdebug(False)
 		self.log("opened!!")
 
 	def on_reconnect(self, ws):
 		self.warn("reconnected")
+		if config.base.wsdebug == "auto":
+			wsdebug(False)
