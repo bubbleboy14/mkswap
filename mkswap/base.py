@@ -74,9 +74,8 @@ class Feeder(Worker):
 	def on_message(self, ws, msg):
 		config.base.unspammed or self.log("message:", msg)
 		data = json.loads(msg)
-		if config.feeder.heartbeat and type(data) is dict:
-			if data.get("type") == "heartbeat":
-				return self.heartbeat()
+		if type(data) is dict and data.get("type") == "heartbeat":
+			return self.heartbeat()
 		self.message(data)
 
 	def heartstop(self):
@@ -84,6 +83,8 @@ class Feeder(Worker):
 		self.start_feed()
 
 	def heartstart(self):
+		if not config.feeder.heartbeat:
+			return
 		if not hasattr(self, "heart"):
 			self.log("heart start")
 			self.heart = rel.timeout(None, self.heartstop)
