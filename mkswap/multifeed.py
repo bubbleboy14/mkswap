@@ -16,7 +16,7 @@ class MultiFeed(Feeder):
 		self.start_feed()
 
 	def on_open(self, ws):
-		self.log("opened!!")
+		Feeder.on_open(self, ws)
 		self.send_subs()
 
 	def on_reconnect(self, ws):
