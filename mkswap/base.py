@@ -61,8 +61,7 @@ class Feeder(Worker):
 		return self._wait
 
 	def on_error(self, ws, err):
-		if config.feeder.wsdebug == "auto":
-			wsdebug(True)
+		self.setdebug(True)
 		if type(err) is WebSocketBadStatusException:
 #			self.ws = None
 			wait = self.get_wait()
@@ -92,13 +91,18 @@ class Feeder(Worker):
 	def message(self, msg): # override!
 		self.log(msg)
 
+	def setdebug(self, ison):
+		if config.feeder.wsdebug == "auto":
+			wsdebug(ison)
+
 	def on_close(self, ws, code, message):
 		self.warn("closed %s"%(code,), message)
+		self.setdebug(True)
 
 	def on_open(self, ws):
 		self.log("opened!!")
+		self.setdebug(False)
 
 	def on_reconnect(self, ws):
 		self.warn("reconnected")
-		if config.feeder.wsdebug == "auto":
-			wsdebug(False)
+		self.setdebug(False)
