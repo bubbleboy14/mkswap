@@ -82,11 +82,15 @@ class Feeder(Worker):
 		self.warn("heart stopped! restarting...")
 		self.start_feed()
 
+	def heartstart(self):
+		self.heart.pending() and self.heart.delete()
+		self.heart.add(config.feeder.heartbeat)
+
 	def heartbeat(self):
 		self.log("heartbeat")
 		if not hasattr(self, "heart"):
 			self.heart = rel.timeout(None, self.heartstop)
-		self.heart.add(config.feeder.heartbeat)
+		self.heartstart()
 
 	def message(self, msg): # override!
 		self.log(msg)
