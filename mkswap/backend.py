@@ -279,4 +279,4 @@ def transEvent(event):
 	return event
 
 def extractEvents(message):
-	return map(transEvent, json.loads(message).get("events", []))
+	return map(transEvent, message.get("events", []))

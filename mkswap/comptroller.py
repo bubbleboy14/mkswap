@@ -126,8 +126,7 @@ class Comptroller(Feeder):
 		emit("affordable", order, True)
 		emit("orderActive", order)
 
-	def on_message(self, ws, msgs):
-		msgs = json.loads(msgs)
+	def message(self, msgs):
 		self.log("message:", msgs)
 		if type(msgs) is not list:
 			return config.base.unspammed or self.log("skipping non-list")

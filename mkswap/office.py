@@ -17,7 +17,7 @@ from .config import config
 
 class Office(Worker):
 	def __init__(self, platform=predefs["platform"], symbols=[], strategy=predefs["strategy"], globalStrategy=False, globalTrade=False):
-		wsdebug(config.base.wsdebug)
+		wsdebug(config.feeder.wsdebug)
 		stish = config.office.stagish
 		self.platform = platform
 		self.symbols = symbols

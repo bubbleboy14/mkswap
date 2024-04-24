@@ -24,7 +24,7 @@ class Observer(Feeder):
 	def sig(self):
 		return "Observer[%s]"%(self.symbol,)
 
-	def on_message(self, ws, message):
+	def message(self, message):
 		self.ingest(extractEvents(message))
 
 	def ingest(self, events):

@@ -17,8 +17,11 @@ config = Config({
 		"realdie": True,
 		"credset": "default"
 	},
+	"feeder": {
+		"heartbeat": 10,
+		"wsdebug": "auto"
+	},
 	"base": {
-		"wsdebug": "auto",
 		"unspammed": True
 	},
 	"trader": {

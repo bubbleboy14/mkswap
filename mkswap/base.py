@@ -1,4 +1,4 @@
-import traceback, pprint, rel
+import json, traceback, rel
 from websocket import WebSocketBadStatusException
 from .backend import log, stop, feed, emit, wsdebug
 from .config import config
@@ -61,7 +61,7 @@ class Feeder(Worker):
 		return self._wait
 
 	def on_error(self, ws, err):
-		if config.base.wsdebug == "auto":
+		if config.feeder.wsdebug == "auto":
 			wsdebug(True)
 		if type(err) is WebSocketBadStatusException:
 #			self.ws = None
@@ -72,8 +72,25 @@ class Feeder(Worker):
 			self.error(err)
 
 	def on_message(self, ws, msg):
-		self.log("message:")
-		pprint.pprint(msg)
+		config.base.unspammed or self.log("message:", msg)
+		data = json.loads(msg)
+		if config.feeder.heartbeat and type(data) is dict:
+			if data.get("type") == "heartbeat":
+				return self.heartbeat()
+		self.message(data)
+
+	def heartstop(self):
+		self.warn("heart stopped! restarting...")
+		self.start_feed()
+
+	def heartbeat(self):
+		self.log("heartbeat")
+		if not hasattr(self, "heart"):
+			self.heart = rel.timeout(None, self.heartstop)
+		self.heart.add(config.feeder.heartbeat)
+
+	def message(self, msg): # override!
+		self.log(msg)
 
 	def on_close(self, ws, code, message):
 		self.warn("closed %s"%(code,), message)
@@ -83,5 +100,5 @@ class Feeder(Worker):
 
 	def on_reconnect(self, ws):
 		self.warn("reconnected")
-		if config.base.wsdebug == "auto":
+		if config.feeder.wsdebug == "auto":
 			wsdebug(False)
