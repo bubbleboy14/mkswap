@@ -113,3 +113,4 @@ class Feeder(Worker):
 	def on_reconnect(self, ws):
 		self.warn("reconnected")
 		self.setdebug(False)
+		self.heartstart()
