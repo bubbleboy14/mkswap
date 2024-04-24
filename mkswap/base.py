@@ -46,6 +46,7 @@ class Feeder(Worker):
 
 	def start_feed(self):
 		self.feed(self.platform, getattr(self, "symbol", None))
+		self.heartstart()
 
 	def waited_enough(self):
 		return self.get_wait(False) == MAX_WAIT
@@ -83,13 +84,14 @@ class Feeder(Worker):
 		self.start_feed()
 
 	def heartstart(self):
+		if not hasattr(self, "heart"):
+			self.log("heart start")
+			self.heart = rel.timeout(None, self.heartstop)
 		self.heart.pending() and self.heart.delete()
 		self.heart.add(config.feeder.heartbeat)
 
 	def heartbeat(self):
 		self.log("heartbeat")
-		if not hasattr(self, "heart"):
-			self.heart = rel.timeout(None, self.heartstop)
 		self.heartstart()
 
 	def message(self, msg): # override!
