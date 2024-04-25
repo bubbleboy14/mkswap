@@ -76,6 +76,7 @@ class Feeder(Worker):
 		data = json.loads(msg)
 		if type(data) is dict and data.get("type") == "heartbeat":
 			return self.heartbeat()
+		self.heartstart()
 		self.message(data)
 
 	def heartstop(self):
