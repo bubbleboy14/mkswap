@@ -107,10 +107,15 @@ class Feeder(Worker):
 		self.setdebug(True)
 
 	def on_open(self, ws):
-		self.log("opened!!")
+		self.warn("opened!!")
 		self.setdebug(False)
+		self.on_ready()
 
 	def on_reconnect(self, ws):
 		self.warn("reconnected")
 		self.setdebug(False)
 		self.heartstart()
+		self.on_ready()
+
+	def on_ready(self):
+		pass # override
