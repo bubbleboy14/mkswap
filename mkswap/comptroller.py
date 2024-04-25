@@ -24,11 +24,7 @@ class Comptroller(Feeder):
 		rel.timeout(10, self.longPrune)
 		if config.comptroller.live:
 			when("clientReady", gem.notional, self.setFees)
-			when("balancesReady", self.startListen)
-
-	def startListen(self):
-		self.log("startListen")
-		self.feed("gemorders")
+			when("balancesReady", self.start_feed)
 
 	def setFees(self, fees):
 		self.fees = {

@@ -45,6 +45,7 @@ class Feeder(Worker):
 			on_error=self.on_error, on_close=self.on_close)
 
 	def start_feed(self):
+		self.warn("starting feed")
 		self.feed(self.platform, getattr(self, "symbol", None))
 		self.heartstart()
 
@@ -108,7 +109,7 @@ class Feeder(Worker):
 		self.setdebug(True)
 
 	def on_open(self, ws):
-		self.warn("opened!!")
+		self.warn("opened")
 		self.setdebug(False)
 		self.on_ready()
 
