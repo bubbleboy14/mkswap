@@ -21,6 +21,10 @@ class Office(Worker):
 		stish = config.office.stagish
 		self.platform = platform
 		self.symbols = symbols
+		self.warnings = []
+		self.crosses = []
+		listen("warning", self.warning)
+		listen("cross", self.cross)
 		self.ndx = NDX()
 		self.accountant = Accountant(platform, symbols)
 		self.trader = globalTrade and Trader(platform)
@@ -41,10 +45,6 @@ class Office(Worker):
 		self.actuary = Actuary()
 		self.booker = Booker()
 		rel.timeout(1, self.tick)
-		self.warnings = []
-		self.crosses = []
-		listen("warning", self.warning)
-		listen("cross", self.cross)
 
 	def cross(self, sym, variety, reason, dimension=None):
 		dimension = dimension or "price"
