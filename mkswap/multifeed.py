@@ -12,26 +12,9 @@ class MultiFeed(Feeder):
 		listen("mfsub", self.subscribe)
 		self.platform = "geminiv2"
 		self.subscriptions = {}
-		self._ready = False
 		self.start_feed()
 
-	def on_open(self, ws):
-		Feeder.on_open(self, ws)
-		self.send_subs()
-
-	def on_reconnect(self, ws):
-		Feeder.on_reconnect(self, ws)
-		self.send_subs()
-
-	def on_error(self, ws, err):
-		self._ready = False
-		Feeder.on_error(self, ws, err)
-
-	def start_feed(self):
-		self._ready = self.feed(self.platform)
-
-	def send_subs(self):
-		self._ready = True
+	def on_ready(self):
 		for sym in self.subscriptions:
 			for mode in self.subscriptions[sym]:
 				self.sub(sym, mode)
@@ -82,7 +65,7 @@ class MultiFeed(Feeder):
 			self.subscriptions[symbol] = {}
 		if mode not in self.subscriptions[symbol]:
 			self.subscriptions[symbol][mode] = []
-			self._ready and self.sub(symbol, mode)
+			self.sub(symbol, mode)
 		return self.subscriptions[symbol][mode]
 
 	def subscribe(self, symbol, cb, mode="l2"):
