@@ -75,6 +75,8 @@ class NDX(Worker):
 		buyer = []
 		seller = []
 		for fullSym in self.histories[history]:
+			if "/" in fullSym:
+				continue
 			if fullSym.startswith(sym):
 				buyer.append(fullSym)
 			elif fullSym.endswith(sym):
