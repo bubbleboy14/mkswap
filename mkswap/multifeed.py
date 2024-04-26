@@ -34,7 +34,9 @@ class MultiFeed(Feeder):
 		return trade
 
 	def message(self, data):
-		mode = data["type"]
+		mode = data.get("type")
+		if not mode:
+			return self.log("skipping typeless data:", data)
 		events = []
 		sym = data["symbol"]
 		if mode == "trade":
