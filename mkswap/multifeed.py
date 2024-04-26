@@ -54,7 +54,7 @@ class MultiFeed(Feeder):
 			sub(events)
 
 	def sub(self, symbol, mode):
-		self.ws.sock and self.ws.jsend({
+		self.ws.ready() and self.ws.jsend({
 			"type": "subscribe",
 			"subscriptions": [{
 				"name": mode,
