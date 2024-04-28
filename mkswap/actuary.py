@@ -75,7 +75,8 @@ class Actuary(Worker):
 				pos += f
 			else:
 				neg -= f
-		candle["mfi"] = 100 - 100 / (1 + pos / neg)
+		mfr = neg and pos / neg or 1 # does this make sense?
+		candle["mfi"] = 100 - 100 / (1 + mfr)
 
 	def updateMF(self, sym, cans):
 		typ = sym in self.candles and self.candles[sym][-1]["typical"] or 0
