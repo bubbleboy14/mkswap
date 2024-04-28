@@ -22,6 +22,7 @@ class Actuary(Worker):
 		self.updateOBV(sym, cans)
 		self.updateVPT(sym, cans)
 		self.updateAD(sym, cans)
+		self.updateMF(sym, cans)
 		prev = None
 		if sym in self.candles:
 			prev = self.candles[sym][-1]
@@ -33,6 +34,7 @@ class Actuary(Worker):
 			prev = can
 
 	def addCan(self, candle, sym, prev=None):
+		self.updateMFI(candle, sym)
 		self.fcans[sym].append(candle)
 		canhist = self.candles[sym]
 		canhist.append(candle)
@@ -63,6 +65,26 @@ class Actuary(Worker):
 
 	def perStretch(self, hist, cb):
 		self.perTerm(lambda tname, tnum : cb(tname, hist[-tnum:]))
+
+	def updateMFI(self, candle, sym):
+		pos = 0
+		neg = 0
+		for can in self.candles[sym][-14:]:
+			f = can["flow"]
+			if f > 0:
+				pos += f
+			else:
+				neg -= f
+		candle["mfi"] = 100 - 100 / (1 + pos / neg)
+
+	def updateMF(self, sym, cans):
+		typ = sym in self.candles and self.candles[sym][-1]["typical"] or 0
+		for can in cans:
+			can["typical"] = (can["high"] + can["low"] + can["close"]) / 3
+			can["flow"] = can["typical"] * can["volume"]
+			if can["typical"] < typ:
+				can["flow"] *= -1
+			typ = can["typical"]
 
 	def updateVPT(self, sym, cans):
 		if sym in self.candles:
