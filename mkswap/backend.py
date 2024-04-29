@@ -35,7 +35,8 @@ presets = [{
 	"symbols": ["BTCUSD", "ETHUSD", "ETHBTC"]
 }, {
 	"strategy": "handcart",
-	"symbols": ["ETHBTC"]
+	"symbols": ["BTCUSD", "ETHUSD", "ETHBTC"]
+#	"symbols": ["ETHBTC"]
 }, {
 	"platform": "dydx",
 	"strategy": "slosh",
