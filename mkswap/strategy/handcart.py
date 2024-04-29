@@ -11,6 +11,9 @@ class HandCart(Base):
 		listen("orderFilled", self.filled)
 		self.log("loaded")
 
+	def stat(self, name, value):
+		self.stats[name] = value
+
 	def filled(self, trade):
 		if trade["remaining"]:
 			return self.log("order filled ... incomplete")
@@ -34,8 +37,8 @@ class HandCart(Base):
 		if side == "buy":
 			pdiff *= -1
 		self.nextPrice = price + pdiff
-		emit("fave", "lastPrice", price)
-		emit("fave", "nextPrice", self.nextPrice)
+		self.stat("lastPrice", price)
+		self.stat("nextPrice", self.nextPrice)
 		self.warn("order(%s, %s) nextPrice: %s"%(side,
 			price, self.nextPrice), order)
 		emit("trade", order)
