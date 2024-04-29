@@ -26,6 +26,7 @@ class Office(Worker):
 		listen("warning", self.warning)
 		listen("cross", self.cross)
 		self.ndx = NDX()
+		self.actuary = Actuary()
 		self.accountant = Accountant(platform, symbols)
 		self.trader = globalTrade and Trader(platform)
 		trec = self.trader and self.trader.recommend
@@ -42,7 +43,6 @@ class Office(Worker):
 		stish and setStaging(True)
 		self.comptroller = Comptroller(self.price)
 		self.harvester = Harvester(self)
-		self.actuary = Actuary()
 		self.booker = Booker()
 		rel.timeout(1, self.tick)
 
