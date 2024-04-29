@@ -26,7 +26,7 @@ class HandCart(Base):
 	def orderAmount(self, side, price):
 		isbuy = side == "buy"
 		sym1, sym2 = self.symbol[:3], self.symbol[-3:]
-		bals = ask("balances", mode="actual")
+		bals = ask("balances", mode="actual", nousd=True)
 		bal = bals[isbuy and sym2 or sym1]
 		if isbuy: # convert to sym1 units
 			bal /= price
@@ -37,6 +37,7 @@ class HandCart(Base):
 			price = ask("bestOrder", self.symbol, side)
 		order = {
 			"side": side,
+			"force": True,
 			"price": price,
 			"symbol": self.symbol,
 			"amount": self.orderAmount(side, price)
