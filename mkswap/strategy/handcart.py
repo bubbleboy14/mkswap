@@ -23,10 +23,13 @@ class HandCart(Base):
 		side = trade["side"] == "buy" and "sell" or "buy"
 		self.order(side, self.nextPrice)
 
-	def orderAmount(self, side):
+	def orderAmount(self, side, price):
+		isbuy = side == "buy"
 		sym1, sym2 = self.symbol[:3], self.symbol[-3:]
 		bals = ask("balances", mode="actual")
-		bal = bals[side == "buy" and sym2 or sym1]
+		bal = bals[isbuy and sym2 or sym1]
+		if isbuy: # convert to sym1 units
+			bal /= price
 		return bal * hcfg.risk
 
 	def order(self, side, price=None):
@@ -36,10 +39,10 @@ class HandCart(Base):
 			"side": side,
 			"price": price,
 			"symbol": self.symbol,
-			"amount": self.orderAmount(side)
+			"amount": self.orderAmount(side, price)
 		}
 		pdiff = price * hcfg.profit
-		if side == "buy":
+		if side == "sell":
 			pdiff *= -1
 		self.nextPrice = price + pdiff
 		self.stat("lastPrice", price)
