@@ -36,7 +36,7 @@ class HandCart(Base):
 		self.nextPrice = price + pdiff
 		emit("fave", "lastPrice", price)
 		emit("fave", "nextPrice", self.nextPrice)
-		self.log("order(%s, %s) nextPrice: %s"%(side,
+		self.warn("order(%s, %s) nextPrice: %s"%(side,
 			price, self.nextPrice), order)
 		emit("trade", order)
 
