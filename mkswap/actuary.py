@@ -1,5 +1,5 @@
 from math import sqrt
-from rel.util import ask, emit
+from rel.util import ask, emit, listen
 from .base import Worker
 from .config import config
 
@@ -12,6 +12,32 @@ class Actuary(Worker):
 		self.candles = {}
 		self.fcans = {}
 		self.predictions = {}
+		self.wheners = {}
+		listen("tellMeWhen", self.tellMeWhen)
+
+	def tellMeWhen(self, symbol, metric, threshold, cb):
+		if symbol not in self.wheners:
+			self.wheners[symbol] = {}
+		if metric not in self.wheners[symbol]:
+			self.wheners[symbol][metric] = {}
+		if threshold not in self.wheners[symbol][metric]:
+			self.wheners[symbol][metric][threshold] = []
+		self.log("tellMeWhen(%s, %s, %s)"%(symbol, metric, threshold))
+		self.wheners[symbol][metric][threshold].append(cb)
+
+	def tellWheners(self, sym):
+		if sym not in self.wheners: return
+		cans = self.candles[sym]
+		prev, cur = cans[-2], cans[-1]
+		wcfg = self.wheners[sym]
+		if "price" in wcfg: # TODO: derive/use average instead?
+			diff = 1 - prev["close"] / cur["close"]
+			pcfg = wcfg["price"]
+			for threshold in pcfg:
+				self.log("checking price threshold", threshold, "for", sym)
+				if (threshold < 0 and diff < threshold) or (threshold > 0 and diff > threshold):
+					for cb in pcfg[threshold]:
+						cb()
 
 	def candle(self, candles, sym):
 		clen = len(candles)
@@ -32,6 +58,7 @@ class Actuary(Worker):
 		for can in cans:
 			self.addCan(can, sym, prev)
 			prev = can
+		self.tellWheners(sym)
 
 	def addCan(self, candle, sym, prev=None):
 		self.updateMFI(candle, sym)
