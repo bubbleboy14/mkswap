@@ -89,14 +89,14 @@ class Accountant(Worker):
 				return False
 		return True
 
-	def fullBalances(self, nodph=True, pricer=None, mode="both", history="trade"):
+	def fullBalances(self, nodph=True, pricer=None, mode="both", nousd=False, history="trade"):
 		if mode == "actual":
 			mode = self._balances
 		elif mode == "theoretical":
 			mode = self._theoretical
-		return self.balances(pricer, mode, nodph, history)
+		return self.balances(pricer, mode, nodph, nousd, history)
 
-	def balances(self, pricer=None, bz=None, nodph=False, history="trade"):
+	def balances(self, pricer=None, bz=None, nodph=False, nousd=False, history="trade"):
 		if not self.accountsReady(history):
 			return { "waiting": "balances not ready" }
 		if bz == "both":
@@ -120,7 +120,7 @@ class Accountant(Worker):
 		for sym in bz:
 			amount = bz[sym] - obz[sym]
 			v = vz[sym] = bz[sym]
-			if sym != "USD":
+			if sym != "USD" and not nousd:
 				if sym in self._skimmed:
 					amount += self._skimmed[sym]
 				price = pricer(self.fullSym(sym), history=history)
