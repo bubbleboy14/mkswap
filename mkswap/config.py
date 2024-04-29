@@ -64,6 +64,11 @@ config = Config({
 			"vcutoff": 0.8,
 			"randlim": 0.04,
 			"oneswap": "auto"
+		},
+		"handcart": {
+			"risk": 0.5,
+			"profit": 0.1,
+			"threshold": 0.05
 		}
 	}
 })
