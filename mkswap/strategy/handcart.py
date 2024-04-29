@@ -34,6 +34,8 @@ class HandCart(Base):
 		if side == "buy":
 			pdiff *= -1
 		self.nextPrice = price + pdiff
+		emit("fave", "lastPrice", price)
+		emit("fave", "nextPrice", self.nextPrice)
 		self.log("order(%s, %s) nextPrice: %s"%(side,
 			price, self.nextPrice), order)
 		emit("trade", order)
