@@ -41,4 +41,4 @@ class HandCart(Base):
 		emit("trade", order)
 
 	def start(self):
-		self.order("buy", ask("bestOrder", self.symbol, side))
+		self.order("buy", ask("bestOrder", self.symbol, "buy"))

@@ -32,6 +32,7 @@ class Actuary(Worker):
 		wcfg = self.wheners[sym]
 		if "price" in wcfg: # TODO: derive/use average instead?
 			diff = 1 - prev["close"] / cur["close"]
+			emit("fave", "%spdiff"%(sym,), diff)
 			pcfg = wcfg["price"]
 			for threshold in pcfg:
 				self.log("checking price threshold", threshold, "against diff", diff, "for", sym)
