@@ -133,7 +133,7 @@ class Harvester(Worker):
 			"amount": amount
 		}
 		self.log("balTrade(%s, %s, %s) placing order: %s"%(sym, side, amount, order))
-		emit("balanceTrade", order)
+		emit("trade", order)
 
 	def balTrades(self, sym, side, amountUSD=10):
 		prices = ask("bestPrices", sym, side)

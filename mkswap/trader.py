@@ -10,7 +10,7 @@ class Trader(Worker):
 		self.live = live
 		self.trades = []
 		self.agent = agencies[platform]()
-		listen("balanceTrade", self.recommend)
+		listen("trade", self.recommend)
 
 	def note(self, recommendation):
 		# TODO: wrap in timestamped object...?
