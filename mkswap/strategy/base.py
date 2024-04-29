@@ -14,6 +14,9 @@ class Base(Worker):
 	def log(self, *msg):
 		config.strategy.base.loud and Worker.log(self, *msg)
 
+	def tick(self, history=None):
+		pass
+
 	def setRecommender(self, recommender):
 		self.recommender = recommender
 
