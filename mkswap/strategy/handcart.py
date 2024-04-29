@@ -7,7 +7,10 @@ hcfg = config.strategy.handcart
 class HandCart(Base):
 	def __init__(self, symbol, recommender=None):
 		Base.__init__(self, symbol, recommender)
-		emit("tellMeWhen", self.symbol, "price", -hcfg.threshold, self.start)
+		emit("tellMeWhen", self.symbol, "price",
+			-hcfg.threshold, lambda : self.order("buy"))
+		emit("tellMeWhen", self.symbol, "price",
+			hcfg.threshold, lambda : self.order("sell"))
 		listen("orderFilled", self.filled)
 		self.log("loaded")
 
@@ -26,7 +29,9 @@ class HandCart(Base):
 		bal = bals[side == "buy" and sym2 or sym1]
 		return bal * hcfg.risk
 
-	def order(self, side, price):
+	def order(self, side, price=None):
+		if not price:
+			price = ask("bestOrder", self.symbol, side)
 		order = {
 			"side": side,
 			"price": price,
@@ -42,6 +47,3 @@ class HandCart(Base):
 		self.warn("order(%s, %s) nextPrice: %s"%(side,
 			price, self.nextPrice), order)
 		emit("trade", order)
-
-	def start(self):
-		self.order("buy", ask("bestOrder", self.symbol, "buy"))
