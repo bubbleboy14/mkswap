@@ -34,7 +34,7 @@ class Actuary(Worker):
 			diff = 1 - prev["close"] / cur["close"]
 			pcfg = wcfg["price"]
 			for threshold in pcfg:
-				self.log("checking price threshold", threshold, "for", sym)
+				self.log("checking price threshold", threshold, "against diff", diff, "for", sym)
 				if (threshold < 0 and diff < threshold) or (threshold > 0 and diff > threshold):
 					for cb in pcfg[threshold]:
 						cb()
