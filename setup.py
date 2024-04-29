@@ -14,8 +14,8 @@ setup(
     zip_safe = False,
     install_requires = [
         "fyg >= 0.1.4",
-        "rel >= 0.4.9.16",
-        "websocket-client >= 1.7.0"
+        "rel >= 0.4.9.17",
+        "websocket-client >= 1.8.0"
     ],
     entry_points = '''''',
     classifiers = [
