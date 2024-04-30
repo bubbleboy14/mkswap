@@ -24,11 +24,13 @@ class HandCart(Base):
 		self.order(side, self.nextPrice(trade))
 
 	def nextPrice(self, trade):
+		side = trade["side"]
 		price = trade["price"]
 		pdiff = price * hcfg.profit
-		if trade["side"] == "sell":
+		if side == "sell":
 			pdiff *= -1
 		nextPrice = price + pdiff
+		self.stat("lastSide", side)
 		self.stat("lastPrice", price)
 		self.stat("nextPrice", nextPrice)
 		return nextPrice
