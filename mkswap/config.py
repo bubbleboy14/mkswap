@@ -67,7 +67,7 @@ config = Config({
 		},
 		"handcart": {
 			"risk": 0.5,
-			"profit": 0.1,
+			"profit": 0.01,
 			"threshold": 0.05
 		}
 	}

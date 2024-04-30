@@ -19,13 +19,13 @@ class Slosh(Base):
 			"side": "sell",
 			"symbol": sellsym,
 			"price": sellprice,
-			"amount": round(size / sellprice, 6)
+			"amount": size / sellprice
 		})
 		self.recommender({
 			"side": "buy",
 			"symbol": buysym,
 			"price": buyprice,
-			"amount": round(size / buyprice, 6)
+			"amount": size / buyprice
 		})
 
 	def oneswap(self, side, size=10):

@@ -24,6 +24,7 @@ class Trader(Worker):
 		if size < mins[sym]:
 			rec["amount"] = mins[sym]
 			self.log("order is too small! increased amount from", size, "to", rec["amount"])
+		rec["amount"] = round(rec["amount"], 6)
 		self.recommendations.append(rec)
 
 	def shouldTrade(self, recommendation):
