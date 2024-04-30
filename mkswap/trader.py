@@ -25,6 +25,7 @@ class Trader(Worker):
 			rec["amount"] = mins[sym]
 			self.log("order is too small! increased amount from", size, "to", rec["amount"])
 		rec["amount"] = round(rec["amount"], 6)
+		rec["price"] = round(rec["price"], predefs["sigfigs"].get(sym, 2))
 		self.recommendations.append(rec)
 
 	def shouldTrade(self, recommendation):
