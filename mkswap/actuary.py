@@ -27,9 +27,9 @@ class Actuary(Worker):
 
 	def tellWheners(self, sym):
 		if sym not in self.wheners: return
-		prev, cur = cans[-5], cans[-1]
 		cans = self.candles[sym]
 		wcfg = self.wheners[sym]
+		prev, cur = cans[-5], cans[-1]
 		if "price" in wcfg: # TODO: derive/use average instead?
 			diff = 1 - prev["close"] / cur["close"]
 			emit("fave", "%spdiff"%(sym,), diff)
