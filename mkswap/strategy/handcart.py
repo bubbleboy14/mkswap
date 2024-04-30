@@ -21,7 +21,17 @@ class HandCart(Base):
 		if trade["remaining"]:
 			return self.log("order filled ... incomplete")
 		side = trade["side"] == "buy" and "sell" or "buy"
-		self.order(side, self.nextPrice)
+		self.order(side, self.nextPrice(trade))
+
+	def nextPrice(self, trade):
+		price = trade["price"]
+		pdiff = price * hcfg.profit
+		if trade["side"] == "sell":
+			pdiff *= -1
+		nextPrice = price + pdiff
+		self.stat("lastPrice", price)
+		self.stat("nextPrice", nextPrice)
+		return nextPrice
 
 	def orderAmount(self, side, price):
 		isbuy = side == "buy"
@@ -42,12 +52,6 @@ class HandCart(Base):
 			"symbol": self.symbol,
 			"amount": self.orderAmount(side, price)
 		}
-		pdiff = price * hcfg.profit
-		if side == "sell":
-			pdiff *= -1
-		self.nextPrice = price + pdiff
-		self.stat("lastPrice", price)
-		self.stat("nextPrice", self.nextPrice)
 		self.warn("order(%s, %s) nextPrice: %s"%(side,
-			price, self.nextPrice), order)
+			price, self.nextPrice(order)), order)
 		emit("trade", order)
