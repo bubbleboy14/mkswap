@@ -15,6 +15,11 @@ class Worker(object):
 			self._lastlog = line
 		log(line)
 
+	def notice(self, msg, extra=None):
+		self.log("NOTICE:", msg)
+		extra and self.log(extra)
+		emit("notice", "%s: %s"%(self.sig(), msg), extra)
+
 	def warn(self, msg, extra=None):
 		self.log("WARNING:", msg)
 		extra and self.log(extra)
@@ -45,7 +50,7 @@ class Feeder(Worker):
 			on_error=self.on_error, on_close=self.on_close)
 
 	def start_feed(self):
-		self.warn("starting feed")
+		self.notice("starting feed")
 		self.feed(self.platform, getattr(self, "symbol", None))
 		self.heartstart()
 
@@ -54,7 +59,7 @@ class Feeder(Worker):
 
 	def reset_wait(self, msg):
 		self._wait = 1
-		self.warn(msg)
+		self.notice(msg)
 
 	def get_wait(self, double=True):
 		self._wait = getattr(self, "_wait", 1)
@@ -109,13 +114,13 @@ class Feeder(Worker):
 		self.setdebug(True)
 
 	def on_open(self, ws):
-		self.warn("opened")
+		self.notice("opened")
 		self.setdebug(True)
 		self.on_ready()
 		self.setdebug(False)
 
 	def on_reconnect(self, ws):
-		self.warn("reconnected")
+		self.notice("reconnected")
 		self.setdebug(True)
 		self.heartstart()
 		self.on_ready()

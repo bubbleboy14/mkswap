@@ -22,8 +22,10 @@ class Office(Worker):
 		self.platform = platform
 		self.symbols = symbols
 		self.warnings = []
+		self.notices = []
 		self.crosses = []
 		listen("warning", self.warning)
+		listen("notice", self.notice)
 		listen("cross", self.cross)
 		self.ndx = NDX()
 		self.actuary = Actuary()
@@ -70,6 +72,14 @@ class Office(Worker):
 		warns = self.warnings
 		self.warnings = []
 		return warns
+
+	def notice(self, msg, data=None):
+		self.notices.append({ "msg": msg, "data": data })
+
+	def getNotices(self):
+		notes = self.notices
+		self.notices = []
+		return notes
 
 	def cancel(self, token):
 		self.log("cancel(%s)"%(token,))
@@ -139,6 +149,7 @@ class Office(Worker):
 			"cancels": com.getCancels(),
 			"candles": act.freshCandles(),
 			"crosses": self.getCrosses(),
+			"notices": self.getNotices(),
 			"warnings": self.getWarnings(),
 			"strategists": self.stratuses(),
 			"balances": acc.balances(self.price, "all")
