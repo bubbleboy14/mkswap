@@ -173,6 +173,7 @@ class Actuary(Worker):
 		score = self.ratios[sym].get("volatility", 0)
 		for prop in SVALS:
 			score += self.latest(sym, prop)
+		score += (self.latest(sym, "mfi") / 50) - 1
 		return score
 
 	def scores(self):
