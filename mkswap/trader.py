@@ -1,6 +1,8 @@
-from .backend import ask, listen, predefs
+from rel.util import ask, listen
+from .backend import predefs
 from .agent import agencies
 from .base import Worker
+from .config import config
 
 class Trader(Worker):
 	def __init__(self, platform=predefs["platform"], live=True):
@@ -8,7 +10,7 @@ class Trader(Worker):
 		self.live = live
 		self.trades = []
 		self.agent = agencies[platform]()
-		listen("balanceTrade", self.recommend)
+		listen("trade", self.recommend)
 
 	def note(self, recommendation):
 		# TODO: wrap in timestamped object...?
@@ -22,11 +24,14 @@ class Trader(Worker):
 		if size < mins[sym]:
 			rec["amount"] = mins[sym]
 			self.log("order is too small! increased amount from", size, "to", rec["amount"])
+		rec["amount"] = round(rec["amount"], 6)
+		rec["price"] = round(rec["price"], predefs["sigfigs"].get(sym, 2))
 		self.recommendations.append(rec)
 
 	def shouldTrade(self, recommendation):
 		self.log("assessing recommendation:", recommendation)
-		return ask("affordable", recommendation)
+		force = "force" in recommendation and recommendation.pop("force") or config.trader.force
+		return ask("affordable", recommendation, force)
 
 	def trade(self, recommendation):
 		self.log("TRADING", recommendation, "\n\n\n")

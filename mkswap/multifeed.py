@@ -1,7 +1,6 @@
 import json
 from rel.util import listen
 from .base import Feeder
-from .config import config
 
 sidetrans = {
 	"buy": "bid",
@@ -13,12 +12,9 @@ class MultiFeed(Feeder):
 		listen("mfsub", self.subscribe)
 		self.platform = "geminiv2"
 		self.subscriptions = {}
-		self._ready = False
 		self.start_feed()
 
-	def on_open(self, ws):
-		self.log("opened")
-		self._ready = True
+	def on_ready(self):
 		for sym in self.subscriptions:
 			for mode in self.subscriptions[sym]:
 				self.sub(sym, mode)
@@ -37,12 +33,10 @@ class MultiFeed(Feeder):
 		trade["amount"] = trade["quantity"]
 		return trade
 
-	def on_message(self, ws, message):
-		config.base.unspammed or self.log(message)
-		data = json.loads(message)
-		mode = data["type"]
-		if mode == "heartbeat":
-			return self.log(message)
+	def message(self, data):
+		mode = data.get("type")
+		if not mode:
+			return self.log("skipping typeless data:", data)
 		events = []
 		sym = data["symbol"]
 		if mode == "trade":
@@ -60,7 +54,7 @@ class MultiFeed(Feeder):
 			sub(events)
 
 	def sub(self, symbol, mode):
-		self.ws.jsend({
+		self.ws.ready() and self.ws.jsend({
 			"type": "subscribe",
 			"subscriptions": [{
 				"name": mode,
@@ -73,7 +67,7 @@ class MultiFeed(Feeder):
 			self.subscriptions[symbol] = {}
 		if mode not in self.subscriptions[symbol]:
 			self.subscriptions[symbol][mode] = []
-			self._ready and self.sub(symbol, mode)
+			self.sub(symbol, mode)
 		return self.subscriptions[symbol][mode]
 
 	def subscribe(self, symbol, cb, mode="l2"):

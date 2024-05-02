@@ -19,13 +19,13 @@ class Slosh(Base):
 			"side": "sell",
 			"symbol": sellsym,
 			"price": sellprice,
-			"amount": round(size / sellprice, 6)
+			"amount": size / sellprice
 		})
 		self.recommender({
 			"side": "buy",
 			"symbol": buysym,
 			"price": buyprice,
-			"amount": round(size / buyprice, 6)
+			"amount": size / buyprice
 		})
 
 	def oneswap(self, side, size=10):
@@ -63,14 +63,14 @@ class Slosh(Base):
 		return bigone
 
 	def swap(self, size=10):
-		side = "buy"
+		side = "sell"
 		if size < 0:
 			size *= -1
-			side = "sell"
+			side = "buy"
 		shouldOne = self.shouldOneSwap(side)
 		shouldOne and self.oneswap(side, size)
 		if not shouldOne or shouldOne == "both":
-			if side == "buy":
+			if side == "sell":
 				self.buysell(self.bottom, self.top, size)
 			else:
 				self.buysell(self.top, self.bottom, size)

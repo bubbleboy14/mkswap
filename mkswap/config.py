@@ -17,19 +17,28 @@ config = Config({
 		"realdie": True,
 		"credset": "default"
 	},
+	"feeder": {
+		"heartbeat": 10,
+		"wsdebug": "auto"
+	},
 	"base": {
 		"unspammed": True
+	},
+	"trader": {
+		"force": False
 	},
 	"comptroller": {
 		"live": False,
 		"actives": 20,
-		"prunelimit": 0.1
+		"prunelimit": 0.1,
+		"canceleach": False
 	},
 	"harvester": {
 		"batch": 10,
 		"bottom": 40,
 		"skim": False,
 		"balance": True,
+		"bookbalance": True,
 		"network": "bitcoin"
 	},
 	"ndx": {
@@ -55,6 +64,11 @@ config = Config({
 			"vcutoff": 0.8,
 			"randlim": 0.04,
 			"oneswap": "auto"
+		},
+		"handcart": {
+			"risk": 0.5,
+			"profit": 0.01,
+			"threshold": 0.05
 		}
 	}
 })

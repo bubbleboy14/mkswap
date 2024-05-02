@@ -1,9 +1,10 @@
 from math import sqrt
-from rel.util import ask, emit
+from rel.util import ask, emit, listen
 from .base import Worker
 from .config import config
 
 TERMS = ["small", "medium", "large"]
+SVALS = ["vpt", "OBVslope", "ADslope"]
 
 class Actuary(Worker):
 	def __init__(self):
@@ -11,6 +12,33 @@ class Actuary(Worker):
 		self.candles = {}
 		self.fcans = {}
 		self.predictions = {}
+		self.wheners = {}
+		listen("tellMeWhen", self.tellMeWhen)
+
+	def tellMeWhen(self, symbol, metric, threshold, cb):
+		if symbol not in self.wheners:
+			self.wheners[symbol] = {}
+		if metric not in self.wheners[symbol]:
+			self.wheners[symbol][metric] = {}
+		if threshold not in self.wheners[symbol][metric]:
+			self.wheners[symbol][metric][threshold] = []
+		self.log("tellMeWhen(%s, %s, %s)"%(symbol, metric, threshold))
+		self.wheners[symbol][metric][threshold].append(cb)
+
+	def tellWheners(self, sym):
+		if sym not in self.wheners: return
+		cans = self.candles[sym]
+		wcfg = self.wheners[sym]
+		prev, cur = cans[-5], cans[-1]
+		if "price" in wcfg: # TODO: derive/use average instead?
+			diff = 1 - prev["close"] / cur["close"]
+			emit("fave", "%spdiff"%(sym,), diff)
+			pcfg = wcfg["price"]
+			for threshold in pcfg:
+				self.log("checking price threshold", threshold, "against diff", diff, "for", sym)
+				if (threshold < 0 and diff < threshold) or (threshold > 0 and diff > threshold):
+					for cb in pcfg[threshold]:
+						cb()
 
 	def candle(self, candles, sym):
 		clen = len(candles)
@@ -21,21 +49,43 @@ class Actuary(Worker):
 		self.updateOBV(sym, cans)
 		self.updateVPT(sym, cans)
 		self.updateAD(sym, cans)
-		if sym not in self.candles:
+		self.updateMF(sym, cans)
+		prev = None
+		if sym in self.candles:
+			prev = self.candles[sym][-1]
+		else:
 			self.candles[sym] = []
 			self.fcans[sym] = []
 		for can in cans:
-			self.addCan(can, sym)
+			self.addCan(can, sym, prev)
+			prev = can
+		self.tellWheners(sym)
 
-	def addCan(self, candle, sym):
+	def addCan(self, candle, sym, prev=None):
+		self.updateMFI(candle, sym)
 		self.fcans[sym].append(candle)
 		canhist = self.candles[sym]
 		canhist.append(candle)
 		self.perStretch(canhist,
 			lambda term, hist : self.updateMovings(candle, term, hist))
+		if prev:
+			self.compare(prev, candle, sym)
+			self.compare(prev, candle, sym, "VPT")
+
+	def compare(self, c1, c2, sym, pref=None):
+		terms = list(pref and map(lambda t : pref + t, TERMS) or TERMS)
+		t1 = terms.pop(0)
+		while terms:
+			for t2 in terms:
+				if c1[t1] < c1[t2] and c2[t1] > c2[t2]:
+					emit("cross", sym, "golden", "%s above %s"%(t1, t2), pref)
+				elif c1[t1] > c1[t2] and c2[t1] < c2[t2]:
+					emit("cross", sym, "death", "%s below %s"%(t1, t2), pref)
+			t1 = terms.pop(0)
 
 	def updateMovings(self, candle, term, hist):
 		candle[term] = ask("ave", list(map(lambda h : h["close"], hist)))
+		candle["VPT" + term] = ask("ave", list(map(lambda h : h["vpt"], hist)))
 
 	def perTerm(self, cb):
 		for term in TERMS:
@@ -43,6 +93,27 @@ class Actuary(Worker):
 
 	def perStretch(self, hist, cb):
 		self.perTerm(lambda tname, tnum : cb(tname, hist[-tnum:]))
+
+	def updateMFI(self, candle, sym):
+		pos = 0
+		neg = 0
+		for can in self.candles[sym][-14:]:
+			f = can["flow"]
+			if f > 0:
+				pos += f
+			else:
+				neg -= f
+		mfr = neg and pos / neg or 1 # does this make sense?
+		candle["mfi"] = 100 - 100 / (1 + mfr)
+
+	def updateMF(self, sym, cans):
+		typ = sym in self.candles and self.candles[sym][-1]["typical"] or 0
+		for can in cans:
+			can["typical"] = (can["high"] + can["low"] + can["close"]) / 3
+			can["flow"] = can["typical"] * can["volume"]
+			if can["typical"] < typ:
+				can["flow"] *= -1
+			typ = can["typical"]
 
 	def updateVPT(self, sym, cans):
 		if sym in self.candles:
@@ -66,11 +137,13 @@ class Actuary(Worker):
 			close = can["close"]
 			volume = can["volume"]
 			hldiff = high - low
+			slope = 0
 			if hldiff:
 				mult = ((close - low) - (high - close)) / hldiff
-				mfv = mult * volume
-				ad += mfv
+				slope = mult * volume
+				ad += slope
 			can["ad"] = ad
+			can["ADslope"] = slope
 
 	def updateOBV(self, sym, cans):
 		if sym in self.candles:
@@ -83,17 +156,36 @@ class Actuary(Worker):
 		for can in cans:
 			volume = can["volume"]
 			price = can["close"]
+			slope = 0
 			if price > oprice:
-				obv += volume
+				slope = volume
 			elif price < oprice:
-				obv -= volume
-			can["obv"] = obv
+				slope = -volume
+			obv += slope
 			oprice = price
+			can["obv"] = obv
+			can["OBVslope"] = slope
 
-	def oldCandles(self):
+	def latest(self, sym, prop):
+		return sym in self.candles and self.candles[sym][-1][prop] or 0
+
+	def score(self, sym):
+		score = self.ratios[sym].get("volatility", 0)
+		for prop in SVALS:
+			score += self.latest(sym, prop)
+		score += (self.latest(sym, "mfi") / 50) - 1
+		return score
+
+	def scores(self):
+		scores = {}
+		for sym in self.candles:
+			scores[sym] = self.score(sym)
+		return scores
+
+	def oldCandles(self, limit=10):
 		cans = {}
 		for sym in self.candles:
-			cans[sym] = self.candles[sym][-10:]
+			cans[sym] = self.candles[sym][-limit:]
 		return cans
 
 	def freshCandles(self):
@@ -128,8 +220,7 @@ class Actuary(Worker):
 	def volatilities(self):
 		vols = {}
 		for sym in self.ratios:
-			if "volatility" in self.ratios[sym]:
-				vols[sym] = self.ratios[sym]["volatility"]
+			vols[sym] = self.ratios[sym].get("volatility", 0)
 		return vols
 
 	def initRatios(self, sym):
@@ -148,10 +239,11 @@ class Actuary(Worker):
 			if self.ratios[sym]["history"]:
 				self.ratios[sym]["sigma"] = self.sigma(sym, rat)
 				if self.ratios[sym]["sigma"]:
-					vol = self.ratios[sym]["volatility"] = self.volatility(sym, rat)
-					if vol > 0.5:
+					self.ratios[sym]["volatility"] = self.volatility(sym, rat)
+					score = self.score(sym)
+					if score > 0.5:
 						self.predictions[sym] = "buy"
-					elif vol < -0.5:
+					elif score < -0.5:
 						self.predictions[sym] = "sell"
 					else:
 						self.predictions[sym] = "chill"

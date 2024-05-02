@@ -1,6 +1,6 @@
 import pprint, atexit, rel
 from rel.util import ask, listen
-from .backend import start, predefs, setStaging, initConfig, selectPreset
+from .backend import start, predefs, setStaging, initConfig, selectPreset, wsdebug
 from .comptroller import Comptroller
 from .accountant import Accountant
 from .strategist import strategies
@@ -17,10 +17,18 @@ from .config import config
 
 class Office(Worker):
 	def __init__(self, platform=predefs["platform"], symbols=[], strategy=predefs["strategy"], globalStrategy=False, globalTrade=False):
+		wsdebug(config.feeder.wsdebug)
 		stish = config.office.stagish
 		self.platform = platform
 		self.symbols = symbols
+		self.warnings = []
+		self.notices = []
+		self.crosses = []
+		listen("warning", self.warning)
+		listen("notice", self.notice)
+		listen("cross", self.cross)
 		self.ndx = NDX()
+		self.actuary = Actuary()
 		self.accountant = Accountant(platform, symbols)
 		self.trader = globalTrade and Trader(platform)
 		trec = self.trader and self.trader.recommend
@@ -37,11 +45,25 @@ class Office(Worker):
 		stish and setStaging(True)
 		self.comptroller = Comptroller(self.price)
 		self.harvester = Harvester(self)
-		self.actuary = Actuary()
 		self.booker = Booker()
 		rel.timeout(1, self.tick)
-		self.warnings = []
-		listen("warning", self.warning)
+
+	def cross(self, sym, variety, reason, dimension=None):
+		dimension = dimension or "price"
+		self.crosses.append({
+			"msg": "%s %s %s cross"%(sym, dimension, variety),
+			"data": {
+				"market": sym,
+				"reason": reason,
+				"variety": variety,
+				"dimension": dimension
+			}
+		})
+
+	def getCrosses(self):
+		crox = self.crosses
+		self.crosses = []
+		return crox
 
 	def warning(self, msg, data=None):
 		self.warnings.append({ "msg": msg, "data": data })
@@ -50,6 +72,14 @@ class Office(Worker):
 		warns = self.warnings
 		self.warnings = []
 		return warns
+
+	def notice(self, msg, data=None):
+		self.notices.append({ "msg": msg, "data": data })
+
+	def getNotices(self):
+		notes = self.notices
+		self.notices = []
+		return notes
 
 	def cancel(self, token):
 		self.log("cancel(%s)"%(token,))
@@ -97,12 +127,16 @@ class Office(Worker):
 		ndx = self.ndx
 		totes = boo.totals()
 		hints = act.hints(totes)
+		volvols = act.volatilities()
 		return {
 			"hints": hints,
 			"totals": totes,
 			"ndx": ndx.faves,
+			"volvols": volvols,
 			"gem": gem.status(),
+			"bests": boo.bests,
 			"orders": boo.orders,
+			"scores": act.scores(),
 			"actives": com.actives,
 			"backlog": com.backlog,
 			"fills": com.getFills(),
@@ -114,7 +148,8 @@ class Office(Worker):
 			"weighted": ndx.weighteds(),
 			"cancels": com.getCancels(),
 			"candles": act.freshCandles(),
-			"volvols": act.volatilities(),
+			"crosses": self.getCrosses(),
+			"notices": self.getNotices(),
 			"warnings": self.getWarnings(),
 			"strategists": self.stratuses(),
 			"balances": acc.balances(self.price, "all")

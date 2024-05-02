@@ -24,11 +24,7 @@ class Comptroller(Feeder):
 		rel.timeout(10, self.longPrune)
 		if config.comptroller.live:
 			when("clientReady", gem.notional, self.setFees)
-			when("balancesReady", self.startListen)
-
-	def startListen(self):
-		self.log("startListen")
-		self.feed("gemorders")
+			when("balancesReady", self.start_feed)
 
 	def setFees(self, fees):
 		self.fees = {
@@ -126,8 +122,7 @@ class Comptroller(Feeder):
 		emit("affordable", order, True)
 		emit("orderActive", order)
 
-	def on_message(self, ws, msgs):
-		msgs = json.loads(msgs)
+	def message(self, msgs):
 		self.log("message:", msgs)
 		if type(msgs) is not list:
 			return config.base.unspammed or self.log("skipping non-list")
@@ -250,17 +245,22 @@ class Comptroller(Feeder):
 			self.log(coi, "already removed!")
 
 	def cancelAll(self):
+		cfg = config.comptroller
 		akeys = list(self.actives.keys())
 		self.log("cancelAll() cancelling", len(akeys), "active orders")
 		for tnum in akeys:
-			self.cancelled(tnum, "blanket cancel")
-			trade = self.actives[tnum]
-			if "order_id" in trade:
-				emit("abort", "cancel %s %s"%(tnum, trade["order_id"]))
+			if cfg.canceleach:
+				self.cancel(tnum)
 			else:
-				emit("abort", "new %s"%(tnum,))
-			del self.actives[tnum]
-		config.comptroller.live and gem.cancelAll() # TODO: get accepted/rejected cancels from return val
+				self.cancelled(tnum, "blanket cancel")
+				trade = self.actives[tnum]
+				if "order_id" in trade:
+					emit("abort", "cancel %s %s"%(tnum, trade["order_id"]))
+				else:
+					emit("abort", "new %s"%(tnum,))
+				del self.actives[tnum]
+		if cfg.live and not cfg.canceleach:
+			gem.cancelAll() # TODO: get accepted/rejected cancels from return val
 
 	def refill(self):
 		self.log("refill(%s)"%(len(self.backlog),))

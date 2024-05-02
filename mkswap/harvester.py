@@ -133,11 +133,13 @@ class Harvester(Worker):
 			"amount": amount
 		}
 		self.log("balTrade(%s, %s, %s) placing order: %s"%(sym, side, amount, order))
-		emit("balanceTrade", order)
+		emit("trade", order)
 
 	def balTrades(self, sym, side, amountUSD=10):
 		prices = ask("bestPrices", sym, side)
 		sym = sym.replace("/", "") # for ratio-derived prices
+		if config.harvester.bookbalance:
+			prices.update({"book": ask("bestOrder", sym, side)})
 		amount = self.fromUSD(sym, amountUSD)
 		self.log("balTrades(%s, %s, %s->%s)"%(sym, side, amountUSD, amount))
 		for span in prices:

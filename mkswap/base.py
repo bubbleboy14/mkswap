@@ -1,6 +1,6 @@
-import traceback, pprint, rel
+import json, traceback, rel
 from websocket import WebSocketBadStatusException
-from .backend import log, stop, feed, emit
+from .backend import log, stop, feed, emit, wsdebug
 from .config import config
 
 class Worker(object):
@@ -15,6 +15,11 @@ class Worker(object):
 			self._lastlog = line
 		log(line)
 
+	def notice(self, msg, extra=None):
+		self.log("NOTICE:", msg)
+		extra and self.log(extra)
+		emit("notice", "%s: %s"%(self.sig(), msg), extra)
+
 	def warn(self, msg, extra=None):
 		self.log("WARNING:", msg)
 		extra and self.log(extra)
@@ -25,6 +30,8 @@ class Worker(object):
 		traceback.print_exc()
 		stop()
 
+MAX_WAIT = 16
+
 class Feeder(Worker):
 	def feed(self, platform, channel=None):
 		self.log("feed", platform, channel)
@@ -32,22 +39,36 @@ class Feeder(Worker):
 		if ws:
 			if ws.has_done_teardown:
 				ws.run_forever(dispatcher=rel, reconnect=1)
-				return self.warn("refreshing feed!")
-			return self.warn("feed already loaded!")
+				return self.reset_wait("refreshing feed!")
+			if not self.waited_enough():
+				self.warn("feed already loaded!")
+				return True
+			self.reset_wait("recreating feed!")
+			ws.close()
 		self.ws = feed(platform, channel, on_open=self.on_open,
 			on_reconnect=self.on_reconnect, on_message=self.on_message,
 			on_error=self.on_error, on_close=self.on_close)
 
 	def start_feed(self):
+		self.notice("starting feed")
 		self.feed(self.platform, getattr(self, "symbol", None))
+		self.heartstart()
 
-	def get_wait(self):
+	def waited_enough(self):
+		return self.get_wait(False) == MAX_WAIT
+
+	def reset_wait(self, msg):
+		self._wait = 1
+		self.notice(msg)
+
+	def get_wait(self, double=True):
 		self._wait = getattr(self, "_wait", 1)
-		if self._wait < 16:
+		if double and self._wait < MAX_WAIT:
 			self._wait *= 2
 		return self._wait
 
 	def on_error(self, ws, err):
+		self.setdebug(True)
 		if type(err) is WebSocketBadStatusException:
 #			self.ws = None
 			wait = self.get_wait()
@@ -57,14 +78,53 @@ class Feeder(Worker):
 			self.error(err)
 
 	def on_message(self, ws, msg):
-		self.log("message:")
-		pprint.pprint(msg)
+		config.base.unspammed or self.log("message:", msg)
+		data = json.loads(msg)
+		if type(data) is dict and data.get("type") == "heartbeat":
+			return self.heartbeat()
+		self.heartstart()
+		self.message(data)
+
+	def heartstop(self):
+		self.warn("heart stopped! restarting...")
+		self.start_feed()
+
+	def heartstart(self):
+		if not config.feeder.heartbeat:
+			return
+		if not hasattr(self, "heart"):
+			self.log("heart start")
+			self.heart = rel.timeout(None, self.heartstop)
+		self.heart.pending() and self.heart.delete()
+		self.heart.add(config.feeder.heartbeat)
+
+	def heartbeat(self):
+		self.log("heartbeat")
+		self.heartstart()
+
+	def message(self, msg): # override!
+		self.log(msg)
+
+	def setdebug(self, ison):
+		if config.feeder.wsdebug == "auto":
+			wsdebug(ison)
 
 	def on_close(self, ws, code, message):
 		self.warn("closed %s"%(code,), message)
+		self.setdebug(True)
 
 	def on_open(self, ws):
-		self.log("opened!!")
+		self.notice("opened")
+		self.setdebug(True)
+		self.on_ready()
+		self.setdebug(False)
 
 	def on_reconnect(self, ws):
-		self.warn("reconnected")
+		self.notice("reconnected")
+		self.setdebug(True)
+		self.heartstart()
+		self.on_ready()
+		self.setdebug(False)
+
+	def on_ready(self):
+		pass # override
