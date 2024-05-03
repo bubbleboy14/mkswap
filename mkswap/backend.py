@@ -19,7 +19,7 @@ predefs = {
 		"BTCUSD": 0.00001
 	},
 	"sigfigs": {
-		"ETHBTC": 4
+		"ETHBTC": 5
 	}
 }
 presets = [{
