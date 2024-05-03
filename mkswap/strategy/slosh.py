@@ -36,7 +36,7 @@ class Slosh(Base):
 			"side": side,
 			"price": price,
 			"symbol": self.onesym,
-			"amount": round(size / denom, 5)
+			"amount": size / denom
 		})
 
 	def shouldOneSwap(self, side):
