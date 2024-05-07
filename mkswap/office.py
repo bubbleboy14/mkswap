@@ -47,8 +47,7 @@ class Office(Worker):
 		self.booker = Booker()
 		rel.timeout(1, self.tick)
 
-	def cross(self, sym, variety, reason, dimension=None):
-		dimension = dimension or "price"
+	def cross(self, sym, variety, reason, dimension="price"):
 		self.crosses.append({
 			"msg": "%s %s %s cross"%(sym, dimension, variety),
 			"data": {
