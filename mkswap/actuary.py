@@ -28,16 +28,25 @@ class Actuary(Worker):
 		if sym not in self.wheners: return
 		cans = self.candles[sym]
 		wcfg = self.wheners[sym]
-		prev, cur = cans[-5], cans[-1]
-		if "price" in wcfg: # TODO: derive/use average instead?
-			diff = 1 - prev["close"] / cur["close"]
+		rest, cur = cans[:-1], cans[-1]
+		curclose = cur["close"]
+		if "price" in wcfg:
+			prev = rest[-4]
+			diff = 1 - prev["close"] / curclose # TODO: derive/use average instead?
 			emit("fave", "%spdiff"%(sym,), diff)
-			pcfg = wcfg["price"]
-			for threshold in pcfg:
-				self.log("checking price threshold", threshold, "against diff", diff, "for", sym)
-				if (threshold < 0 and diff < threshold) or (threshold > 0 and diff > threshold):
-					for cb in pcfg[threshold]:
-						cb()
+			self.thresh(sym, "price", diff)
+		if "volatility" in wcfg:
+			sig = ask("sigma", curclose, map(lambda c : c["close"], rest))
+			vol = ask("volatility", curclose, ask("ave", rest), sig)
+			self.thresh(sym, "volatility", vol)
+
+	def thresh(self, sym, prop, comp):
+		pcfg = self.wheners[sym][prop]
+		for threshold in pcfg:
+			self.log("checking", sym, prop, "threshold", threshold, "against", diff)
+			if (threshold < 0 and comp < threshold) or (threshold > 0 and comp > threshold):
+				for cb in pcfg[threshold]:
+					cb()
 
 	def candle(self, candles, sym):
 		clen = len(candles)
