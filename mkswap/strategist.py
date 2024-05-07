@@ -1,7 +1,8 @@
-from .strategy import RSI, Slosh, HandCart
+from .strategy import RSI, Cross, Slosh, HandCart
 
 strategies = {
 	"rsi": RSI,
+	"cross": Cross,
 	"slosh": Slosh,
 	"handcart": HandCart
 }
