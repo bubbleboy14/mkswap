@@ -17,17 +17,18 @@ class Trader(Worker):
 		# TODO: wrap in timestamped object...?
 		self.trades.append(recommendation)
 
-	def order(self, sym, side, amount, price):
+	def order(self, sym, side, amount, price, force=False):
 		order = {
 			"side": side,
 			"symbol": sym,
 			"price": price,
+			"force": force,
 			"amount": amount
 		}
 		self.log("order(%s, %s, %s): %s"%(sym, side, amount, order))
 		self.recommend(order)
 
-	def bestTrades(self, sym, side, amountUSD=10):
+	def bestTrades(self, sym, side, amountUSD=10, force=False):
 		prices = ask("bestPrices", sym, side)
 		sym = sym.replace("/", "") # for ratio-derived prices
 		if config.trader.booktrades:
@@ -35,7 +36,7 @@ class Trader(Worker):
 		amount = ask("fromUSD", sym, amountUSD)
 		self.log("bestTrades(%s, %s, %s->%s)"%(sym, side, amountUSD, amount))
 		for span in prices:
-			self.order(sym, side, amount, prices[span])
+			self.order(sym, side, amount, prices[span], force)
 		return {
 			"amount": amount,
 			"prices": prices
