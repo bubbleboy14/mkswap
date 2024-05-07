@@ -14,7 +14,7 @@ class Cross(Base):
 		self.notice("hard %s!"%(side,), ask("bestTrades", sym, side, force=True))
 
 	def hint(self, sym, side, score):
-		if abs(score) < config.strategy.cross.threshold:
+		if abs(score) < config.strategy.cross.score:
 			return
 		price = ask("bestPrice", sym, side)
 		amount = score / price
