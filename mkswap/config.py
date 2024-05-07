@@ -60,7 +60,7 @@ config = Config({
 			"period": 16
 		},
 		"cross": {
-			"score": 2.5
+			"score": 1.5
 		},
 		"slosh": {
 			"vmult": 16,
