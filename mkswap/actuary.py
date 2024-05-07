@@ -38,6 +38,8 @@ class Actuary(Worker):
 		if "volatility" in wcfg:
 			sig = ask("sigma", curclose, map(lambda c : c["close"], rest))
 			vol = ask("volatility", curclose, ask("ave", rest), sig)
+			emit("fave", "%scsig"%(sym,), sig)
+			emit("fave", "%scvol"%(sym,), vol)
 			self.thresh(sym, "volatility", vol)
 
 	def thresh(self, sym, prop, comp):
