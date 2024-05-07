@@ -47,8 +47,7 @@ class Office(Worker):
 		self.booker = Booker()
 		rel.timeout(1, self.tick)
 
-	def cross(self, sym, variety, reason, dimension=None):
-		dimension = dimension or "price"
+	def cross(self, sym, variety, reason, dimension="price"):
 		self.crosses.append({
 			"msg": "%s %s %s cross"%(sym, dimension, variety),
 			"data": {
@@ -124,22 +123,18 @@ class Office(Worker):
 		act = self.actuary
 		boo = self.booker
 		ndx = self.ndx
-		totes = boo.totals()
-		hints = act.hints(totes)
-		volvols = act.volatilities()
 		return {
-			"hints": hints,
-			"totals": totes,
 			"ndx": ndx.faves,
-			"volvols": volvols,
 			"gem": gem.status(),
 			"bests": boo.bests,
+			"totals": boo.totes,
 			"orders": boo.orders,
 			"scores": act.scores(),
 			"actives": com.actives,
 			"backlog": com.backlog,
 			"fills": com.getFills(),
 			"prices": self.prices(),
+			"hints": act.predictions,
 			"volumes": ndx.volumes(),
 			"accountant": acc.counts,
 			"harvester": har.status(),
@@ -149,6 +144,7 @@ class Office(Worker):
 			"candles": act.freshCandles(),
 			"crosses": self.getCrosses(),
 			"notices": self.getNotices(),
+			"volvols": act.volatilities(),
 			"warnings": self.getWarnings(),
 			"strategists": self.stratuses(),
 			"balances": acc.balances(self.price, "all")
@@ -223,6 +219,7 @@ class Office(Worker):
 			if manStrat or manTrad:
 				for manager in self.managers:
 					self.managers[manager].tick(manStrat, manTrad)
+			self.actuary.hints(self.booker.totals())
 		return True
 
 def getOffice(**kwargs):

@@ -59,6 +59,9 @@ config = Config({
 			"size": 4,
 			"period": 16
 		},
+		"cross": {
+			"score": 2.5
+		},
 		"slosh": {
 			"vmult": 16,
 			"vcutoff": 0.8,
