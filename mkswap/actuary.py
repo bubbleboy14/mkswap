@@ -1,4 +1,3 @@
-from math import sqrt
 from rel.util import ask, emit, listen
 from .base import Worker
 from .config import config
@@ -205,18 +204,6 @@ class Actuary(Worker):
 			"volume": candle[5]
 		}
 
-	def sigma(self, symbol, cur):
-		hist = self.ratios[symbol]["history"]
-		sqds = []
-		for rat in hist:
-			d = rat - cur
-			sqds.append(d * d)
-		return sqrt(ask("ave", sqds))
-
-	def volatility(self, symbol, cur):
-		rdata = self.ratios[symbol]
-		return (cur - ask("ave", rdata["history"])) / rdata["sigma"]
-
 	def volatilities(self):
 		vols = {}
 		for sym in self.ratios:
@@ -236,10 +223,12 @@ class Actuary(Worker):
 			if not vscores[sym]["bid"]:
 				continue
 			rat = vscores[sym]["ask"] / vscores[sym]["bid"]
-			if self.ratios[sym]["history"]:
-				self.ratios[sym]["sigma"] = self.sigma(sym, rat)
-				if self.ratios[sym]["sigma"]:
-					self.ratios[sym]["volatility"] = self.volatility(sym, rat)
+			rdata = self.ratios[sym]
+			rhist = rdata["history"]
+			if rhist:
+				sig = rdata["sigma"] = ask("sigma", rat, rhist)
+				if sig:
+					rdata["volatility"] = ask("volatility", rat, ask("ave", rhist), sig)
 					score = self.score(sym)
 					if score > 0.5:
 						self.predictions[sym] = "buy"
@@ -247,5 +236,5 @@ class Actuary(Worker):
 						self.predictions[sym] = "sell"
 					else:
 						self.predictions[sym] = "chill"
-			self.ratios[sym]["history"].append(rat)
+			rhist.append(rat)
 		return self.predictions
