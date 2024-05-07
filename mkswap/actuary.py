@@ -36,8 +36,9 @@ class Actuary(Worker):
 			emit("fave", "%spdiff"%(sym,), diff)
 			self.thresh(sym, "price", diff)
 		if "volatility" in wcfg:
-			sig = ask("sigma", curclose, map(lambda c : c["close"], rest))
-			vol = ask("volatility", curclose, ask("ave", rest), sig)
+			closers = list(map(lambda c : c["close"], rest))
+			sig = ask("sigma", curclose, closers)
+			vol = ask("volatility", curclose, ask("ave", closers), sig)
 			emit("fave", "%scsig"%(sym,), sig)
 			emit("fave", "%scvol"%(sym,), vol)
 			self.thresh(sym, "volatility", vol)
@@ -45,7 +46,7 @@ class Actuary(Worker):
 	def thresh(self, sym, prop, comp):
 		pcfg = self.wheners[sym][prop]
 		for threshold in pcfg:
-			self.log("checking", sym, prop, "threshold", threshold, "against", diff)
+			self.log("checking", sym, prop, "threshold", threshold, "against", comp)
 			if (threshold < 0 and comp < threshold) or (threshold > 0 and comp > threshold):
 				for cb in pcfg[threshold]:
 					cb()
