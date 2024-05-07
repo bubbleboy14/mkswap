@@ -2,6 +2,8 @@ from rel.util import ask, emit
 from .base import Base
 from ..config import config
 
+scfg = config.strategy.slosh
+
 class Slosh(Base):
 	def __init__(self, symbol, recommender=None):
 		self.top, self.bottom = symbol
@@ -10,7 +12,15 @@ class Slosh(Base):
 		self.ratsym = "/".join(self.syms)
 		self.shouldUpdate = False
 		emit("observe", self.onesym)
+		emit("tellMeWhen", self.onesym, "volatility", scfg.vcutoff, self.hardsell)
+		emit("tellMeWhen", self.onesym, "volatility", -scfg.vcutoff, self.hardbuy)
 		Base.__init__(self, symbol, recommender)
+
+	def hardsell(self):
+		self.notice("hardsell!", ask("bestTrades", self.onesym, "sell", force=True))
+
+	def hardbuy(self):
+		self.notice("hardbuy!", ask("bestTrades", self.onesym, "buy", force=True))
 
 	def buysell(self, buysym, sellsym, size=10):
 		buyprice = ask("bestPrice", buysym, "buy")
@@ -42,7 +52,6 @@ class Slosh(Base):
 	def shouldOneSwap(self, side):
 		bias = self.stats["bias"]
 		bigone = bias > 0
-		scfg = config.strategy.slosh
 		if scfg.oneswap != "auto":
 			return scfg.oneswap
 		bals = ask("balances")
@@ -84,7 +93,6 @@ class Slosh(Base):
 
 	def hilo(self):
 		self.upStats()
-		scfg = config.strategy.slosh
 		volatility = self.stats["volatility"]
 		if abs(volatility) + abs(self.stats["bias"]) > scfg.vcutoff:
 			self.swap(volatility * scfg.vmult)
