@@ -20,7 +20,6 @@ class Manager(Worker):
 			setrec = True
 		else:
 			self.strategist = strategist
-		setrec and self.strategist.setRecommender(self.trader.recommend)
 
 	def sig(self):
 		return "Manager[%s:%s]"%(self.platform, self.symbol)

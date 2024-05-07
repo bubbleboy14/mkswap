@@ -5,8 +5,8 @@ from ..config import config
 hcfg = config.strategy.handcart
 
 class HandCart(Base):
-	def __init__(self, symbol, recommender=None):
-		Base.__init__(self, symbol, recommender)
+	def __init__(self, symbol):
+		Base.__init__(self, symbol)
 		emit("tellMeWhen", self.symbol, "price",
 			-hcfg.threshold, lambda : self.order("buy"))
 		emit("tellMeWhen", self.symbol, "price",

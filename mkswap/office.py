@@ -31,16 +31,15 @@ class Office(Worker):
 		self.actuary = Actuary()
 		self.accountant = Accountant(platform, symbols)
 		self.trader = globalTrade and Trader(platform)
-		trec = self.trader and self.trader.recommend
 		strat = strategies[strategy]
 		stish and setStaging(False)
 		self.stratname = strategy
 		self.multifeed = config.backend.mdv2 and MultiFeed()
-		self.strategist = globalStrategy and strat(symbols, trec)
+		self.strategist = globalStrategy and strat(symbols)
 		self.managers = {}
 		for symbol in symbols:
 			self.managers[symbol] = Manager(platform, symbol, self.review,
-				self.strategist or strat(symbol, trec), self.trader)
+				self.strategist or strat(symbol), self.trader)
 		self.log("initialized %s managers"%(len(symbols),))
 		stish and setStaging(True)
 		self.comptroller = Comptroller(self.price)

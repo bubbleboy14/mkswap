@@ -3,10 +3,9 @@ from ..base import Worker
 from ..config import config
 
 class Base(Worker):
-	def __init__(self, symbol, recommender=None):
+	def __init__(self, symbol):
 		self.stats = {}
 		self.symbol = symbol
-		self.recommender = recommender
 
 	def sig(self):
 		return "Strategist[%s:%s]"%(self.__class__.__name__, self.symbol)
@@ -16,9 +15,6 @@ class Base(Worker):
 
 	def tick(self, history=None):
 		pass
-
-	def setRecommender(self, recommender):
-		self.recommender = recommender
 
 	def process(self, symbol, event, history):
 		self.compare(symbol, event["side"], float(event["price"]), event, history)

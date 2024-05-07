@@ -5,7 +5,7 @@ from ..config import config
 scfg = config.strategy.slosh
 
 class Slosh(Base):
-	def __init__(self, symbol, recommender=None):
+	def __init__(self, symbol):
 		self.top, self.bottom = symbol
 		self.syms = [self.top[:3], self.bottom[:3]]
 		self.onesym = "".join(self.syms)
@@ -14,7 +14,7 @@ class Slosh(Base):
 		emit("observe", self.onesym)
 		emit("tellMeWhen", self.onesym, "volatility", scfg.vcutoff, self.hardsell)
 		emit("tellMeWhen", self.onesym, "volatility", -scfg.vcutoff, self.hardbuy)
-		Base.__init__(self, symbol, recommender)
+		Base.__init__(self, symbol)
 
 	def hardsell(self):
 		self.notice("hardsell!", ask("bestTrades", self.onesym, "sell", force=True))
@@ -25,13 +25,13 @@ class Slosh(Base):
 	def buysell(self, buysym, sellsym, size=10):
 		buyprice = ask("bestPrice", buysym, "buy")
 		sellprice = ask("bestPrice", sellsym, "sell")
-		self.recommender({
+		emit("trade", {
 			"side": "sell",
 			"symbol": sellsym,
 			"price": sellprice,
 			"amount": size / sellprice
 		})
-		self.recommender({
+		emit("trade", {
 			"side": "buy",
 			"symbol": buysym,
 			"price": buyprice,
@@ -42,7 +42,7 @@ class Slosh(Base):
 		vmult = config.strategy.slosh.vmult
 		price = ask("bestPrice", self.onesym, side)
 		denom = vmult * vmult / price # arbitrary
-		self.recommender({
+		emit("trade", {
 			"side": side,
 			"price": price,
 			"symbol": self.onesym,

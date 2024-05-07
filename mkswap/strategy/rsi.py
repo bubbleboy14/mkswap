@@ -52,7 +52,7 @@ class RSI(Base):
 					"symbol": symbol,
 					"amount": config.strategy.rsi.size * predefs["minimums"][symbol]
 				}
-				self.recommender(self.stats["lastrec"])
+				emit("trade", self.stats["lastrec"])
 		Base.compare(self, symbol, side, price, eobj, history)
 
 	def tick(self, history):
