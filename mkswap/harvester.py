@@ -24,8 +24,6 @@ class Harvester(Worker):
 		self.fullSym = self.accountant.fullSym(self.bigSym)
 		gem.accounts(network, self.setStorehouse)
 		listen("tooLow", self.tooLow)
-		listen("getUSD", self.getUSD)
-		listen("balTrades", self.balTrades)
 		rel.timeout(10, self.measure)
 		self.log("starting to measure")
 
@@ -80,8 +78,8 @@ class Harvester(Worker):
 				if sym == "diff":
 					continue
 				fs = self.accountant.fullSym(sym)
-				abal = self.getUSD(fs, abal)
-				tbal = self.getUSD(fs, tbal)
+				abal = ask("getUSD", fs, abal)
+				tbal = ask("getUSD", fs, tbal)
 				if abal is None:
 					self.log("no balance for", fs)
 					continue
@@ -110,45 +108,6 @@ class Harvester(Worker):
 		bot = config.harvester.bottom * 2
 		return max(0, bal - bot)
 
-	def getUSD(self, sym, bal):
-		iline = "getUSD(%s, %s) ->"%(sym, bal)
-		if type(bal) in [float, int]:
-			price = self.pricer(sym)
-			if not price:
-				return self.log("%s no price yet!"%(iline,))
-			bal *= price
-		else:
-			bal = float(bal[:-1].split(" ($").pop())
-		config.base.unspammed or self.log(iline, "$%s"%(bal,))
-		return bal
-
-	def fromUSD(self, sym, amount):
-		return round(amount / self.pricer(self.accountant.fullSym(sym[:3])), 6)
-
-	def balTrade(self, sym, side, amount, price):
-		order = {
-			"side": side,
-			"symbol": sym,
-			"price": price,
-			"amount": amount
-		}
-		self.log("balTrade(%s, %s, %s) placing order: %s"%(sym, side, amount, order))
-		emit("trade", order)
-
-	def balTrades(self, sym, side, amountUSD=10):
-		prices = ask("bestPrices", sym, side)
-		sym = sym.replace("/", "") # for ratio-derived prices
-		if config.harvester.bookbalance:
-			prices.update({"book": ask("bestOrder", sym, side)})
-		amount = self.fromUSD(sym, amountUSD)
-		self.log("balTrades(%s, %s, %s->%s)"%(sym, side, amountUSD, amount))
-		for span in prices:
-			self.balTrade(sym, side, amount, prices[span])
-		return {
-			"amount": amount,
-			"prices": prices
-		}
-
 	def orderBalance(self, sym, diff, balancers):
 		bals = {}
 		markets = ask("markets", sym)
@@ -158,7 +117,7 @@ class Harvester(Worker):
 			for fullSym in markets[side]:
 				for balancer in balancers:
 					if balancer in fullSym:
-						bals[fullSym] = self.balTrades(fullSym, side, diff)
+						bals[fullSym] = ask("bestTrades", fullSym, side, diff)
 		return {
 			"msg": "balance %s"%(sig,),
 			"data": bals

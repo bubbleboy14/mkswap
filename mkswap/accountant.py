@@ -49,6 +49,8 @@ class Accountant(Worker):
 		listen("affordable", self.affordable)
 		listen("realistic", self.realistic)
 		listen("fullSym", self.fullSym)
+		listen("fromUSD", self.fromUSD)
+		listen("getUSD", self.getUSD)
 
 	def getBalances(self):
 		self.log("getBalances!!!")
@@ -75,6 +77,21 @@ class Accountant(Worker):
 		for sym in self.syms:
 			self.counts["filled"] += len(ask("fills", sym))
 		return True
+
+	def getUSD(self, sym, bal):
+		iline = "getUSD(%s, %s) ->"%(sym, bal)
+		if type(bal) in [float, int]:
+			price = self.price(sym)
+			if not price:
+				return self.log("%s no price yet!"%(iline,))
+			bal *= price
+		else:
+			bal = float(bal[:-1].split(" ($").pop())
+		config.base.unspammed or self.log(iline, "$%s"%(bal,))
+		return bal
+
+	def fromUSD(self, sym, amount):
+		return round(amount / self.price(self.fullSym(sym[:3])), 6)
 
 	def fullSym(self, sym):
 		return sym + self._usd

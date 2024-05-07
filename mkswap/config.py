@@ -25,7 +25,8 @@ config = Config({
 		"unspammed": True
 	},
 	"trader": {
-		"force": False
+		"force": False,
+		"booktrades": True
 	},
 	"comptroller": {
 		"live": False,
@@ -38,7 +39,6 @@ config = Config({
 		"bottom": 40,
 		"skim": False,
 		"balance": True,
-		"bookbalance": True,
 		"network": "bitcoin"
 	},
 	"ndx": {

@@ -10,11 +10,36 @@ class Trader(Worker):
 		self.live = live
 		self.trades = []
 		self.agent = agencies[platform]()
+		listen("bestTrades", self.bestTrades)
 		listen("trade", self.recommend)
 
 	def note(self, recommendation):
 		# TODO: wrap in timestamped object...?
 		self.trades.append(recommendation)
+
+	def order(self, sym, side, amount, price):
+		order = {
+			"side": side,
+			"symbol": sym,
+			"price": price,
+			"amount": amount
+		}
+		self.log("order(%s, %s, %s): %s"%(sym, side, amount, order))
+		self.recommend(order)
+
+	def bestTrades(self, sym, side, amountUSD=10):
+		prices = ask("bestPrices", sym, side)
+		sym = sym.replace("/", "") # for ratio-derived prices
+		if config.trader.booktrades:
+			prices.update({"book": ask("bestOrder", sym, side)})
+		amount = ask("fromUSD", sym, amountUSD)
+		self.log("bestTrades(%s, %s, %s->%s)"%(sym, side, amountUSD, amount))
+		for span in prices:
+			self.order(sym, side, amount, prices[span])
+		return {
+			"amount": amount,
+			"prices": prices
+		}
 
 	def recommend(self, rec):
 		self.log("recommend(%s)"%(rec,))
