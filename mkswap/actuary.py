@@ -86,6 +86,7 @@ class Actuary(Worker):
 
 	def compare(self, c1, c2, sym, pref=None):
 		terms = list(pref and map(lambda t : pref + t, TERMS) or TERMS)
+		pref = pref or "price"
 		t1 = terms.pop(0)
 		while terms:
 			for t2 in terms:
