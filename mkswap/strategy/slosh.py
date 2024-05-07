@@ -76,10 +76,10 @@ class Slosh(Base):
 				self.buysell(self.top, self.bottom, size)
 
 	def upStats(self):
-		mad = self.stats["mad"] = ask("mad", self.top, self.bottom)
-		sigma = self.stats["sigma"] = ask("sigma", self.top, self.bottom)
-		self.stats["turb"] = ask("volatility", self.top, self.bottom, mad)
-		self.stats["volatility"] = ask("volatility", self.top, self.bottom, sigma)
+		mad = self.stats["mad"] = ask("rmad", self.top, self.bottom)
+		sigma = self.stats["sigma"] = ask("rsigma", self.top, self.bottom)
+		self.stats["turb"] = ask("rvolatility", self.top, self.bottom, mad)
+		self.stats["volatility"] = ask("rvolatility", self.top, self.bottom, sigma)
 		self.stats["bias"] = (ask("price", self.onesym) / ask("price", self.ratsym)) - 1
 
 	def hilo(self):
