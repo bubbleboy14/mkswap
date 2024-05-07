@@ -21,13 +21,15 @@ class NDX(Worker):
 		self._volumes = {}
 		self.observers = {}
 		self.histories = { "trade": {}, "ask": {}, "bid": {} }
-		listen("mad", self.mad)
 		listen("ave", self.ave)
+		listen("mad", self.mad)
+		listen("rmad", self.rmad)
 		listen("fave", self.fave)
 		listen("price", self.price)
 		listen("quote", self.quote)
 		listen("ratio", self.ratio)
 		listen("sigma", self.sigma)
+		listen("rsigma", self.rsigma)
 		listen("histUp", self.histUp)
 		listen("markets", self.markets)
 		listen("observe", self.observe)
@@ -37,6 +39,7 @@ class NDX(Worker):
 		listen("perStretch", self.perStretch)
 		listen("bestPrices", self.bestPrices)
 		listen("volatility", self.volatility)
+		listen("rvolatility", self.rvolatility)
 		listen("observersReady", self.observersReady)
 
 	def volumes(self):
@@ -111,26 +114,36 @@ class NDX(Worker):
 		rats = self.ratios[top][bot]
 		return rats["current"], rats["all"][:-1]
 
-	def mad(self, top, bot, span="short"):
+	def mad(self, cur, rest):
 		adiffs = []
-		cur, rats = self.nowAndThen(top, bot)
-		for r in rats[-getSpan(span):]:
+		for r in rest:
 			adiffs.append(abs(r - cur))
 		return self.ave(adiffs)
 
-	def sigma(self, top, bot, span="short"):
-		sqds = []
+	def rmad(self, top, bot, span="short"):
 		cur, rats = self.nowAndThen(top, bot)
-		for r in rats[-getSpan(span):]:
+		return self.mad(cur, rats[-getSpan(span):])
+
+	def sigma(self, cur, rest):
+		sqds = []
+		for r in rest:
 			d = r - cur
 			sqds.append(d * d)
 		return sqrt(self.ave(sqds))
 
-	def volatility(self, top, bot, sigma, span="short"):
-		rstats = self.ratio(top, bot)
+	def rsigma(self, top, bot, span="short"):
+		sqds = []
+		cur, rats = self.nowAndThen(top, bot)
+		return self.sigma(cur, rats[-getSpan(span):])
+
+	def volatility(self, cur, ave, sigma):
 		if not sigma:
 			return 0
-		return (rstats["current"] - rstats[span]) / sigma
+		return (cur - ave) / sigma
+
+	def rvolatility(self, top, bot, sigma, span="short"):
+		rstats = self.ratio(top, bot)
+		return self.volatility(rstats["current"], rstats[span], sigma)
 
 	def ave(self, symbol, limit=None, ratio=False, history="trade"):
 		if ratio:
