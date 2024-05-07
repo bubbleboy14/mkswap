@@ -67,9 +67,10 @@ class Actuary(Worker):
 		else:
 			self.candles[sym] = []
 			self.fcans[sym] = []
-		for can in cans:
-			self.addCan(can, sym, prev)
+		for can in cans[:-1]:
+			self.addCan(can, sym)
 			prev = can
+		self.addCan(cans[-1], sym, prev)
 		self.tellWheners(sym)
 
 	def addCan(self, candle, sym, prev=None):
@@ -244,8 +245,10 @@ class Actuary(Worker):
 					score = self.score(sym)
 					if score > 0.5:
 						self.predictions[sym] = "buy"
+						emit("hint", sym, "buy", score)
 					elif score < -0.5:
 						self.predictions[sym] = "sell"
+						emit("hint", sym, "sell", score)
 					else:
 						self.predictions[sym] = "chill"
 			rhist.append(rat)
