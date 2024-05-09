@@ -13,6 +13,10 @@ class Base(Worker):
 	def log(self, *msg):
 		config.strategy.base.loud and Worker.log(self, *msg)
 
+	def stat(self, name, value):
+		self.stats[name] = value
+		return value
+
 	def tick(self, history=None):
 		pass
 

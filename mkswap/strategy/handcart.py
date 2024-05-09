@@ -14,9 +14,6 @@ class HandCart(Base):
 		listen("orderFilled", self.filled)
 		self.log("loaded")
 
-	def stat(self, name, value):
-		self.stats[name] = value
-
 	def filled(self, trade):
 		if trade["remaining"]:
 			return self.log("order filled ... incomplete")

@@ -20,11 +20,10 @@ class RSI(Base):
 		self.log("compare", side, price, remaining)
 		hs = history[side]
 		hwa = history["w_average"]
-		self.stats["latest"] = {
+		hs.append(self.stat("latest", {
 			"price": price,
 			"remaining": remaining
-		}
-		hs.append(self.stats["latest"])
+		}))
 		hwa.append(self.weighted_average(hs))
 		self.log(side, "weighted average (full):", hwa[-1])
 		lspan = getSpan("long")
@@ -46,13 +45,12 @@ class RSI(Base):
 					self.log("bid price > average -> SELL!!!!")
 					rec = "sell"
 			if rec:
-				self.stats["lastrec"] = {
+				emit("trade", self.stat("lastrec", {
 					"side": rec,
 					"price": price,
 					"symbol": symbol,
 					"amount": config.strategy.rsi.size * predefs["minimums"][symbol]
-				}
-				emit("trade", self.stats["lastrec"])
+				}))
 		Base.compare(self, symbol, side, price, eobj, history)
 
 	def tick(self, history):
