@@ -14,10 +14,11 @@ class Cross(Base):
 		self.notice("hard %s!"%(side,), ask("bestTrades", sym, side, force=True))
 
 	def hint(self, sym, side, score):
+		if sym != self.symbol: return
 		self.stat(side, score)
 		if abs(score) < config.strategy.cross.score:
 			return
-		price = ask("bestPrice", sym, side)
+		price = self.stat("best%s"%(side,), ask("bestPrice", sym, side))
 		amount = score / price
 		if side == "sell":
 			amount *= -1
