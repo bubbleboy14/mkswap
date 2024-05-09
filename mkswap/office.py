@@ -16,7 +16,7 @@ from .gem import gem
 from .config import config
 
 class Office(Worker):
-	def __init__(self, platform=predefs["platform"], symbols=[], strategy=predefs["strategy"], globalStrategy=False, globalTrade=False):
+	def __init__(self, platform=predefs["platform"], symbols=[], strategy=predefs["strategy"], globalStrategy=False, globalTrade=True):
 		wsdebug(config.feeder.wsdebug)
 		stish = config.office.stagish
 		self.platform = platform

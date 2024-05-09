@@ -24,7 +24,6 @@ predefs = {
 }
 presets = [{
 	"strategy": "slosh",
-	"globalTrade": True,
 	"globalStrategy": True,
 	"symbols": ["ETHUSD", "BTCUSD"]
 }, {
@@ -42,7 +41,6 @@ presets = [{
 }, {
 	"platform": "dydx",
 	"strategy": "slosh",
-	"globalTrade": True,
 	"globalStrategy": True,
 	"symbols": ["BTC-USD", "ETH-USD"]
 }, {
