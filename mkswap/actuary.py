@@ -31,7 +31,7 @@ class Actuary(Worker):
 		rest, cur = cans[:-1], cans[-1]
 		curclose = cur["close"]
 		if "price" in wcfg:
-			prev = rest[-4]
+			prev = rest[-1]
 			diff = 1 - prev["close"] / curclose # TODO: derive/use average instead?
 			emit("fave", "%spdiff"%(sym,), diff)
 			self.thresh(sym, "price", diff)
@@ -229,7 +229,7 @@ class Actuary(Worker):
 			self.ratios[sym] = {
 				"history": []
 			}
-			emit("mfsub", sym, lambda c : self.candle(c, sym), "candles_1m")
+			emit("mfsub", sym, lambda c : self.candle(c, sym), "candles_5m")
 
 	def hints(self, vscores):
 		for sym in vscores:
