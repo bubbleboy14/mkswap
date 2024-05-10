@@ -1,4 +1,4 @@
-from rel.util import ask, listen
+from rel.util import ask, emit, listen
 from .backend import predefs
 from .agent import agencies
 from .base import Worker
