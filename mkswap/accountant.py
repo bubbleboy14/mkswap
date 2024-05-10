@@ -223,8 +223,17 @@ class Accountant(Worker):
 		trade["price"] = round(oprice + pdiff, predefs["sigfigs"].get(sym, 2))
 		self.log("nudge(%s -> %s)"%(oprice, trade["price"]), trade)
 
-	def realistic(self, trade, feeSide="taker", asScore=False, nudge=False, nudged=0):
+	def downsize(self, trade):
+		origamount = float(trade["amount"])
+		trade["amount"] = str(round(origamount / 2, 6))
+		self.log("downsize(%s -> %s)"%(origamount, trade["amount"]), trade)
+		return trade
+
+	def realistic(self, trade, feeSide="taker", asScore=False, nudge=False, nudged=0, downsize=False):
 		if not self.updateBalances(trade, self._balances, test=True):
+			if downsize:
+				return self.realistic(self.downsize(trade),
+					feeSide, asScore, nudge, downsize=True)
 			return asScore and -1
 		score = gain = ask("estimateGain", trade)
 		fee = ask("estimateFee", trade, feeSide)
@@ -266,7 +275,9 @@ class Accountant(Worker):
 	def affordable(self, prop, force=False):
 		if prop["symbol"] not in self.syms:
 			self.syms.append(prop["symbol"])
-		if (force or self.realistic(prop, nudge=config.accountant.nudge)) and self.updateBalances(prop, force=force):
+		looksgood = force or self.realistic(prop,
+			nudge=config.accountant.nudge, downsize=True)
+		if looksgood and self.updateBalances(prop, force=force):
 			self.counts["approved"] += 1
 			self.log("trade approved!", prop)
 			return True
