@@ -14,6 +14,8 @@ class Accountant(Worker):
 			"filled": 0,
 			"nudges": 0,
 			"nudged": 0,
+			"downsizes": 0,
+			"downsized": 0,
 			"active": 0,
 			"approved": 0,
 			"rejected": 0,
@@ -224,16 +226,19 @@ class Accountant(Worker):
 		self.log("nudge(%s -> %s)"%(oprice, trade["price"]), trade)
 
 	def downsize(self, trade):
+		self.counts["downsizes"] += 1
 		origamount = float(trade["amount"])
 		trade["amount"] = str(round(origamount / 2, 6))
 		self.log("downsize(%s -> %s)"%(origamount, trade["amount"]), trade)
 		return trade
 
-	def realistic(self, trade, feeSide="taker", asScore=False, nudge=False, nudged=0, downsize=False):
+	def realistic(self, trade, feeSide="taker", asScore=False, nudge=False, nudged=0, downsize=False, downsized=0):
 		if not self.updateBalances(trade, self._balances, test=True):
 			if downsize:
-				return self.realistic(self.downsize(trade),
-					feeSide, asScore, nudge, downsize=True)
+				if not downsized:
+					self.counts["downsized"] += 1
+				return self.realistic(self.downsize(trade), feeSide,
+					asScore, nudge, nudged, downsize, downsized + 1)
 			return asScore and -1
 		score = gain = ask("estimateGain", trade)
 		fee = ask("estimateFee", trade, feeSide)
