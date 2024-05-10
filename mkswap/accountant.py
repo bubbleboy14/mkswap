@@ -229,12 +229,12 @@ class Accountant(Worker):
 	def downsize(self, trade):
 		self.counts["downsizes"] += 1
 		origamount = trade["amount"]
-		trade["amount"] = origamount / 2
+		trade["amount"] = origamount / 3
 		self.log("downsize(%s -> %s)"%(origamount, trade["amount"]), trade)
 		return trade
 
 	def tooBig(self, trade):
-		return not self.updateBalances(trade, self._balances, test=True)
+		return trade["amount"] and not self.updateBalances(trade, self._balances, test=True)
 
 	def resize(self, trade):
 		if self.tooBig(trade):
