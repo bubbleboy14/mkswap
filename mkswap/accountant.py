@@ -53,6 +53,7 @@ class Accountant(Worker):
 		listen("fullSym", self.fullSym)
 		listen("fromUSD", self.fromUSD)
 		listen("getUSD", self.getUSD)
+		listen("resize", self.resize)
 
 	def getBalances(self):
 		self.log("getBalances!!!")
@@ -227,18 +228,30 @@ class Accountant(Worker):
 
 	def downsize(self, trade):
 		self.counts["downsizes"] += 1
-		origamount = float(trade["amount"])
-		trade["amount"] = str(round(origamount / 2, 6))
+		origamount = trade["amount"]
+		trade["amount"] = origamount / 2
 		self.log("downsize(%s -> %s)"%(origamount, trade["amount"]), trade)
 		return trade
 
-	def realistic(self, trade, feeSide="taker", asScore=False, nudge=False, nudged=0, downsize=False, downsized=0):
+	def tooBig(self, trade):
+		return not self.updateBalances(trade, self._balances, test=True)
+
+	def resize(self, trade):
+		if self.tooBig(trade):
+			self.counts["downsized"] += 1
+			while self.tooBig(trade):
+				self.downsize(trade)
+		mins = predefs["minimums"]
+		size = trade["amount"]
+		sym = trade["symbol"]
+		if size < mins[sym]:
+			trade["amount"] = mins[sym]
+			self.log("order is too small! increased amount from", size, "to", trade["amount"])
+		trade["amount"] = round(trade["amount"], 6)
+		trade["price"] = round(trade["price"], predefs["sigfigs"].get(sym, 2))
+
+	def realistic(self, trade, feeSide="taker", asScore=False, nudge=False, nudged=0):
 		if not self.updateBalances(trade, self._balances, test=True):
-			if downsize:
-				if not downsized:
-					self.counts["downsized"] += 1
-				return self.realistic(self.downsize(trade), feeSide,
-					asScore, nudge, nudged, downsize, downsized + 1)
 			return asScore and -1
 		score = gain = ask("estimateGain", trade)
 		fee = ask("estimateFee", trade, feeSide)
@@ -280,8 +293,7 @@ class Accountant(Worker):
 	def affordable(self, prop, force=False):
 		if prop["symbol"] not in self.syms:
 			self.syms.append(prop["symbol"])
-		looksgood = force or self.realistic(prop,
-			nudge=config.accountant.nudge, downsize=True)
+		looksgood = force or self.realistic(prop, nudge=config.accountant.nudge)
 		if looksgood and self.updateBalances(prop, force=force):
 			self.counts["approved"] += 1
 			self.log("trade approved!", prop)
