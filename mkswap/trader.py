@@ -1,4 +1,4 @@
-from rel.util import ask, emit, listen
+from rel.util import ask, listen
 from .backend import predefs
 from .agent import agencies
 from .base import Worker
@@ -44,8 +44,7 @@ class Trader(Worker):
 
 	def recommend(self, rec):
 		self.log("recommend(%s)"%(rec,))
-		emit("resize", rec)
-		self.recommendations.append(rec)
+		self.recommendations.append(ask("resize", rec))
 
 	def shouldTrade(self, recommendation):
 		self.log("assessing recommendation:", recommendation)

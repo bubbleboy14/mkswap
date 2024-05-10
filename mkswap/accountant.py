@@ -249,6 +249,7 @@ class Accountant(Worker):
 			self.log("order is too small! increased amount from", size, "to", trade["amount"])
 		trade["amount"] = round(trade["amount"], 6)
 		trade["price"] = round(trade["price"], predefs["sigfigs"].get(sym, 2))
+		return trade
 
 	def realistic(self, trade, feeSide="taker", asScore=False, nudge=False, nudged=0):
 		if not self.updateBalances(trade, self._balances, test=True):
