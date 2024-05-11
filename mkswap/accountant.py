@@ -270,7 +270,7 @@ class Accountant(Worker):
 			if v > bz[sym2] and not force:
 				self.log("not enough %s!"%(sym2,))
 				if test and repair:
-					prop["amount"] = bz[sym2] / 3
+					prop["amount"] = bz[sym2] / 8
 					self.log("downsized order: %s -> %s"%(s, prop["amount"]))
 				return False
 			if not test:
@@ -280,8 +280,8 @@ class Accountant(Worker):
 			if s > bz[sym1] and not force:
 				self.log("not enough %s!"%(sym1,))
 				if test and repair:
-					prop["amount"] = bz[sym1] / 3
-					self.log("reducing amount to third of balance: %s -> %s"%(s, prop["amount"]))
+					prop["amount"] = bz[sym1] / 8
+					self.log("downsized order: %s -> %s"%(s, prop["amount"]))
 				return False
 			if not test:
 				bz[sym2] += rv
