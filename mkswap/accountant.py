@@ -271,7 +271,7 @@ class Accountant(Worker):
 				self.log("not enough %s!"%(sym2,))
 				if test and repair:
 					prop["amount"] = bz[sym2] / 3
-					self.log("reducing amount to third of balance: %s -> %s"%(s, prop["amount"]))
+					self.log("downsized order: %s -> %s"%(s, prop["amount"]))
 				return False
 			if not test:
 				bz[sym2] -= rv
