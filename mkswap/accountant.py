@@ -14,7 +14,6 @@ class Accountant(Worker):
 			"filled": 0,
 			"nudges": 0,
 			"nudged": 0,
-			"downsizes": 0,
 			"downsized": 0,
 			"active": 0,
 			"approved": 0,
@@ -226,21 +225,13 @@ class Accountant(Worker):
 		trade["price"] = round(oprice + pdiff, predefs["sigfigs"].get(sym, 2))
 		self.log("nudge(%s -> %s)"%(oprice, trade["price"]), trade)
 
-	def downsize(self, trade):
-		self.counts["downsizes"] += 1
-		origamount = trade["amount"]
-		trade["amount"] = origamount / 3
-		self.log("downsize(%s -> %s)"%(origamount, trade["amount"]), trade)
-		return trade
-
 	def tooBig(self, trade):
-		return trade["amount"] and not self.updateBalances(trade, self._balances, test=True)
+		return not self.updateBalances(trade, self._balances, test=True)
 
 	def resize(self, trade):
 		if self.tooBig(trade):
 			self.counts["downsized"] += 1
-			while self.tooBig(trade):
-				self.downsize(trade)
+			self.updateBalances(trade, self._balances, test=True, repair=True)
 		mins = predefs["minimums"]
 		size = trade["amount"]
 		sym = trade["symbol"]
@@ -267,7 +258,7 @@ class Accountant(Worker):
 			return score
 		return score > 0
 
-	def updateBalances(self, prop, bz=None, revert=False, force=False, test=False):
+	def updateBalances(self, prop, bz=None, revert=False, force=False, test=False, repair=False):
 		bz = bz or self._theoretical
 		s = rs = float(prop.get("amount", 10))
 		v = rv = s * float(prop["price"])
@@ -275,9 +266,12 @@ class Accountant(Worker):
 			rs *= -1
 			rv *= -1
 		sym1, sym2 = self.pair(prop["symbol"])
-		if prop["side"] == "buy":
+		if prop["side"] == "buy": # TODO: condense this
 			if v > bz[sym2] and not force:
 				self.log("not enough %s!"%(sym2,))
+				if test and repair:
+					prop["amount"] = bz[sym2] / 3
+					self.log("reducing amount to third of balance: %s -> %s"%(s, prop["amount"]))
 				return False
 			if not test:
 				bz[sym2] -= rv
@@ -285,6 +279,9 @@ class Accountant(Worker):
 		else:
 			if s > bz[sym1] and not force:
 				self.log("not enough %s!"%(sym1,))
+				if test and repair:
+					prop["amount"] = bz[sym1] / 3
+					self.log("reducing amount to third of balance: %s -> %s"%(s, prop["amount"]))
 				return False
 			if not test:
 				bz[sym2] += rv
