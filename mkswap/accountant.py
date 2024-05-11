@@ -262,30 +262,30 @@ class Accountant(Worker):
 		bz = bz or self._theoretical
 		s = rs = float(prop.get("amount", 10))
 		v = rv = s * float(prop["price"])
+		side = prop["side"]
+		sym1, sym2 = self.pair(prop["symbol"])
+		if side == "buy":
+			fromSym = sym2
+			toSym = sym1
+			fromVal = v
+			rv *= -1
+		else:
+			fromSym = sym1
+			toSym = sym2
+			fromVal = s
+			rs *= -1
 		if revert:
 			rs *= -1
 			rv *= -1
-		sym1, sym2 = self.pair(prop["symbol"])
-		if prop["side"] == "buy": # TODO: condense this
-			if v > bz[sym2] and not force:
-				self.log("not enough %s!"%(sym2,))
-				if test and repair:
-					prop["amount"] = bz[sym2] / 8
-					self.log("downsized order: %s -> %s"%(s, prop["amount"]))
-				return False
-			if not test:
-				bz[sym2] -= rv
-				bz[sym1] += rs
-		else:
-			if s > bz[sym1] and not force:
-				self.log("not enough %s!"%(sym1,))
-				if test and repair:
-					prop["amount"] = bz[sym1] / 8
-					self.log("downsized order: %s -> %s"%(s, prop["amount"]))
-				return False
-			if not test:
-				bz[sym2] += rv
-				bz[sym1] -= rs
+		if fromVal > bz[fromSym] and not force:
+			self.log("not enough %s for %s!"%(fromSym, side))
+			if test and repair:
+				prop["amount"] = bz[fromSym] / 8
+				self.log("downsized order: %s -> %s"%(s, prop["amount"]))
+			return False
+		if not test:
+			bz[sym2] += rv
+			bz[sym1] += rs
 		return True
 
 	def affordable(self, prop, force=False):
