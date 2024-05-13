@@ -63,7 +63,7 @@ class Accountant(Worker):
 		for bal in bals:
 			sym = bal["currency"]
 			if sym in self._balances:
-				self._balances[sym] = float(bal["available"])
+				self._balances[sym] = float(bal["amount"])
 		self._obals.update(self._balances)
 		self._theoretical.update(self._balances)
 		self.log("setBalances", self._balances)
