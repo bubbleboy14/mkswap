@@ -154,6 +154,8 @@ class Gem(Worker):
 		self.get("/v1/order/new", cb, trade, trade["client_order_id"])
 
 	def cancel(self, trade, cb=None):
+		if "order_id" not in trade:
+			return self.warn("cancel() aborted - no order_id!", trade)
 		self.inc("cancels")
 		self.get("/v1/order/cancel", cb, {
 			"order_id": trade["order_id"]
