@@ -26,6 +26,7 @@ config = Config({
 		"unspammed": True
 	},
 	"trader": {
+		"size": 8,
 		"force": False,
 		"booktrades": True
 	},

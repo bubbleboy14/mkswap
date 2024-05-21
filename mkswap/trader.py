@@ -28,7 +28,8 @@ class Trader(Worker):
 		self.log("order(%s, %s, %s): %s"%(sym, side, amount, order))
 		self.recommend(order)
 
-	def bestTrades(self, sym, side, amountUSD=10, force=False):
+	def bestTrades(self, sym, side, amountUSD=None, force=False):
+		amountUSD = amountUSD or config.trader.size
 		prices = ask("bestPrices", sym, side)
 		sym = sym.replace("/", "") # for ratio-derived prices
 		if config.trader.booktrades:
