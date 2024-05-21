@@ -280,7 +280,7 @@ class Accountant(Worker):
 		if fromVal > bz[fromSym] and not force:
 			self.log("not enough %s for %s!"%(fromSym, side))
 			if test and repair:
-				prop["amount"] = bz[fromSym] / 8
+				prop["amount"] = bz[fromSym] / config.accountant.split
 				self.log("downsized order: %s -> %s"%(s, prop["amount"]))
 			return False
 		if not test:

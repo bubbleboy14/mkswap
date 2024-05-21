@@ -7,6 +7,7 @@ config = Config({
 		"large": 360
 	},
 	"accountant": {
+		"split": 16,
 		"nmult": 1.0,
 		"nudge": "auto",
 		"capped": "auto"
