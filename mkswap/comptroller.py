@@ -187,7 +187,7 @@ class Comptroller(Feeder):
 					if limit:
 						ratio = float(tp) / curprice
 						toofar = abs(1 - ratio) > limit
-					if s < 0 or toofar:
+					if s < -config.comptroller.leeway or toofar:
 						cancels.append(tnum)
 			else:
 				skips += 1

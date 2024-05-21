@@ -33,6 +33,7 @@ config = Config({
 	"comptroller": {
 		"live": False,
 		"actives": 20,
+		"leeway": 0.001,
 		"prunelimit": 0.1,
 		"canceleach": False
 	},
