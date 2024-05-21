@@ -32,7 +32,7 @@ class Trader(Worker):
 		amountUSD = amountUSD or config.trader.size
 		prices = ask("bestPrices", sym, side)
 		sym = sym.replace("/", "") # for ratio-derived prices
-		if config.trader.booktrades:
+		if config.trader.book:
 			prices.update({"book": ask("bestOrder", sym, side)})
 		amount = ask("fromUSD", sym, amountUSD)
 		self.log("bestTrades(%s, %s, %s->%s)"%(sym, side, amountUSD, amount))

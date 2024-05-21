@@ -27,8 +27,8 @@ config = Config({
 	},
 	"trader": {
 		"size": 8,
-		"force": False,
-		"booktrades": True
+		"book": True,
+		"force": False
 	},
 	"comptroller": {
 		"live": False,
