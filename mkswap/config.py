@@ -35,7 +35,7 @@ config = Config({
 		"actives": 20,
 		"leeway": 0.001,
 		"prunelimit": 0.1,
-		"canceleach": False
+		"canceleach": True
 	},
 	"harvester": {
 		"batch": 10,
