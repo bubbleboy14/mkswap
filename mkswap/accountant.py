@@ -60,10 +60,14 @@ class Accountant(Worker):
 
 	def setBalances(self, bals):
 		self.log("setBalances", bals)
+		syms = list(self._balances.keys())
 		for bal in bals:
 			sym = bal["currency"]
 			if sym in self._balances:
 				self._balances[sym] = float(bal["amount"])
+				syms.remove(sym)
+		for sym in syms:
+			self._balances[sym] = 0
 		self._obals.update(self._balances)
 		self._theoretical.update(self._balances)
 		self.log("setBalances", self._balances)
