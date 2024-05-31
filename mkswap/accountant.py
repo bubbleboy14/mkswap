@@ -22,11 +22,14 @@ class Accountant(Worker):
 		}
 		self.syms = symbols
 		self._skimmed = {}
-		self._obals = {}
-		self._theoretical = {}
-		self._balances = balances
-		self._obals.update(balances)
-		self._theoretical.update(balances)
+		bz = self._balances = {
+			"initial": {},
+			"available": {},
+			"theoretical": {},
+			"actual": balances
+		}
+		bz["initial"].update(balances)
+		bz["theoretical"].update(balances)
 		self.starttime = datetime.now()
 		self.platform = platform
 		self._usd = "USD"
@@ -60,16 +63,20 @@ class Accountant(Worker):
 
 	def setBalances(self, bals):
 		self.log("setBalances", bals)
-		syms = list(self._balances.keys())
+		bz = self._balances
+		acz = bz["actual"]
+		avz = bz["available"]
+		syms = list(az.keys())
 		for bal in bals:
 			sym = bal["currency"]
-			if sym in self._balances:
-				self._balances[sym] = float(bal["amount"])
+			if sym in syms:
+				avz[sym] = float(bal["available"])
+				acz[sym] = float(bal["amount"])
 				syms.remove(sym)
 		for sym in syms:
-			self._balances[sym] = 0
-		self._obals.update(self._balances)
-		self._theoretical.update(self._balances)
+			avz[sym] = acz[sym] = 0
+		bz["initial"].update(acz)
+		bz["theoretical"].update(acz)
 		self.log("setBalances", self._balances)
 		transpire("balancesReady")
 
@@ -113,32 +120,29 @@ class Accountant(Worker):
 		return True
 
 	def fullBalances(self, nodph=True, pricer=None, mode="both", nousd=False, history="trade"):
-		if mode == "actual":
-			mode = self._balances
-		elif mode == "theoretical":
-			mode = self._theoretical
 		return self.balances(pricer, mode, nodph, nousd, history)
 
-	def balances(self, pricer=None, bz=None, nodph=False, nousd=False, history="trade"):
+	def balances(self, pricer=None, bz="theoretical", nodph=False, nousd=False, history="trade"):
+		obz = self._balances["initial"]
 		if not self.accountsReady(history):
 			return { "waiting": "balances not ready" }
 		if bz == "both":
 			return {
-				"actual": self.balances(pricer, self._balances, nodph),
+				"actual": self.balances(pricer, "actual", nodph),
 				"theoretical": self.balances(pricer, nodph=nodph)
 			}
 		elif bz == "all":
 			return {
-				"initial": self._obals,
+				"initial": obz,
+				"actual": self.balances(pricer, "actual", nodph),
 				"theoretical": self.balances(pricer, nodph=nodph),
-				"actual": self.balances(pricer, self._balances, nodph),
+				"available": self.balances(pricer, "available", nodph),
 				"ask": self.balances(pricer, nodph=nodph, history="ask"),
 				"bid": self.balances(pricer, nodph=nodph, history="bid")
 			}
 		pricer = pricer or self.price
+		bz = self._balances[bz]
 		total = 0
-		bz = bz or self._theoretical
-		obz = self._obals
 		vz = {}
 		for sym in bz:
 			amount = bz[sym] - obz[sym]
@@ -164,7 +168,7 @@ class Accountant(Worker):
 		self.log("order cancelled!")
 
 	def orderFilled(self, trade):
-		self.updateBalances(trade, self._balances, force=True)
+		self.updateBalances(trade, "actual", force=True)
 		complete = not trade["remaining"]
 		side = trade["side"]
 		price = trade["price"]
@@ -179,7 +183,7 @@ class Accountant(Worker):
 			adjustment = amount * pdiff
 			self.log(sig, "adjusting", feesym, "by",
 				amount, "times", pdiff, "=", adjustment)
-			self._theoretical[feesym] += adjustment
+			self._balances["theoretical"][feesym] += adjustment
 		self.counts["fills"] += 1
 		if complete:
 			self.counts["filled"] += 1
@@ -212,8 +216,8 @@ class Accountant(Worker):
 
 	def deduct(self, sym, amount):
 		self.log("deducting", amount, "from", sym)
-		self._theoretical[sym] -= amount
-		self._balances[sym] -= amount
+		for b in ["actual", "theoretical"]:
+			self._balances[b][sym] -= amount
 
 	def shouldNudge(self, nudge):
 		if nudge == "auto":
@@ -230,12 +234,12 @@ class Accountant(Worker):
 		self.log("nudge(%s -> %s)"%(oprice, trade["price"]), trade)
 
 	def tooBig(self, trade):
-		return not self.updateBalances(trade, self._balances, test=True)
+		return not self.updateBalances(trade, "available", test=True)
 
 	def resize(self, trade):
 		if self.tooBig(trade):
 			self.counts["downsized"] += 1
-			self.updateBalances(trade, self._balances, test=True, repair=True)
+			self.updateBalances(trade, "available", test=True, repair=True)
 		mins = predefs["minimums"]
 		size = trade["amount"]
 		sym = trade["symbol"]
@@ -247,7 +251,7 @@ class Accountant(Worker):
 		return trade
 
 	def realistic(self, trade, feeSide="taker", asScore=False, nudge=False, nudged=0):
-		if not self.updateBalances(trade, self._balances, test=True):
+		if not self.updateBalances(trade, "actual", test=True):
 			return asScore and -1
 		score = gain = ask("estimateGain", trade)
 		fee = ask("estimateFee", trade, feeSide)
@@ -262,8 +266,8 @@ class Accountant(Worker):
 			return score
 		return score > 0
 
-	def updateBalances(self, prop, bz=None, revert=False, force=False, test=False, repair=False):
-		bz = bz or self._theoretical
+	def updateBalances(self, prop, bz="theoretical", revert=False, force=False, test=False, repair=False):
+		bz = self._balances[bz]
 		s = rs = float(prop.get("amount", 10))
 		v = rv = s * float(prop["price"])
 		side = prop["side"]
