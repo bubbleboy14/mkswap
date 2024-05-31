@@ -23,13 +23,13 @@ class Accountant(Worker):
 		self.syms = symbols
 		self._skimmed = {}
 		bz = self._balances = {
+			"actual": {},
 			"initial": {},
 			"available": {},
-			"theoretical": {},
-			"actual": balances
+			"theoretical": {}
 		}
-		bz["initial"].update(balances)
-		bz["theoretical"].update(balances)
+		for bal in bz:
+			bz[bal].update(balances)
 		self.starttime = datetime.now()
 		self.platform = platform
 		self._usd = "USD"
@@ -51,6 +51,7 @@ class Accountant(Worker):
 		listen("accountsReady", self.accountsReady)
 		listen("balances", self.fullBalances)
 		listen("realistic", self.realistic)
+		listen("available", self.available)
 		listen("approved", self.approved)
 		listen("fullSym", self.fullSym)
 		listen("fromUSD", self.fromUSD)
@@ -65,18 +66,17 @@ class Accountant(Worker):
 		self.log("setBalances", bals)
 		bz = self._balances
 		acz = bz["actual"]
-		avz = bz["available"]
 		syms = list(az.keys())
 		for bal in bals:
 			sym = bal["currency"]
 			if sym in syms:
-				avz[sym] = acz[sym] = float(bal["amount"])
+				acz[sym] = float(bal["amount"])
 				syms.remove(sym)
 		for sym in syms:
-			avz[sym] = acz[sym] = 0
-		bz["initial"].update(acz)
-		bz["theoretical"].update(acz)
-		self.log("setBalances", self._balances)
+			acz[sym] = 0
+		for bal in ["initial", "available", "theoretical"]:
+			bz[bal].update(acz)
+		self.log("setBalances", acz)
 		transpire("balancesReady")
 
 	def pair(self, syms):
@@ -110,6 +110,12 @@ class Accountant(Worker):
 
 	def price(self, sym, history="trade", fallback=None):
 		return ask("price", sym, history=history, fallback=fallback)
+
+	def available(self, sym=None):
+		abz = self._balances["available"]
+		if sym:
+			return abz[sym]
+		return abz
 
 	def accountsReady(self, history="trade"):
 		for sym in self.syms:
