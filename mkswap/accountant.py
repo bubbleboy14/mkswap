@@ -70,8 +70,7 @@ class Accountant(Worker):
 		for bal in bals:
 			sym = bal["currency"]
 			if sym in syms:
-				avz[sym] = float(bal["available"])
-				acz[sym] = float(bal["amount"])
+				avz[sym] = acz[sym] = float(bal["amount"])
 				syms.remove(sym)
 		for sym in syms:
 			avz[sym] = acz[sym] = 0
@@ -216,7 +215,7 @@ class Accountant(Worker):
 
 	def deduct(self, sym, amount):
 		self.log("deducting", amount, "from", sym)
-		for b in ["actual", "theoretical"]:
+		for b in ["actual", "available", "theoretical"]:
 			self._balances[b][sym] -= amount
 
 	def shouldNudge(self, nudge):
