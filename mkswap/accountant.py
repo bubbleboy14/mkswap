@@ -66,7 +66,7 @@ class Accountant(Worker):
 		self.log("setBalances", bals)
 		bz = self._balances
 		acz = bz["actual"]
-		syms = list(az.keys())
+		syms = list(acz.keys())
 		for bal in bals:
 			sym = bal["currency"]
 			if sym in syms:
