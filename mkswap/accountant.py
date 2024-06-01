@@ -297,18 +297,23 @@ class Accountant(Worker):
 				self.log("downsized order: %s -> %s"%(s, prop["amount"]))
 			return False
 		if not test:
-			bz[sym2] += rv
-			bz[sym1] += rs
 			if available:
 				az = self._balances["available"]
 				if revert or balset == "actual":
 					do2 = rv > 0
 				else:
 					do2 = rv < 0
+				if not (force or revert):
+					if do2 and az[sym2] + rv < 0:
+						return False
+					elif az[sym1] + rs < 0:
+						return False
 				if do2:
 					az[sym2] += rv
 				else:
 					az[sym1] += rs
+			bz[sym2] += rv
+			bz[sym1] += rs
 		return True
 
 	def approved(self, prop, force=False):
