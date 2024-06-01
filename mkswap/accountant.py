@@ -269,7 +269,7 @@ class Accountant(Worker):
 			return self.realistic(trade, feeSide, asScore, nudge, nudged + 1)
 		if asScore:
 			return score
-		return score > 0
+		return score > -config.comptroller.leeway
 
 	def updateBalances(self, prop, balset="theoretical", revert=False, force=False, test=False, repair=False, available=False):
 		bz = self._balances[balset]
