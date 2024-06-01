@@ -256,7 +256,7 @@ class Accountant(Worker):
 		return trade
 
 	def realistic(self, trade, feeSide="taker", asScore=False, nudge=False, nudged=0):
-		if not self.updateBalances(trade, "actual", test=True):
+		if self.tooBig(trade):
 			return asScore and -1
 		score = gain = ask("estimateGain", trade)
 		fee = ask("estimateFee", trade, feeSide)
