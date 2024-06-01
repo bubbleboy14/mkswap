@@ -50,7 +50,7 @@ class Trader(Worker):
 	def shouldTrade(self, recommendation):
 		self.log("assessing recommendation:", recommendation)
 		force = "force" in recommendation and recommendation.pop("force") or config.trader.force
-		return ask("affordable", recommendation, force)
+		return ask("approved", recommendation, force)
 
 	def trade(self, recommendation):
 		self.log("TRADING", recommendation, "\n\n\n")
