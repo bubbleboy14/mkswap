@@ -91,7 +91,7 @@ class Harvester(Worker):
 				bigs.append(sym)
 		for sym in smalls:
 			self.refillCount += 1
-			self.refills.append(self.orderBalance(sym, smalls[sym], bigs))
+			self.refills.append(self.orderBalance(sym, round(smalls[sym], 5), bigs))
 
 	def getRefills(self):
 		refs = self.refills
