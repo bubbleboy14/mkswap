@@ -239,7 +239,9 @@ class Accountant(Worker):
 		self.log("nudge(%s -> %s)"%(oprice, trade["price"]), trade)
 
 	def tooBig(self, trade):
-		return not self.updateBalances(trade, "available", test=True)
+		if not self.updateBalances(trade, "available", test=True):
+			self.log("trade is too big!", trade)
+			return True
 
 	def resize(self, trade):
 		if self.tooBig(trade):
@@ -271,12 +273,12 @@ class Accountant(Worker):
 			return score
 		return score > -config.comptroller.leeway
 
-	def updateBalances(self, prop, balset="theoretical", revert=False, force=False, test=False, repair=False, available=False):
+	def updateBalances(self, trade, balset="theoretical", revert=False, force=False, test=False, repair=False, available=False):
 		bz = self._balances[balset]
-		s = rs = float(prop.get("amount", 10))
-		v = rv = s * float(prop["price"])
-		side = prop["side"]
-		sym1, sym2 = self.pair(prop["symbol"])
+		s = rs = float(trade.get("amount", 10))
+		v = rv = s * float(trade["price"])
+		side = trade["side"]
+		sym1, sym2 = self.pair(trade["symbol"])
 		if side == "buy":
 			fromSym = sym2
 			toSym = sym1
@@ -293,8 +295,8 @@ class Accountant(Worker):
 		if fromVal > bz[fromSym] and not force:
 			self.log("not enough %s for %s!"%(fromSym, side))
 			if test and repair:
-				prop["amount"] = bz[fromSym] / config.accountant.split
-				self.log("downsized order: %s -> %s"%(s, prop["amount"]))
+				trade["amount"] = bz[fromSym] / config.accountant.split
+				self.log("downsized order: %s -> %s"%(s, trade["amount"]))
 			return False
 		if not test:
 			if available:
@@ -316,11 +318,14 @@ class Accountant(Worker):
 			bz[sym1] += rs
 		return True
 
-	def approved(self, prop, force=False):
-		if prop["symbol"] not in self.syms:
-			self.syms.append(prop["symbol"])
-		looksgood = force or self.realistic(prop, nudge=config.accountant.nudge)
-		if looksgood and self.updateBalances(prop, force=force, available=True):
+	def approved(self, trade, force=False):
+		if trade["symbol"] not in self.syms:
+			self.syms.append(trade["symbol"])
+		if force:
+			looksgood = not self.tooBig(trade)
+		else:
+			looksgood = self.realistic(trade, nudge=config.accountant.nudge)
+		if looksgood and self.updateBalances(trade, force=force, available=True):
 			self.counts["approved"] += 1
-			self.log("trade approved!", prop)
+			self.log("trade approved!", trade)
 			return True
