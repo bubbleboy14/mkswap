@@ -11,6 +11,7 @@ class Cross(Base):
 		listen("hint", self.hint)
 
 	def cross(self, sym, variety, reason, dimension="price"):
+		if sym != self.symbol: return
 		self.log("cross(%s, %s, %s) %s"%(sym, dimension, variety, reason))
 		side = (variety == "golden") and "buy" or "sell"
 		self.notice("hard %s!"%(side,), ask("bestTrades", sym, side, force=True))
