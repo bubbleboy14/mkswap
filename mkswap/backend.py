@@ -33,7 +33,13 @@ presets = [{
 }, {
 	"symbols": ["BTCUSD", "ETHUSD", "ETHBTC"]
 }, {
+	"strategy": "crosshint",
+	"symbols": ["BTCUSD", "ETHUSD", "ETHBTC"]
+}, {
 	"strategy": "cross",
+	"symbols": ["BTCUSD", "ETHUSD", "ETHBTC"]
+}, {
+	"strategy": "hint",
 	"symbols": ["BTCUSD", "ETHUSD", "ETHBTC"]
 }, {
 	"strategy": "handcart",
