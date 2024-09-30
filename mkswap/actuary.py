@@ -2,6 +2,7 @@ from rel.util import ask, emit, listen
 from .base import Worker
 from .config import config
 
+PERIODS = ["fast", "slow"]
 TERMS = ["small", "medium", "large"]
 SVALS = ["vpt", "OBVslope", "ADslope"]
 
@@ -80,6 +81,9 @@ class Actuary(Worker):
 		canhist.append(candle)
 		self.perStretch(canhist,
 			lambda term, hist : self.updateMovings(candle, term, hist))
+		self.perStretch(canhist,
+			lambda term, hist : self.updateExMovings(candle, term, hist), PERIODS)
+		self.updateMACD(candle, sym)
 		if prev:
 			self.compare(prev, candle, sym)
 			self.compare(prev, candle, sym, "VPT")
@@ -100,12 +104,21 @@ class Actuary(Worker):
 		candle[term] = ask("ave", list(map(lambda h : h["close"], hist)))
 		candle["VPT" + term] = ask("ave", list(map(lambda h : h["vpt"], hist)))
 
-	def perTerm(self, cb):
-		for term in TERMS:
+	def updateExMovings(self, candle, term, hist):
+		candle["ema" + term] = ask("ema", list(map(lambda h : h["close"], hist)))
+
+	def perTerm(self, cb, terms=TERMS):
+		for term in terms:
 			cb(term, config.actuary[term])
 
-	def perStretch(self, hist, cb):
-		self.perTerm(lambda tname, tnum : cb(tname, hist[-tnum:]))
+	def perStretch(self, hist, cb, terms=TERMS):
+		self.perTerm(lambda tname, tnum : cb(tname, hist[-tnum:]), terms)
+
+	def updateMACD(self, candle, sym):
+		candle["macd"] = candle["emafast"] - candle["emaslow"]
+		candle["macdsig"] = ask("ema", list(map(lambda c : c["macd"],
+			self.candles[sym])), config.actuary.sig)
+		candle["macdhist"] = candle["macd"] - candle["macdsig"]
 
 	def updateMFI(self, candle, sym):
 		pos = 0
