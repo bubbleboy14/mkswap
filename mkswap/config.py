@@ -2,6 +2,9 @@ from fyg import Config
 
 config = Config({
 	"actuary": {
+		"sig": 9,
+		"fast": 12,
+		"slow": 26,
 		"small": 10,
 		"medium": 60,
 		"large": 360
