@@ -100,12 +100,15 @@ class Actuary(Worker):
 					emit("cross", sym, "death", "%s below %s"%(t1, t2), pref)
 			t1 = terms.pop(0)
 
+	def ave(self, hist, prop="close", op="ave", limit=None):
+		return ask(op, list(map(lambda h : h[prop], hist)), limit)
+
 	def updateMovings(self, candle, term, hist):
-		candle[term] = ask("ave", list(map(lambda h : h["close"], hist)))
-		candle["VPT" + term] = ask("ave", list(map(lambda h : h["vpt"], hist)))
+		candle[term] = self.ave(hist)
+		candle["VPT" + term] = self.ave(hist, "vpt")
 
 	def updateExMovings(self, candle, term, hist):
-		candle["ema" + term] = ask("ema", list(map(lambda h : h["close"], hist)))
+		candle["ema" + term] = self.ave(hist, op="ema")
 
 	def perTerm(self, cb, terms=TERMS):
 		for term in terms:
@@ -116,8 +119,7 @@ class Actuary(Worker):
 
 	def updateMACD(self, candle, sym):
 		candle["macd"] = candle["emafast"] - candle["emaslow"]
-		candle["macdsig"] = ask("ema", list(map(lambda c : c["macd"],
-			self.candles[sym])), config.actuary.sig)
+		candle["macdsig"] = self.ave(self.candles[sym], "macd", "ema", config.actuary.sig)
 		candle["macdhist"] = candle["macd"] - candle["macdsig"]
 
 	def updateMFI(self, candle, sym):
