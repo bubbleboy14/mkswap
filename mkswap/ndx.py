@@ -22,6 +22,7 @@ class NDX(Worker):
 		self.observers = {}
 		self.histories = { "trade": {}, "ask": {}, "bid": {} }
 		listen("ave", self.ave)
+		listen("ema", self.ema)
 		listen("mad", self.mad)
 		listen("rmad", self.rmad)
 		listen("fave", self.fave)
@@ -145,17 +146,30 @@ class NDX(Worker):
 		rstats = self.ratio(top, bot)
 		return self.volatility(rstats["current"], rstats[span], sigma)
 
-	def ave(self, symbol, limit=None, ratio=False, history="trade"):
+	def vals(self, symbol, limit=None, ratio=False, history="trade"):
 		if ratio:
 			top, bot = symbol
-			rats = self.ratios[top][bot]["all"]
+			vals = self.ratios[top][bot]["all"]
 		elif type(symbol) is list:
-			rats = symbol
+			vals = symbol
 		else:
-			rats = self.histories[history][symbol]["all"]
+			vals = self.histories[history][symbol]["all"]
 		if limit:
-			rats = rats[-limit:]
-		return sum(rats) / len(rats)
+			vals = vals[-limit:]
+		return vals
+
+	def ema(self, symbol, limit=None, ratio=False, history="trade"):
+		vals = self.vals(symbol, limit, ratio, history)
+		ema = n = 0
+		for val in vals:
+			n += 1
+			k = 2 / (n + 1)
+			ema = val * k + ema * (1 - k)
+		return ema
+
+	def ave(self, symbol, limit=None, ratio=False, history="trade"):
+		vals = self.vals(symbol, limit, ratio, history)
+		return sum(vals) / len(vals)
 
 	def ratio(self, top, bot, update=False, history="trade"):
 		lpref = "ratio(%s/%s)"%(top, bot)
