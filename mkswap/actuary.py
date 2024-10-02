@@ -87,6 +87,13 @@ class Actuary(Worker):
 		if prev:
 			self.compare(prev, candle, sym)
 			self.compare(prev, candle, sym, "VPT")
+			self.crossCheck(sym, prev, candle, "macd", "macdsig", "MACD")
+
+	def crossCheck(self, sym, c1, c2, t1, t2, pref=None):
+		if c1[t1] < c1[t2] and c2[t1] > c2[t2]:
+			emit("cross", sym, "golden", "%s above %s"%(t1, t2), pref)
+		elif c1[t1] > c1[t2] and c2[t1] < c2[t2]:
+			emit("cross", sym, "death", "%s below %s"%(t1, t2), pref)
 
 	def compare(self, c1, c2, sym, pref=None):
 		terms = list(pref and map(lambda t : pref + t, TERMS) or TERMS)
@@ -94,10 +101,7 @@ class Actuary(Worker):
 		t1 = terms.pop(0)
 		while terms:
 			for t2 in terms:
-				if c1[t1] < c1[t2] and c2[t1] > c2[t2]:
-					emit("cross", sym, "golden", "%s above %s"%(t1, t2), pref)
-				elif c1[t1] > c1[t2] and c2[t1] < c2[t2]:
-					emit("cross", sym, "death", "%s below %s"%(t1, t2), pref)
+				self.crossCheck(sym, c1, c2, t1, t2, pref)
 			t1 = terms.pop(0)
 
 	def ave(self, hist, prop="close", op="ave", limit=None):
