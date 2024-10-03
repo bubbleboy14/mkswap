@@ -1,7 +1,8 @@
-from .strategy import RSI, Hint, Cross, Slosh, HandCart, CrossHint
+from .strategy import RSI, MACD, Hint, Cross, Slosh, HandCart, CrossHint
 
 strategies = {
 	"rsi": RSI,
+	"macd": MACD,
 	"hint": Hint,
 	"cross": Cross,
 	"slosh": Slosh,
