@@ -106,7 +106,9 @@ class Actuary(Worker):
 				self.crossCheck(sym, c1, c2, t1, t2, pref)
 			t1 = terms.pop(0)
 
-	def ave(self, hist, prop="close", op="ave", limit=None):
+	def ave(self, hist, prop="close", op="ave", limit=None, filt=False):
+		if filt:
+			hist = filter(lambda h : prop in h, hist)
 		return ask(op, list(map(lambda h : h[prop], hist)), limit)
 
 	def updateMovings(self, candle, term, hist):
@@ -131,17 +133,24 @@ class Actuary(Worker):
 		can["DM"] = max(can["+DM"], can["-DM"])
 		can["TR"] = max(can["high"] - can["low"],
 			can["high"] - prev["close"], can["low"] - prev["close"])
-		can["smooth-DM"] = self.ave(cans, "-DM")
-		can["smooth+DM"] = self.ave(cans, "+DM")
-		can["+DI"] = 100 * can["smooth+DM"] / can["TR"]
-		can["-DI"] = 100 * can["smooth-DM"] / can["TR"]
-		can["DX"] = 100 * (can["+DI"] - can["-DI"]) / (can["+DI"] + can["-DI"])
+		can["smooth-DM"] = self.ave(cans, "-DM", filt=True)
+		can["smooth+DM"] = self.ave(cans, "+DM", filt=True)
+		if can["TR"]:
+			can["+DI"] = 100 * can["smooth+DM"] / can["TR"]
+			can["-DI"] = 100 * can["smooth-DM"] / can["TR"]
+			dxdivisor = can["+DI"] + can["-DI"]
+			if dxdivisor:
+				can["DX"] = 100 * (can["+DI"] - can["-DI"]) / dxdivisor
+			else:
+				can["DX"] = 50 # ??????
+		else: # is this right?????
+			can["+DI"] = can["-DI"] = can["DX"] = 50 # ?????????
 		if len(cans) < r:
 			return
 		if "ADX" in prev:
 			can["ADX"] = (prev["ADX"] * (r - 1) + can["DX"]) / r
 		else:
-			can["ADX"] = self.ave(cans, "DX")
+			can["ADX"] = self.ave(cans, "DX", filt=True)
 
 	def updateMACD(self, candle, sym):
 		candle["macd"] = candle["emafast"] - candle["emaslow"]
