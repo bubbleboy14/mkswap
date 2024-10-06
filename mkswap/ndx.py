@@ -21,6 +21,7 @@ class NDX(Worker):
 		self._volumes = {}
 		self.observers = {}
 		self.histories = { "trade": {}, "ask": {}, "bid": {} }
+		listen("sum", self.sum)
 		listen("ave", self.ave)
 		listen("ema", self.ema)
 		listen("mad", self.mad)
@@ -170,6 +171,9 @@ class NDX(Worker):
 	def ave(self, symbol, limit=None, ratio=False, history="trade"):
 		vals = self.vals(symbol, limit, ratio, history)
 		return sum(vals) / len(vals)
+
+	def sum(self, symbol, limit=None, ratio=False, history="trade"):
+		return sum(self.vals(symbol, limit, ratio, history))
 
 	def ratio(self, top, bot, update=False, history="trade"):
 		lpref = "ratio(%s/%s)"%(top, bot)
