@@ -85,6 +85,7 @@ class Actuary(Worker):
 			lambda term, hist : self.updateExMovings(candle, term, hist), PERIODS)
 		self.updateMACD(candle, sym)
 		if prev:
+			self.updateADX(prev, candle, sym)
 			self.compare(prev, candle, sym)
 			self.compare(prev, candle, sym, "VPT")
 			self.crossCheck(sym, prev, candle, "macd", "macdsig", "MACD")
@@ -121,6 +122,26 @@ class Actuary(Worker):
 	def perStretch(self, hist, cb, terms=TERMS):
 		self.perTerm(lambda tname, tnum : cb(tname, hist[-tnum:]), terms)
 
+	def updateADX(self, prev, can, sym):
+		r = config.actuary.range
+		cans = self.candles[sym][-r:]
+		can["-DM"] = prev["low"] - can["low"]
+		can["+DM"] = can["high"] - prev["high"]
+		can["DM"] = max(can["+DM"], can["-DM"])
+		can["TR"] = max(can["high"] - can["low"],
+			can["high"] - prev["close"], can["low"] - prev["close"])
+		can["smooth-DM"] = self.ave(cans, "-DM")
+		can["smooth+DM"] = self.ave(cans, "+DM")
+		can["+DI"] = 100 * can["smooth+DM"] / can["TR"]
+		can["-DI"] = 100 * can["smooth-DM"] / can["TR"]
+		can["DX"] = 100 * (can["+DI"] - can["-DI"]) / (can["+DI"] + can["-DI"])
+		if len(cans) < r:
+			return
+		if "ADX" in prev:
+			can["ADX"] = (prev["ADX"] * (r - 1) + can["DX"]) / r
+		else:
+			can["ADX"] = self.ave(cans, "DX")
+
 	def updateMACD(self, candle, sym):
 		candle["macd"] = candle["emafast"] - candle["emaslow"]
 		candle["macdsig"] = self.ave(self.candles[sym], "macd", "ema", config.actuary.sig)
@@ -129,7 +150,7 @@ class Actuary(Worker):
 	def updateMFI(self, candle, sym):
 		pos = 0
 		neg = 0
-		for can in self.candles[sym][-14:]:
+		for can in self.candles[sym][-config.actuary.range:]:
 			f = can["flow"]
 			if f > 0:
 				pos += f
