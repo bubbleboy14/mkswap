@@ -69,12 +69,12 @@ class Actuary(Worker):
 			self.candles[sym] = []
 			self.fcans[sym] = []
 		for can in cans[:-1]:
-			self.addCan(can, sym)
+			self.addCan(can, sym, prev)
 			prev = can
-		self.addCan(cans[-1], sym, prev)
+		self.addCan(cans[-1], sym, prev, True)
 		self.tellWheners(sym)
 
-	def addCan(self, candle, sym, prev=None):
+	def addCan(self, candle, sym, prev=None, check=False):
 		self.updateMFI(candle, sym)
 		self.fcans[sym].append(candle)
 		canhist = self.candles[sym]
@@ -86,9 +86,10 @@ class Actuary(Worker):
 		self.updateMACD(candle, sym)
 		if prev:
 			self.updateADX(prev, candle, sym)
-			self.compare(prev, candle, sym)
-			self.compare(prev, candle, sym, "VPT")
-			self.crossCheck(sym, prev, candle, "macd", "macdsig", "MACD")
+			if check:
+				self.compare(prev, candle, sym)
+				self.compare(prev, candle, sym, "VPT")
+				self.crossCheck(sym, prev, candle, "macd", "macdsig", "MACD")
 
 	def crossCheck(self, sym, c1, c2, t1, t2, pref=None):
 		if c1[t1] < c1[t2] and c2[t1] > c2[t2]:
