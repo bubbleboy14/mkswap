@@ -56,7 +56,8 @@ config = Config({
 	},
 	"office": {
 		"verbose": False,
-		"stagish": False
+		"stagish": False,
+		"strategy": "preset"
 	},
 	"strategy": {
 		"base": {
