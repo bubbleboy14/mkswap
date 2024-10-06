@@ -5,6 +5,7 @@ config = Config({
 		"sig": 9,
 		"fast": 12,
 		"slow": 26,
+		"range": 14,
 		"small": 10,
 		"medium": 60,
 		"large": 360
