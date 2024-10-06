@@ -232,7 +232,7 @@ def getOffice(index=None, strategy=None, symbols=["BTCUSD", "ETHUSD", "ETHBTC"])
 	prestrat = strat == "preset"
 	if prestrat and index == None:
 		return setOffice()
-	return setOffice(**getConf(index, not prestrat and strategy, symbols))
+	return setOffice(**getConf(index, not prestrat and strat, symbols))
 
 def load():
 	initConfig()
