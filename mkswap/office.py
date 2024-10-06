@@ -1,6 +1,6 @@
 import pprint, atexit, rel
 from rel.util import ask, listen
-from .backend import start, predefs, setStaging, initConfig, selectPreset, wsdebug
+from .backend import start, predefs, getConf, setStaging, initConfig, selectPreset, wsdebug
 from .comptroller import Comptroller
 from .accountant import Accountant
 from .strategist import strategies
@@ -222,10 +222,17 @@ class Office(Worker):
 			self.actuary.hints(self.booker.totals())
 		return True
 
-def getOffice(**kwargs):
+def setOffice(**kwargs):
 	office = Office(**(kwargs or selectPreset()))
 	atexit.register(office.teardown)
 	return office
+
+def getOffice(index=None, strategy=None, symbols=["BTCUSD", "ETHUSD", "ETHBTC"]):
+	strat = strategy or config.office.strategy
+	prestrat = strat == "preset"
+	if prestrat and index == None:
+		return setOffice()
+	return setOffice(**getConf(index, not prestrat and strategy, symbols))
 
 def load():
 	initConfig()
