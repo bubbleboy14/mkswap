@@ -57,6 +57,15 @@ presets = [{
 	"symbols": ["BTC-USD"]
 }]
 
+def getConf(index=None, strategy=None, symbols=["BTCUSD", "ETHUSD", "ETHBTC"]):
+	if strategy:
+		return {
+			"symbols": symbols,
+			"strategy": strategy
+		}
+	if index != None:
+		return presets[index]
+
 def initConfig():
 	cfg = {}
 	if confirm("live comptroller"):
