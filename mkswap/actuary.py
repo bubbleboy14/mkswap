@@ -279,7 +279,7 @@ class Actuary(Worker):
 			self.ratios[sym] = {
 				"history": []
 			}
-			emit("mfsub", sym, lambda c : self.candle(c, sym), "candles_5m")
+			emit("mfsub", sym, lambda c : self.candle(c, sym), "candles_%s"%(config.actuary.int,))
 
 	def hints(self, vscores):
 		for sym in vscores:

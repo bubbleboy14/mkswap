@@ -8,7 +8,8 @@ config = Config({
 		"range": 14,
 		"small": 10,
 		"medium": 60,
-		"large": 360
+		"large": 360,
+		"int": "5m" # 1m/5m/15m/30m/1h/6h/1d
 	},
 	"accountant": {
 		"split": 16,
@@ -37,8 +38,8 @@ config = Config({
 	"comptroller": {
 		"live": False,
 		"actives": 20,
+		"plimit": 0.1,
 		"leeway": 0.001,
-		"prunelimit": 0.1,
 		"canceleach": True
 	},
 	"harvester": {

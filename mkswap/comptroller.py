@@ -196,7 +196,7 @@ class Comptroller(Feeder):
 		return skips, cancels, dupes
 
 	def longPrune(self):
-		skips, cancels, dupes = self.pruneActives(config.comptroller.prunelimit, True)
+		skips, cancels, dupes = self.pruneActives(config.comptroller.plimit, True)
 		self.log("longPrune():", len(cancels), "cancels;", dupes, "dupes;", skips, "skips")
 		return True
 
