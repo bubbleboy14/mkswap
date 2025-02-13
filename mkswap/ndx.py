@@ -247,10 +247,11 @@ class NDX(Worker):
 		hist = self.histories[history][symbol]
 		hents = hist["events"]
 		hents.append(event)
+		henlen = len(hents)
 		waves = hist["weighted"]
 		for span in SPANS:
 			waves[span] = self.waverage(symbol, span, history)
-		self.log("histUp", symbol, len(hents), "events", waves)
+		henlen % 500 or self.log("histUp", symbol, henlen, "events", waves)
 
 	def perSpan(self, cb):
 		for span in SPANS:
