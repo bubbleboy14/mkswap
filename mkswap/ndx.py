@@ -251,7 +251,10 @@ class NDX(Worker):
 		waves = hist["weighted"]
 		for span in SPANS:
 			waves[span] = self.waverage(symbol, span, history)
-		henlen % 500 or self.log("histUp", symbol, henlen, "events", waves)
+		if henlen > getSpan("hist"):
+			hents.pop(0)
+		elif not henlen % 64:
+			self.log("histUp", symbol, henlen, "events", waves)
 
 	def perSpan(self, cb):
 		for span in SPANS:
