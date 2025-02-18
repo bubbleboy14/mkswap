@@ -13,6 +13,7 @@ class Actuary(Worker):
 		self.fcans = {}
 		self.predictions = {}
 		self.wheners = {}
+		listen("metric", self.latest)
 		listen("tellMeWhen", self.tellMeWhen)
 
 	def tellMeWhen(self, symbol, metric, threshold, cb):
@@ -128,23 +129,25 @@ class Actuary(Worker):
 	def updateADX(self, prev, can, sym):
 		r = config.actuary.range
 		cans = self.candles[sym][-r:]
-		can["-DM"] = prev["low"] - can["low"]
-		can["+DM"] = can["high"] - prev["high"]
+		can["+DM"] = can["-DM"] = can["+DI"] = can["-DI"] = can["DX"] = 0
+		mneg = prev["low"] - can["low"]
+		mpos = can["high"] - prev["high"]
+		if mneg > mpos and mneg > 0:
+			can["-DM"] = mneg
+		elif mpos > mneg and mpos > 0:
+			can["+DM"] = mpos
 		can["DM"] = max(can["+DM"], can["-DM"])
 		can["TR"] = max(can["high"] - can["low"],
 			can["high"] - prev["close"], can["low"] - prev["close"])
-		can["smooth-DM"] = self.ave(cans, "-DM", filt=True)
-		can["smooth+DM"] = self.ave(cans, "+DM", filt=True)
-		if can["TR"]:
-			can["+DI"] = 100 * can["smooth+DM"] / can["TR"]
-			can["-DI"] = 100 * can["smooth-DM"] / can["TR"]
-			dxdivisor = can["+DI"] + can["-DI"]
-			if dxdivisor:
-				can["DX"] = 100 * (can["+DI"] - can["-DI"]) / dxdivisor
-			else:
-				can["DX"] = 50 # ??????
-		else: # is this right?????
-			can["+DI"] = can["-DI"] = can["DX"] = 50 # ?????????
+		can["ATR"] = self.ave(cans, "TR", filt=True)
+		can["-ADM"] = self.ave(cans, "-DM", filt=True)
+		can["+ADM"] = self.ave(cans, "+DM", filt=True)
+		if can["ATR"]:
+			can["+DI"] = 100 * can["+ADM"] / can["ATR"]
+			can["-DI"] = 100 * can["-ADM"] / can["ATR"]
+			divisor = can["+DI"] + can["-DI"]
+			if divisor:
+				can["DX"] = abs(100 * (can["+DI"] - can["-DI"]) / divisor)
 		if len(cans) < r:
 			return
 		if "ADX" in prev:

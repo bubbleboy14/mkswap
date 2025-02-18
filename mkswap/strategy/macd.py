@@ -9,5 +9,7 @@ class MACD(Base):
 	def cross(self, sym, variety, reason, dimension="price"):
 		if sym != self.symbol or dimension != "MACD": return
 		self.log("cross(%s, %s, %s) %s"%(sym, dimension, variety, reason))
-		side = (variety == "golden") and "buy" or "sell"
+		self.trigTrade(sym, (variety == "golden") and "buy" or "sell")
+
+	def trigTrade(self, sym, side):
 		self.notice("hard %s!"%(side,), ask("bestTrades", sym, side, force=True))
