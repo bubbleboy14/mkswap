@@ -129,23 +129,26 @@ class Actuary(Worker):
 	def updateADX(self, prev, can, sym):
 		r = config.actuary.range
 		cans = self.candles[sym][-r:]
-		can["-DM"] = prev["low"] - can["low"]
-		can["+DM"] = can["high"] - prev["high"]
+		mneg = can["-DM"] = prev["low"] - can["low"]
+		mpos = can["+DM"] = can["high"] - prev["high"]
+		if mneg > 0 and mpos > 0: # what if they're equal?
+			can[mneg > mpos and "+DM" or "-DM"] = 0
 		can["DM"] = max(can["+DM"], can["-DM"])
 		can["TR"] = max(can["high"] - can["low"],
 			can["high"] - prev["close"], can["low"] - prev["close"])
-		can["smooth-DM"] = self.ave(cans, "-DM", filt=True)
-		can["smooth+DM"] = self.ave(cans, "+DM", filt=True)
-		if can["TR"]:
-			can["+DI"] = 100 * can["smooth+DM"] / can["TR"]
-			can["-DI"] = 100 * can["smooth-DM"] / can["TR"]
-			dxdivisor = can["+DI"] + can["-DI"]
-			if dxdivisor:
-				can["DX"] = 100 * (can["+DI"] - can["-DI"]) / dxdivisor
+		can["ATR"] = self.ave(cans, "TR", filt=True)
+		can["-ADM"] = self.ave(cans, "-DM", filt=True)
+		can["+ADM"] = self.ave(cans, "+DM", filt=True)
+		if can["ATR"]:
+			can["+DI"] = 100 * can["+ADM"] / can["ATR"]
+			can["-DI"] = 100 * can["-ADM"] / can["ATR"]
+			divisor = abs(can["+DI"]) + abs(can["-DI"])
+			if divisor:
+				can["DX"] = 100 * (can["+DI"] - can["-DI"]) / divisor
 			else:
-				can["DX"] = 50 # ??????
+				can["DX"] = 0#50 # ?????????
 		else: # is this right?????
-			can["+DI"] = can["-DI"] = can["DX"] = 50 # ?????????
+			can["+DI"] = can["-DI"] = can["DX"] = 0#50 # ?????????
 		if len(cans) < r:
 			return
 		if "ADX" in prev:
