@@ -129,7 +129,7 @@ class Actuary(Worker):
 	def updateADX(self, prev, can, sym):
 		r = config.actuary.range
 		cans = self.candles[sym][-r:]
-		can["-DM"] = can["+DM"] = 0
+		can["+DM"] = can["-DM"] = can["+DI"] = can["-DI"] = can["DX"] = 0
 		mneg = prev["low"] - can["low"]
 		mpos = can["high"] - prev["high"]
 		if mneg > mpos and mneg > 0:
@@ -148,10 +148,6 @@ class Actuary(Worker):
 			divisor = can["+DI"] + can["-DI"]
 			if divisor:
 				can["DX"] = abs(100 * (can["+DI"] - can["-DI"]) / divisor)
-			else:
-				can["DX"] = 0#50 # ?????????
-		else: # is this right?????
-			can["+DI"] = can["-DI"] = can["DX"] = 0#50 # ?????????
 		if len(cans) < r:
 			return
 		if "ADX" in prev:
