@@ -13,6 +13,7 @@ class Actuary(Worker):
 		self.fcans = {}
 		self.predictions = {}
 		self.wheners = {}
+		listen("metric", self.latest)
 		listen("tellMeWhen", self.tellMeWhen)
 
 	def tellMeWhen(self, symbol, metric, threshold, cb):
