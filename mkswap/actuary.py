@@ -129,10 +129,13 @@ class Actuary(Worker):
 	def updateADX(self, prev, can, sym):
 		r = config.actuary.range
 		cans = self.candles[sym][-r:]
-		mneg = can["-DM"] = prev["low"] - can["low"]
-		mpos = can["+DM"] = can["high"] - prev["high"]
-		if mneg > 0 and mpos > 0: # what if they're equal?
-			can[mneg > mpos and "+DM" or "-DM"] = 0
+		can["-DM"] = can["+DM"] = 0
+		mneg = prev["low"] - can["low"]
+		mpos = can["high"] - prev["high"]
+		if mneg > mpos and mneg > 0:
+			can["-DM"] = mneg
+		elif mpos > mneg and mpos > 0:
+			can["+DM"] = mpos
 		can["DM"] = max(can["+DM"], can["-DM"])
 		can["TR"] = max(can["high"] - can["low"],
 			can["high"] - prev["close"], can["low"] - prev["close"])
@@ -142,9 +145,9 @@ class Actuary(Worker):
 		if can["ATR"]:
 			can["+DI"] = 100 * can["+ADM"] / can["ATR"]
 			can["-DI"] = 100 * can["-ADM"] / can["ATR"]
-			divisor = abs(can["+DI"]) + abs(can["-DI"])
+			divisor = can["+DI"] + can["-DI"]
 			if divisor:
-				can["DX"] = 100 * (can["+DI"] - can["-DI"]) / divisor
+				can["DX"] = abs(100 * (can["+DI"] - can["-DI"]) / divisor)
 			else:
 				can["DX"] = 0#50 # ?????????
 		else: # is this right?????
