@@ -124,10 +124,10 @@ class Accountant(Worker):
 				return False
 		return True
 
-	def fullBalances(self, nodph=True, pricer=None, mode="both", nousd=False, history="trade"):
+	def fullBalances(self, nodph=True, pricer=None, mode="both", nousd=False, nodiff=False, history="trade"):
 		return self.balances(pricer, mode, nodph, nousd, history)
 
-	def balances(self, pricer=None, balset="theoretical", nodph=False, nousd=False, history="trade"):
+	def balances(self, pricer=None, balset="theoretical", nodph=False, nousd=False, nodiff=False, history="trade"):
 		obz = self._balances["initial"]
 		if not self.accountsReady(history):
 			return { "waiting": "balances not ready" }
@@ -159,7 +159,8 @@ class Accountant(Worker):
 				amount *= price
 				vz[sym] = "%s ($%s)"%(v, v * price)
 			total += amount
-		vz["diff"] = total
+		if not nodiff:
+			vz["diff"] = total
 		secs = (datetime.now() - self.starttime).seconds
 		if not nodph:
 			vz["dph"] = secs and (total * 60 * 60 / secs)
