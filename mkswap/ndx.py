@@ -27,10 +27,11 @@ class NDX(Worker):
 		listen("mad", self.mad)
 		listen("rmad", self.rmad)
 		listen("fave", self.fave)
-		listen("price", self.price)
 		listen("quote", self.quote)
 		listen("ratio", self.ratio)
 		listen("sigma", self.sigma)
+		listen("price", self.price)
+		listen("prices", self.prices)
 		listen("rsigma", self.rsigma)
 		listen("histUp", self.histUp)
 		listen("markets", self.markets)
@@ -55,6 +56,13 @@ class NDX(Worker):
 
 	def weighted(self, symbol, history="trade", span="inner"):
 		return self.histories[history][symbol]["weighted"][span]
+
+	def prices(self, history="trade", prop="current"):
+		prices = {}
+		hists = self.histories[history]
+		for sym in hists:
+			prices[sym] = hists[sym][prop]
+		return prices
 
 	def price(self, symbol, fullSym=False, history="trade", fallback=None):
 		if fullSym:
