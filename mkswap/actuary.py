@@ -138,7 +138,7 @@ class Actuary(Worker):
 			can["+DM"] = mpos
 		can["DM"] = max(can["+DM"], can["-DM"])
 		can["TR"] = max(can["high"] - can["low"],
-			can["high"] - prev["close"], can["low"] - prev["close"])
+			abs(can["high"] - prev["close"]), abs(can["low"] - prev["close"]))
 		can["ATR"] = self.ave(cans, "TR", filt=True)
 		can["-ADM"] = self.ave(cans, "-DM", filt=True)
 		can["+ADM"] = self.ave(cans, "+DM", filt=True)
