@@ -7,6 +7,7 @@ mxfg = config.strategy.macdadx
 class MACDADX(MACD):
 	def trigTrade(self, sym, side):
 		adx = ask("metric", sym, "ADX")
+		self.stat("adx", adx)
 		if adx < mxfg.low:
 			return self.log("trigTrade(%s, %s) aborted! ADX=%s"%(sym, side, adx))
 		force = adx > mxfg.high
