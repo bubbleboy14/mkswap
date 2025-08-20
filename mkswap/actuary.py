@@ -248,10 +248,16 @@ class Actuary(Worker):
 			scores[sym] = self.score(sym)
 		return scores
 
-	def oldCandles(self, limit=10):
+	def oldCandles(self, limit=10, mod=0):
 		cans = {}
+		if mod:
+			limit = limit * mod
 		for sym in self.candles:
 			cans[sym] = self.candles[sym][-limit:]
+			if mod:
+				cans[sym].reverse()
+				cans[sym] = cans[sym][::mod]
+				cans[sym].reverse()
 		return cans
 
 	def freshCandles(self):
