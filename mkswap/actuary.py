@@ -90,6 +90,7 @@ class Actuary(Worker):
 			if check:
 				self.compare(prev, candle, sym)
 				self.compare(prev, candle, sym, "VPT")
+				self.crossCheck(sym, prev, candle, "+DI", "-DI", "ADX")
 				self.crossCheck(sym, prev, candle, "macd", "macdsig", "MACD")
 
 	def crossCheck(self, sym, c1, c2, t1, t2, pref=None):
