@@ -49,13 +49,15 @@ class Trader(Worker):
 
 	def shouldTrade(self, recommendation):
 		self.log("assessing recommendation:", recommendation)
-		if config.trader.adxguard:
+		tcfg = config.trader
+		adxlim = tcfg.adxguard
+		if adxlim:
 			side = recommendation["side"]
 			sym = recommendation["symbol"]
 			adx = ask("metric", sym, "ADX")
 			pdi = ask("metric", sym, "+DI")
 			mdi = ask("metric", sym, "-DI")
-			if adx > 30:
+			if adx > adxlim:
 				goingup = pdi > mdi
 				selling = side == "sell"
 				if (goingup and selling) or (not goingup and not selling):
@@ -65,7 +67,7 @@ class Trader(Worker):
 						"-DI": mdi,
 						"rec": recommendation
 					})
-		force = "force" in recommendation and recommendation.pop("force") or config.trader.force
+		force = "force" in recommendation and recommendation.pop("force") or tcfg.force
 		return ask("approved", recommendation, force)
 
 	def trade(self, recommendation):

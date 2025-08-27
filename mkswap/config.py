@@ -32,9 +32,9 @@ config = Config({
 	},
 	"trader": {
 		"size": 8,
+		"adxguard": 0,
 		"book": True,
-		"force": False,
-		"adxguard": False
+		"force": False
 	},
 	"comptroller": {
 		"live": False,
