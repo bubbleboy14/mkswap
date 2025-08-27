@@ -61,12 +61,18 @@ class Trader(Worker):
 				goingup = pdi > mdi
 				selling = side == "sell"
 				if (goingup and selling) or (not goingup and not selling):
-					return self.notice("adxguard vetoed %s %s"%(sym, side), {
+					mfi = ask("metric", sym, "mfi")
+					vals = {
 						"ADX": adx,
 						"+DI": pdi,
 						"-DI": mdi,
+						"mfi": mfi,
 						"rec": recommendation
-					})
+					}
+					if (selling and mfi > 80) or (not selling and mfi < 20):
+						self.notice("adxguard allowed %s %s"%(sym, side), vals)
+					else:
+						return self.notice("adxguard vetoed %s %s"%(sym, side), vals)
 		force = "force" in recommendation and recommendation.pop("force") or tcfg.force
 		return ask("approved", recommendation, force)
 
