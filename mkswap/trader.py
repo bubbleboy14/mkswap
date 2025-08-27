@@ -55,7 +55,7 @@ class Trader(Worker):
 			adx = ask("metric", sym, "ADX")
 			pdi = ask("metric", sym, "+DI")
 			mdi = ask("metric", sym, "-DI")
-			if adx > 25:
+			if adx > 30:
 				goingup = pdi > mdi
 				selling = side == "sell"
 				if (goingup and selling) or (not goingup and not selling):
