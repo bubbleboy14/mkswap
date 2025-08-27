@@ -73,7 +73,7 @@ class Harvester(Worker):
 		tbals = balances["theoretical"]
 		smalls = {}
 		bigs = []
-		highness = 0
+		lows = []
 		for sym in abals:
 			isusd = sym == "USD"
 			abal = abals[sym]
@@ -89,6 +89,7 @@ class Harvester(Worker):
 					continue
 			lowness = self.tooLow(abal, True) or self.tooLow(tbal)
 			if lowness:
+				lows.append(sym)
 				if not self.tooHigh(abal, True) and not self.tooHigh(tbal):
 					smalls[sym] = lowness
 			else:
@@ -101,8 +102,8 @@ class Harvester(Worker):
 			self.refills.append(self.orderBalance(sym, round(smalls[sym], 5), bigs))
 		if highness:
 			self.defills += 1
-			self.refills.append(self.orderBalance("USD",
-				round(highness, 5), list(smalls.keys()), "sell"))
+			syms = lows or list(filter(lambda s : s != "USD"), bigs)
+			self.refills.append(self.orderBalance("USD", round(highness, 5), syms, "sell"))
 
 	def getRefills(self):
 		refs = self.refills
