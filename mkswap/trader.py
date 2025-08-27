@@ -49,7 +49,6 @@ class Trader(Worker):
 
 	def shouldTrade(self, recommendation):
 		self.log("assessing recommendation:", recommendation)
-		force = "force" in recommendation and recommendation.pop("force") or config.trader.force
 		if config.trader.adxguard:
 			side = recommendation["side"]
 			sym = recommendation["symbol"]
@@ -60,8 +59,13 @@ class Trader(Worker):
 				goingup = pdi > mdi
 				selling = side == "sell"
 				if (goingup and selling) or (not goingup and not selling):
-					nstr = "adxguard vetoed %s %s with %s adx %s +DI %s -DI"
-					return self.notice(nstr%(sym, side, adx, pdi, mdi))
+					return self.notice("adxguard vetoed %s %s"%(sym, side), {
+						"ADX": adx,
+						"+DI": pdi,
+						"-DI": mdi,
+						"rec": recommendation
+					})
+		force = "force" in recommendation and recommendation.pop("force") or config.trader.force
 		return ask("approved", recommendation, force)
 
 	def trade(self, recommendation):
