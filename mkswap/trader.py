@@ -60,8 +60,8 @@ class Trader(Worker):
 				goingup = pdi > mdi
 				selling = side == "sell"
 				if (goingup and selling) or (not goingup and not selling):
-					return self.notice("adxguard vetoed", sym, side,
-						"with", adx, "adx", pdi, "+DI", mdi, "-DI")
+					nstr = "adxguard vetoed %s %s with %s adx %s +DI %s -DI"
+					return self.notice(nstr%(sym, side, adx, pdi, mdi))
 		return ask("approved", recommendation, force)
 
 	def trade(self, recommendation):
