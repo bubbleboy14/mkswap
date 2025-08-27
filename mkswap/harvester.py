@@ -13,6 +13,7 @@ class Harvester(Worker):
 	def __init__(self, office):
 		self.hauls = 0
 		self.harvest = 0
+		self.defills = 0
 		self.refills = []
 		self.refillCount = 0
 		self.office = office
@@ -31,7 +32,8 @@ class Harvester(Worker):
 		return {
 			"hauls": self.hauls,
 			"harvest": self.harvest,
-			"refills": self.refillCount
+			"refills": self.refillCount,
+			"defills": self.defills
 		}
 
 	def setStorehouse(self, resp):
@@ -71,10 +73,12 @@ class Harvester(Worker):
 		tbals = balances["theoretical"]
 		smalls = {}
 		bigs = []
+		highness = 0
 		for sym in abals:
+			isusd = sym == "USD"
 			abal = abals[sym]
 			tbal = tbals[sym]
-			if sym != "USD":
+			if not isusd:
 				if sym == "diff":
 					continue
 				fs = self.accountant.fullSym(sym)
@@ -89,9 +93,16 @@ class Harvester(Worker):
 					smalls[sym] = lowness
 			else:
 				bigs.append(sym)
+				if isusd:
+					umax = config.harvester.usdmax
+					highness = self.tooHigh(abal, True, umax) or self.tooHigh(tbal, bot=umax)
 		for sym in smalls:
 			self.refillCount += 1
 			self.refills.append(self.orderBalance(sym, round(smalls[sym], 5), bigs))
+		if highness:
+			self.defills += 1
+			bigs = list(filter(lambda b : b != "USD", bigs))
+			self.refills.append(self.orderBalance("USD", round(highness, 5), bigs, "sell"))
 
 	def getRefills(self):
 		refs = self.refills
@@ -104,14 +115,15 @@ class Harvester(Worker):
 			bot *= 2
 		return max(0, bot - bal)
 
-	def tooHigh(self, bal, actual=False):
-		bot = config.harvester.bottom * 2
+	def tooHigh(self, bal, actual=False, bot=None):
+		if bot == None:
+			bot = config.harvester.bottom * 2
 		return max(0, bal - bot)
 
-	def orderBalance(self, sym, diff, balancers):
+	def orderBalance(self, sym, diff, balancers, side="buy"):
 		bals = {}
-		markets = ask("markets", sym)
-		sig = "%s, %s, %s"%(sym, diff, balancers)
+		markets = ask("markets", sym, side)
+		sig = "%s %s %s %s"%(side, diff, sym, balancers)
 		self.log("orderBalance(%s)"%(sig,), markets)
 		for side in markets:
 			for fullSym in markets[side]:
