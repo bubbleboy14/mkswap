@@ -90,13 +90,13 @@ class Feeder(Worker):
 		self.start_feed()
 
 	def heartstart(self):
-		if not config.feeder.heartbeat:
+		if not config.feeder.hbeat:
 			return
 		if not hasattr(self, "heart"):
 			self.log("heart start")
 			self.heart = rel.timeout(None, self.heartstop)
 		self.heart.pending() and self.heart.delete()
-		self.heart.add(config.feeder.heartbeat)
+		self.heart.add(config.feeder.hbeat)
 
 	def heartbeat(self):
 		self.log("heartbeat")
