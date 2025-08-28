@@ -9,7 +9,7 @@ config = Config({
 		"small": 10,
 		"medium": 60,
 		"large": 360,
-		"int": "5m" # 1m/5m/15m/30m/1h/6h/1d
+		"int": "1m" # 1m/5m/15m/30m/1h/6h/1d
 	},
 	"accountant": {
 		"split": 16,
