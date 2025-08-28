@@ -32,6 +32,7 @@ config = Config({
 	},
 	"trader": {
 		"size": 8,
+		"mfilim": 20,
 		"adxguard": 0,
 		"book": True,
 		"force": False

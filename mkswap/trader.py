@@ -50,6 +50,8 @@ class Trader(Worker):
 	def shouldTrade(self, recommendation):
 		self.log("assessing recommendation:", recommendation)
 		tcfg = config.trader
+		mfibot = tcfg.mfilim
+		mfitop = 100 - mfibot
 		adxlim = tcfg.adxguard
 		if adxlim:
 			side = recommendation["side"]
@@ -69,7 +71,7 @@ class Trader(Worker):
 						"mfi": mfi,
 						"rec": recommendation
 					}
-					if (selling and mfi > 80) or (not selling and mfi < 20):
+					if (selling and mfi > mfitop) or (not selling and mfi < mfibot):
 						self.notice("adxguard allowed %s %s"%(sym, side), vals)
 					else:
 						return self.notice("adxguard vetoed %s %s"%(sym, side), vals)
