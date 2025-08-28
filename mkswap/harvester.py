@@ -74,6 +74,7 @@ class Harvester(Worker):
 		smalls = {}
 		bigs = []
 		lows = []
+		highness = 0
 		for sym in abals:
 			isusd = sym == "USD"
 			abal = abals[sym]
