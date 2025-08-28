@@ -49,7 +49,7 @@ class Harvester(Worker):
 			if not ask("accountsReady"):
 				self.log("measure() waiting for accounts")
 				return True
-			bals = self.accountant.balances(self.pricer, "both", True)
+			bals = self.accountant.balances(self.pricer, "tri", True)
 			self.log("measure(%s)"%(bals,))
 			msg = "measure() complete"
 			hcfg.balance and self.balance(bals)

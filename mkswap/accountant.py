@@ -137,6 +137,12 @@ class Accountant(Worker):
 				"actual": self.balances(pricer, "actual", nodph),
 				"theoretical": self.balances(pricer, nodph=nodph)
 			}
+		elif balset == "tri":
+			return {
+				"actual": self.balances(pricer, "actual", nodph),
+				"theoretical": self.balances(pricer, nodph=nodph),
+				"available": self.balances(pricer, "available", nodph)
+			}
 		elif balset == "all":
 			return {
 				"initial": obz,
