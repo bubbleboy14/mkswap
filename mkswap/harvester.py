@@ -70,6 +70,7 @@ class Harvester(Worker):
 
 	def balance(self, balances):
 		abals = balances["actual"]
+		avbals = balances["available"]
 		tbals = balances["theoretical"]
 		smalls = {}
 		bigs = []
@@ -91,13 +92,14 @@ class Harvester(Worker):
 			lowness = self.tooLow(abal, True) or self.tooLow(tbal)
 			if lowness:
 				lows.append(sym)
-				if not self.tooHigh(abal, True) and not self.tooHigh(tbal):
+				if not self.tooHigh(abal) and not self.tooHigh(tbal):
 					smalls[sym] = lowness
 			else:
 				bigs.append(sym)
 				if isusd:
 					umax = config.harvester.usdmax
-					highness = self.tooHigh(abal, True, umax) or self.tooHigh(tbal, bot=umax)
+					highness = self.tooHigh(abal, umax) or self.tooHigh(tbal, umax)
+					highness = min(highness, avbals["USD"] / 2)
 		for sym in smalls:
 			self.refillCount += 1
 			self.refills.append(self.orderBalance(sym, round(smalls[sym], 5), bigs))
@@ -117,7 +119,7 @@ class Harvester(Worker):
 			bot *= 2
 		return max(0, bot - bal)
 
-	def tooHigh(self, bal, actual=False, bot=None):
+	def tooHigh(self, bal, bot=None):
 		if bot == None:
 			bot = config.harvester.bottom * 2
 		return max(0, bal - bot)
