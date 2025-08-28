@@ -48,6 +48,7 @@ class Accountant(Worker):
 		listen("orderRejected", self.orderRejected)
 		listen("orderFilled", self.orderFilled)
 		listen("orderActive", self.orderActive)
+		listen("overActive", self.overActive)
 		listen("accountsReady", self.accountsReady)
 		listen("balances", self.fullBalances)
 		listen("realistic", self.realistic)
@@ -225,9 +226,12 @@ class Accountant(Worker):
 		for b in ["actual", "available", "theoretical"]:
 			self._balances[b][sym] -= amount
 
+	def overActive(self):
+		return self.counts["active"] / config.comptroller.actives < 0.5
+
 	def shouldNudge(self, nudge):
 		if nudge == "auto":
-			return self.counts["active"] / config.comptroller.actives < 0.5
+			return self.overActive()
 		return nudge
 
 	def nudge(self, trade):
