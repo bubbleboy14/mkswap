@@ -227,11 +227,11 @@ class Accountant(Worker):
 			self._balances[b][sym] -= amount
 
 	def overActive(self):
-		return self.counts["active"] / config.comptroller.actives < 0.5
+		return self.counts["active"] / config.comptroller.actives >= 0.5
 
 	def shouldNudge(self, nudge):
 		if nudge == "auto":
-			return self.overActive()
+			return not self.overActive()
 		return nudge
 
 	def nudge(self, trade):
