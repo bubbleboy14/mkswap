@@ -196,8 +196,11 @@ class Comptroller(Feeder):
 		return skips, cancels, dupes
 
 	def longPrune(self):
-		skips, cancels, dupes = self.pruneActives(config.comptroller.plimit, True)
-		self.log("longPrune():", len(cancels), "cancels;", dupes, "dupes;", skips, "skips")
+		lim = config.comptroller.plimit
+		if ask("overActive"):
+			lim = lim / 2
+		skips, cancels, dupes = self.pruneActives(lim, True)
+		self.log("longPrune(lim=%s):"%(lim,), len(cancels), "cancels;", dupes, "dupes;", skips, "skips")
 		return True
 
 	def prune(self):
