@@ -232,8 +232,9 @@ class Accountant(Worker):
 		for b in ["actual", "available", "theoretical"]:
 			self._balances[b][sym] -= amount
 
-	def overActive(self, ratio=0.5):
-		return self.counts["active"] / config.comptroller.actives >= ratio
+	def overActive(self, lim=0.8):
+		rat = self.counts["active"] / config.comptroller.actives
+		return max(0, rat - lim)
 
 	def shouldNudge(self, nudge):
 		if nudge == "auto":
