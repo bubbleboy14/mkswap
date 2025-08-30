@@ -201,7 +201,8 @@ class Comptroller(Feeder):
 		if oa:
 			lim = lim / (10 * oa)
 		skips, cancels, dupes = self.pruneActives(lim, True)
-		self.log("longPrune(oa=%s,lim=%s):"%(oa, lim), len(cancels), "cancels;", dupes, "dupes;", skips, "skips")
+		self.log("longPrune(oa=%s,lim=%s):"%(round(oa, 3), round(lim, 4)),
+			len(cancels), "cancels;", dupes, "dupes;", skips, "skips")
 		return True
 
 	def prune(self):
