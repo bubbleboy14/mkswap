@@ -66,12 +66,17 @@ class Trader(Worker):
 					mfi = ask("metric", sym, "mfi")
 					vpts = ask("metric", sym, "VPTsmall")
 					vptm = ask("metric", sym, "VPTmedium")
+					macdsig = ask("metric", sym, "macdsig")
+					macd = ask("metric", sym, "macd")
+					macdup = macd > macdsig
 					vptup = vpts > vptm
 					vals = {
 						"ADX": adx,
 						"+DI": pdi,
 						"-DI": mdi,
 						"mfi": mfi,
+						"macd": macd,
+						"macdsig": macdsig,
 						"VPTsmall": vpts,
 						"VPTmedium": vptm,
 						"rec": recommendation
@@ -80,6 +85,8 @@ class Trader(Worker):
 						self.notice("adxguard allowed (mfi) %s %s"%(sym, side), vals)
 					elif (selling and not vptup) or (not selling and vptup):
 						self.notice("adxguard allowed (vpt) %s %s"%(sym, side), vals)
+					elif (selling and not macdup) or (not selling and macdup):
+						self.notice("adxguard allowed (macd) %s %s"%(sym, side), vals)
 					else:
 						return self.notice("adxguard vetoed %s %s"%(sym, side), vals)
 		force = "force" in recommendation and recommendation.pop("force") or tcfg.force
