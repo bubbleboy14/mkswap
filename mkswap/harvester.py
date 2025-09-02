@@ -97,7 +97,7 @@ class Harvester(Worker):
 			else:
 				bigs.append(sym)
 				if isusd:
-					umax = config.harvester.usdmax
+					umax = ask("usdcap", config.harvester.usdmax)
 					highness = self.tooHigh(abal, umax) or self.tooHigh(tbal, umax)
 					highness = min(highness, avbals["USD"] / 8)
 		for sym in smalls:
