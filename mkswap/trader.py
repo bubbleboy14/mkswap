@@ -17,18 +17,19 @@ class Trader(Worker):
 		# TODO: wrap in timestamped object...?
 		self.trades.append(recommendation)
 
-	def order(self, sym, side, amount, price, force=False):
+	def order(self, sym, side, amount, price, force=False, strict=False):
 		order = {
 			"side": side,
 			"symbol": sym,
 			"price": price,
 			"force": force,
+			"strict": strict,
 			"amount": amount
 		}
 		self.log("order(%s, %s, %s): %s"%(sym, side, amount, order))
 		self.recommend(order)
 
-	def bestTrades(self, sym, side, amountUSD=None, force=False):
+	def bestTrades(self, sym, side, amountUSD=None, force=False, strict=False):
 		amountUSD = amountUSD or config.trader.size
 		prices = ask("bestPrices", sym, side)
 		sym = sym.replace("/", "") # for ratio-derived prices
@@ -37,7 +38,7 @@ class Trader(Worker):
 		amount = ask("fromUSD", sym, amountUSD)
 		self.log("bestTrades(%s, %s, %s->%s)"%(sym, side, amountUSD, amount))
 		for span in prices:
-			self.order(sym, side, amount, prices[span], force)
+			self.order(sym, side, amount, prices[span], force, strict)
 		return {
 			"amount": amount,
 			"prices": prices
@@ -49,48 +50,9 @@ class Trader(Worker):
 
 	def shouldTrade(self, recommendation):
 		self.log("assessing recommendation:", recommendation)
-		tcfg = config.trader
-		mfibot = tcfg.mfilim
-		mfitop = 100 - mfibot
-		adxlim = tcfg.adxguard
-		if adxlim:
-			side = recommendation["side"]
-			sym = recommendation["symbol"]
-			adx = ask("metric", sym, "ADX")
-			pdi = ask("metric", sym, "+DI")
-			mdi = ask("metric", sym, "-DI")
-			if adx > adxlim:
-				goingup = pdi > mdi
-				selling = side == "sell"
-				if (goingup and selling) or (not goingup and not selling):
-					mfi = ask("metric", sym, "mfi")
-					vpts = ask("metric", sym, "VPTsmall")
-					vptm = ask("metric", sym, "VPTmedium")
-					macdsig = ask("metric", sym, "macdsig")
-					macd = ask("metric", sym, "macd")
-					macdup = macd > macdsig
-					vptup = vpts > vptm
-					vals = {
-						"ADX": adx,
-						"+DI": pdi,
-						"-DI": mdi,
-						"mfi": mfi,
-						"macd": macd,
-						"macdsig": macdsig,
-						"VPTsmall": vpts,
-						"VPTmedium": vptm,
-						"rec": recommendation
-					}
-					if (selling and mfi > mfitop) or (not selling and mfi < mfibot):
-						self.notice("adxguard allowed (mfi) %s %s"%(sym, side), vals)
-					elif (selling and not vptup) or (not selling and vptup):
-						self.notice("adxguard allowed (vpt) %s %s"%(sym, side), vals)
-					elif (selling and not macdup) or (not selling and macdup):
-						self.notice("adxguard allowed (macd) %s %s"%(sym, side), vals)
-					else:
-						return self.notice("adxguard vetoed %s %s"%(sym, side), vals)
-		force = "force" in recommendation and recommendation.pop("force") or tcfg.force
-		return ask("approved", recommendation, force)
+		strict = "strict" in recommendation and recommendation.pop("strict")
+		force = "force" in recommendation and recommendation.pop("force") or config.trader.force
+		return ask("wise", recommendation, strict) and ask("approved", recommendation, force)
 
 	def trade(self, recommendation):
 		self.log("TRADING", recommendation, "\n\n\n")

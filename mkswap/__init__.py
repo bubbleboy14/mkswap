@@ -10,6 +10,7 @@ from .multifeed import MultiFeed
 from .manager import Manager
 from .actuary import Actuary
 from .booker import Booker
+from .judge import Judge
 from .ndx import NDX
 from .office import getOffice, Office
 

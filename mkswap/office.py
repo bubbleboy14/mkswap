@@ -10,6 +10,7 @@ from .actuary import Actuary
 from .manager import Manager
 from .trader import Trader
 from .booker import Booker
+from .judge import Judge
 from .base import Worker
 from .ndx import NDX
 from .gem import gem
@@ -27,6 +28,7 @@ class Office(Worker):
 		listen("warning", self.warning)
 		listen("notice", self.notice)
 		listen("cross", self.cross)
+		self.judge = Judge(symbols)
 		self.ndx = NDX()
 		self.actuary = Actuary()
 		self.accountant = Accountant(platform, symbols)
