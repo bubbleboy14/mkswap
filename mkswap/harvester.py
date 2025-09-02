@@ -125,7 +125,7 @@ class Harvester(Worker):
 			bot = config.harvester.bottom * 2
 		return max(0, bal - bot)
 
-	def orderBalance(self, sym, diff, balancers, side="buy"):
+	def orderBalance(self, sym, diff, balancers, side="buy", strict=True):
 		bals = {}
 		markets = ask("markets", sym, side)
 		sig = "%s %s %s %s"%(side, diff, sym, balancers)
@@ -134,7 +134,7 @@ class Harvester(Worker):
 			for fullSym in markets[side]:
 				for balancer in balancers:
 					if balancer in fullSym:
-						bals[fullSym] = ask("bestTrades", fullSym, side, diff)
+						bals[fullSym] = ask("bestTrades", fullSym, side, diff, strict=strict)
 		return {
 			"msg": "balance %s"%(sig,),
 			"data": bals
