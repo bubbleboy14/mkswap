@@ -3,7 +3,7 @@ from .base import Worker
 from .config import config
 
 PERIODS = ["fast", "slow"]
-TERMS = ["small", "medium", "large"]
+TERMS = ["small", "medium", "large", "jumbo"]
 SVALS = ["vpt", "OBVslope", "ADslope"]
 
 class Actuary(Worker):
