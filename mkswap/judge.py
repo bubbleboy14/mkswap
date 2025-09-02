@@ -14,7 +14,7 @@ class Judge(Worker):
 		for sym in self.syms:
 			small = ask("metric", sym, "small")
 			large = ask("metric", sym, "large")
-			mods[sym] = small / large
+			mods[sym] = large and small / large or 0
 		vals = list(mods.values())
 		vals.sort()
 		mods["lowest"] = vals.pop(0)
