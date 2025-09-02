@@ -4,7 +4,7 @@ from .config import config
 
 class Judge(Worker):
 	def __init__(self, syms=["ETHUSD", "BTCUSD"]):
-		self.syms = syms
+		self.syms = list(filter(lambda s : s.endswith("USD"), syms))
 		listen("wise", self.wise)
 		listen("usdcap", self.usdcap)
 		listen("bestBuy", self.bestBuy)
