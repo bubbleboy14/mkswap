@@ -27,6 +27,7 @@ class Actuary(Worker):
 		robj["low"] = vals[0]
 		robj["high"] = vals[1]
 		robj["span"] = robj["high"] - robj["low"]
+		self.log("range(%s)"%(symbol,), robj)
 		return robj
 
 	def tellMeWhen(self, symbol, metric, threshold, cb):
