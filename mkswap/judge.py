@@ -12,9 +12,11 @@ class Judge(Worker):
 	def mods(self):
 		mods = {}
 		for sym in self.syms:
-			small = ask("metric", sym, "small")
-			jumbo = ask("metric", sym, "jumbo")
-			mods[sym] = jumbo and small / jumbo or 0
+			r = ask("range", sym)
+			short = r["short"]
+			span = r["span"]
+			low = r["low"]
+			mods[sym] = (short - low) / span - 0.5
 		vals = list(mods.values())
 		vals.sort()
 		mods["lowest"] = vals.pop(0)
@@ -28,7 +30,7 @@ class Judge(Worker):
 
 	def usdcap(self, base=50):
 		mods = self.mods()
-		cap = base * mods["lowest"]
+		cap = base + base * mods["lowest"]
 		self.log("usdcap", cap, mods)
 		return cap
 
