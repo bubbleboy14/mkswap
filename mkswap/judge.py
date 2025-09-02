@@ -29,7 +29,7 @@ class Judge(Worker):
 	def usdcap(self, base=50):
 		mods = self.mods()
 		cap = base * mods["lowest"]
-		self.log("usdcap %s"%(cap,), mods)
+		self.log("usdcap", cap, mods)
 		return cap
 
 	def wise(self, trade, strict=False):
