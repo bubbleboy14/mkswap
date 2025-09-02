@@ -13,8 +13,21 @@ class Actuary(Worker):
 		self.fcans = {}
 		self.predictions = {}
 		self.wheners = {}
+		listen("range", self.range)
 		listen("metric", self.latest)
 		listen("tellMeWhen", self.tellMeWhen)
+
+	def range(self, symbol):
+		vals = [ask("metric", symbol, r) for r in TERMS]
+		robj = {
+			"short": vals[0],
+			"long": vals[-1]
+		}
+		vals.sort()
+		robj["low"] = vals[0]
+		robj["high"] = vals[1]
+		robj["span"] = robj["high"] - robj["low"]
+		return robj
 
 	def tellMeWhen(self, symbol, metric, threshold, cb):
 		if symbol not in self.wheners:
