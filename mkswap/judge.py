@@ -16,7 +16,7 @@ class Judge(Worker):
 			short = r["short"]
 			span = r["span"]
 			low = r["low"]
-			mods[sym] = (short - low) / span - 0.5
+			mods[sym] = span and ((short - low) / span - 0.5) or 0
 		vals = list(mods.values())
 		vals.sort()
 		mods["lowest"] = vals.pop(0)
