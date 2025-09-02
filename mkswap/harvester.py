@@ -89,7 +89,7 @@ class Harvester(Worker):
 				if abal is None:
 					self.log("no balance for", fs)
 					continue
-			lowness = self.tooLow(abal, True) or self.tooLow(tbal)
+			lowness = self.tooLow(abal) or self.tooLow(tbal, True)
 			if lowness:
 				lows.append(sym)
 				if not self.tooHigh(abal) and not self.tooHigh(tbal):
@@ -115,9 +115,9 @@ class Harvester(Worker):
 		self.refills = []
 		return refs
 
-	def tooLow(self, bal, actual=False):
+	def tooLow(self, bal, double=False):
 		bot = config.harvester.bottom
-		if actual:
+		if double:
 			bot *= 2
 		return max(0, bot - bal)
 
