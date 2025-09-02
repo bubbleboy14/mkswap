@@ -97,9 +97,10 @@ class Harvester(Worker):
 			else:
 				bigs.append(sym)
 				if isusd:
+					avbal = avbals["USD"]
 					umax = ask("usdcap", config.harvester.usdmax)
-					highness = self.tooHigh(abal, umax) or self.tooHigh(tbal, umax)
-					highness = min(highness, avbals["USD"] / 8)
+					highness = self.tooHigh(avbal, umax) or self.tooHigh(tbal, umax)
+					highness = min(highness, avbal / 4)
 		for sym in smalls:
 			self.refillCount += 1
 			self.refills.append(self.orderBalance(sym, round(smalls[sym], 5), bigs))
