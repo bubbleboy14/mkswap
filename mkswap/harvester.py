@@ -106,7 +106,8 @@ class Harvester(Worker):
 		if highness:
 			self.defills += 1
 			syms = list(smalls.keys()) or lows or list(filter(lambda s : s != "USD", bigs))
-			self.refills.append(self.orderBalance("USD", round(highness, 5), syms, "sell"))
+			self.refills.append(self.orderBalance("USD",
+				round(highness, 5), [ask("bestBuy", syms)], "sell"))
 
 	def getRefills(self):
 		refs = self.refills
