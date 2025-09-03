@@ -93,7 +93,7 @@ class Harvester(Worker):
 			if lowness:
 				lows.append(sym)
 				if not self.tooHigh(abal) and not self.tooHigh(tbal):
-					smalls[sym] = lowness
+					smalls[sym] = lowness / 4
 			else:
 				bigs.append(sym)
 				if isusd:
