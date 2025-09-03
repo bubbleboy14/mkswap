@@ -103,7 +103,7 @@ class Harvester(Worker):
 					highness = min(highness, avbal / 4)
 		for sym in smalls:
 			self.refillCount += 1
-			self.refills.append(self.orderBalance(sym, round(smalls[sym], 5), bigs))
+			self.refills.append(self.orderBalance(sym, round(smalls[sym] / len(bigs), 5), bigs))
 		if highness:
 			self.defills += 1
 			syms = list(smalls.keys()) or lows or list(filter(lambda s : s != "USD", bigs))
