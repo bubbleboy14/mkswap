@@ -232,7 +232,7 @@ class Accountant(Worker):
 		for b in ["actual", "available", "theoretical"]:
 			self._balances[b][sym] -= amount
 
-	def overActive(self, lim=0.8):
+	def overActive(self, lim=0.9):
 		rat = self.counts["active"] / config.comptroller.actives
 		return max(0, rat - lim)
 
