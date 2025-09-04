@@ -161,16 +161,19 @@ class Comptroller(Feeder):
 		cancels = []
 		skips = 0
 		dupes = 0
-		prices = set()
+		prices = {}
 		for tnum in self.actives:
 			trade = self.actives[tnum]
 			if trade.get("status", None) == "booked":
 				tp = trade["price"]
-				if undupe and tp in prices:
-					cancels.append(tnum)
+				if tp in prices:
+					prices[tp]["orders"].append(tnum)
 					dupes += 1
 				else:
-					prices.add(tp)
+					prices[tp] = {
+						"cancel": False,
+						"orders": [tnum]
+					}
 					sym = trade["symbol"]
 					curprice = self.pricer(sym)
 					if not curprice:
@@ -187,10 +190,18 @@ class Comptroller(Feeder):
 					if limit:
 						ratio = float(tp) / curprice
 						toofar = abs(1 - ratio) > limit
-					if s < -config.comptroller.leeway or toofar:
-						cancels.append(tnum)
+					prices[tp]["cancel"] = s < -config.comptroller.leeway or toofar
 			else:
 				skips += 1
+		for price in prices:
+			pset = prices[price]
+			ords = pset["orders"]
+			if pset["cancel"]:
+				cancels += ords
+			elif undupe and len(ords) > 1:
+				ords.sort(key = lambda tnum : -float(self.actives[tnum]["amount"]))
+				self.log("unduping", len(ords), "at", price)
+				cancels += ords[1:]
 		for tnum in cancels:
 			self.cancel(tnum)
 		return skips, cancels, dupes
