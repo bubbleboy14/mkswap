@@ -100,7 +100,7 @@ class Harvester(Worker):
 				bigs.append(sym)
 				if isusd:
 					umax = ask("usdcap", config.harvester.usdmax)
-					highness = self.tooHigh(avbal, umax) or self.tooHigh((abal + tbal) / 2, umax * 2)
+					highness = self.tooHigh(avbal, umax) or self.tooHigh(abal + tbal, umax * 3)
 					highness = min(highness, avbal / 5)
 		for sym in smalls:
 			self.refillCount += 1
