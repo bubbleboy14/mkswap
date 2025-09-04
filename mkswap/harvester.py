@@ -91,7 +91,7 @@ class Harvester(Worker):
 				if abal is None:
 					self.log("no balance for", fs)
 					continue
-			lowness = self.tooLow(abal) or self.tooLow(tbal, True) or self.tooLow(avbal, not isusd)
+			lowness = self.tooLow(abal) or self.tooLow(tbal, True) or self.tooLow(avbal, isusd)
 			if lowness:
 				lows.append(sym)
 				if not self.tooHigh(abal) and not self.tooHigh(tbal):
