@@ -78,18 +78,20 @@ class Harvester(Worker):
 		highness = 0
 		for sym in abals:
 			isusd = sym == "USD"
+			avbal = avbals[sym]
 			abal = abals[sym]
 			tbal = tbals[sym]
 			if not isusd:
 				if sym == "diff":
 					continue
 				fs = self.accountant.fullSym(sym)
+				avbal = ask("getUSD", fs, avbal)
 				abal = ask("getUSD", fs, abal)
 				tbal = ask("getUSD", fs, tbal)
 				if abal is None:
 					self.log("no balance for", fs)
 					continue
-			lowness = self.tooLow(abal) or self.tooLow(tbal, True)
+			lowness = self.tooLow(abal) or self.tooLow(tbal, True) or self.tooLow(avbal, not isusd)
 			if lowness:
 				lows.append(sym)
 				if not self.tooHigh(abal) and not self.tooHigh(tbal):
@@ -97,9 +99,8 @@ class Harvester(Worker):
 			else:
 				bigs.append(sym)
 				if isusd:
-					avbal = avbals["USD"]
 					umax = ask("usdcap", config.harvester.usdmax)
-					highness = self.tooHigh(avbal, umax) or self.tooHigh(tbal, umax * 2)
+					highness = self.tooHigh(avbal, umax) or self.tooHigh((abal + tbal) / 2, umax * 2)
 					highness = min(highness, avbal / 5)
 		for sym in smalls:
 			self.refillCount += 1
