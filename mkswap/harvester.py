@@ -99,7 +99,7 @@ class Harvester(Worker):
 				if isusd:
 					avbal = avbals["USD"]
 					umax = ask("usdcap", config.harvester.usdmax)
-					highness = (self.tooHigh(avbal, umax) + self.tooHigh(tbal, umax)) / 2
+					highness = self.tooHigh(avbal, umax) or self.tooHigh(tbal, umax * 1.5)
 					highness = min(highness, avbal / 4)
 		for sym in smalls:
 			self.refillCount += 1
