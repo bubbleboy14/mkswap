@@ -8,7 +8,7 @@ def getSpan(span):
 	return config.ndx[span]
 
 SPANS = ["inner", "short", "long", "outer"]
-BESTIES = ["short", "long", "outer"]
+BESTIES = ["short", "long", "outer"] # not currently used...
 side2height = {
 	"buy": "low",
 	"sell": "high"
@@ -77,7 +77,7 @@ class NDX(Worker):
 	def bestPrice(self, sym, side, span="inner", history="trade"):
 		return round(self.histories[history][sym][span][side2height[side]], 6)
 
-	def bestPrices(self, sym, side, spans=BESTIES, history="trade"):
+	def bestPrices(self, sym, side, spans=SPANS, history="trade"):
 		d = {}
 		for span in spans:
 			d[span] = self.bestPrice(sym, side, span, history)
