@@ -55,7 +55,11 @@ class Slosh(Base):
 
 	def shouldOneSwap(self, side):
 		bias = self.stats["bias"]
+		isbuy = side == "buy"
 		bigone = bias > 0
+		top, bot = self.syms
+		sellsym = isbuy and bot or top
+		sellfs = ask("fullSym", sellsym)
 		if scfg.oneswap != "auto":
 			return scfg.oneswap
 		bals = ask("balances")
@@ -63,13 +67,12 @@ class Slosh(Base):
 			s = bals[sec]
 			if ask("tooLow", s["USD"]):
 				return True
-			for sym in self.syms:
-				usdval = ask("getUSD", ask("fullSym", sym), s[sym])
-				if usdval and ask("tooLow", usdval):
-					return False
+			usdval = ask("getUSD", sellfs, s[sellsym])
+			if usdval and ask("tooLow", usdval):
+				return False
 		if abs(bias) < scfg.randlim:
 			return "both"
-		if side == "buy":
+		if isbuy:
 			return not bigone
 		return bigone
 
