@@ -43,12 +43,14 @@ class Slosh(Base):
 	def oneswap(self, side, size=10):
 		vmult = config.strategy.slosh.vmult
 		price = ask("bestPrice", self.onesym, side)
-		denom = vmult * vmult / price # arbitrary
+		botprice = ask("price", self.bot)
+		amount = size / (price * botprice)
 		emit("trade", {
 			"side": side,
 			"price": price,
-			"symbol": self.onesym,
-			"amount": size / denom
+			"force": "auto",
+			"amount": amount,
+			"symbol": self.onesym
 		})
 
 	def shouldOneSwap(self, side):
