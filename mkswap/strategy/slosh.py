@@ -27,7 +27,7 @@ class Slosh(Base):
 		sellprice = ask("bestPrice", sellsym, "sell")
 		emit("trade", {
 			"side": "sell",
-#			"force": "auto", # sells are already easy...
+			"force": "auto",
 			"symbol": sellsym,
 			"price": sellprice,
 			"amount": size / sellprice
