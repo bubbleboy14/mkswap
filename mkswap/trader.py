@@ -52,7 +52,10 @@ class Trader(Worker):
 		self.log("assessing recommendation:", recommendation)
 		strict = "strict" in recommendation and recommendation.pop("strict")
 		force = "force" in recommendation and recommendation.pop("force") or config.trader.force
-		return ask("wise", recommendation, strict) and ask("approved", recommendation, force)
+		wise = ask("wise", recommendation, strict)
+		if force == "auto":
+			force = wise
+		return wise and ask("approved", recommendation, force)
 
 	def trade(self, recommendation):
 		self.log("TRADING", recommendation, "\n\n\n")
