@@ -1,5 +1,4 @@
 from rel.util import emit, listen
-from .backend import predefs
 from .base import Worker
 
 request2order = {
@@ -21,7 +20,7 @@ class Booker(Worker):
 		bo = self.bests[symbol][oside]
 		self.log("bestOrder(%s, %s->%s)"%(symbol, side, oside), bo)
 		if shift:
-			inc = predefs["minimums"][symbol]
+			inc = symbol.endswith("USD") and 0.01 or 0.00001
 			if side == "buy":
 				inc *= -1
 			obo = bo
