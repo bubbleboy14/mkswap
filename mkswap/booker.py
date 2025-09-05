@@ -38,7 +38,7 @@ class Booker(Worker):
 		oside = request2order[side]
 		bo = self.bests[symbol][oside]
 		self.log("bestOrder(%s, %s->%s)"%(symbol, side, oside), bo)
-		return shifted and self.shifted(symbol, side, bo) or bo
+		return shift and self.shifted(symbol, side, bo) or bo
 
 	def pricePoints(self, symbol, side):
 		obook = self.orderBook[symbol][side]
