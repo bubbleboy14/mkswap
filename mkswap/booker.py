@@ -25,10 +25,10 @@ class Booker(Worker):
 			if side == "buy":
 				inc *= -1
 			obo = bo
-			ob = self.orderBook[symbol][side]
+			ob = self.orderBook[symbol][oside]
 			while bo in ob:
 				bo += inc
-			self.notice("shifted %s %s from %s to %s"%(symbol, side, obo, bo))
+			self.notice("shifted %s %s from %s to %s"%(symbol, oside, obo, bo))
 		return bo
 
 	def pricePoints(self, symbol, side):
