@@ -27,7 +27,7 @@ class Booker(Worker):
 			ob = self.orderBook[symbol][oside]
 			while bo in ob:
 				bo += inc
-			self.notice("shifted %s %s from %s to %s"%(symbol, oside, obo, bo))
+			self.notice("shifted %s %s (%s) from %s to %s"%(symbol, oside, side, obo, bo))
 		return bo
 
 	def pricePoints(self, symbol, side):
