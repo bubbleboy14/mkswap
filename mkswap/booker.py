@@ -20,13 +20,15 @@ class Booker(Worker):
 		bo = self.bests[symbol][oside]
 		self.log("bestOrder(%s, %s->%s)"%(symbol, side, oside), bo)
 		if shift:
-			inc = symbol.endswith("USD") and 0.01 or 0.00001
+			inusd = symbol.endswith("USD")
+			inc = inusd and 0.01 or 0.00001
 			if side == "buy":
 				inc *= -1
 			obo = bo
 			ob = self.orderBook[symbol][oside]
 			while bo in ob:
 				bo += inc
+			bo = round(bo, inusd and 2 or 5)
 			self.notice("shifted %s %s (%s) from %s to %s"%(symbol, oside, side, obo, bo))
 		return bo
 
