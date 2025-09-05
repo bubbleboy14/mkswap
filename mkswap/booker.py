@@ -18,6 +18,7 @@ class Booker(Worker):
 
 	def unbook(self, order):
 		order["price"] = self.shifted(order["symbol"], order["side"], order["price"])
+		return order
 
 	def shifted(self, symbol, side, price):
 		oside = request2order[side]
