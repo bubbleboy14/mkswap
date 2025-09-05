@@ -33,7 +33,7 @@ config = Config({
 	},
 	"trader": {
 		"size": 8,
-		"book": False,
+		"book": True,
 		"force": False
 	},
 	"judge": {
