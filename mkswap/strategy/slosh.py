@@ -54,14 +54,14 @@ class Slosh(Base):
 		})
 
 	def shouldOneSwap(self, side):
+		if scfg.oneswap != "auto":
+			return scfg.oneswap
 		bias = self.stats["bias"]
 		isbuy = side == "buy"
 		bigone = bias > 0
 		top, bot = self.syms
 		sellsym = isbuy and bot or top
 		sellfs = ask("fullSym", sellsym)
-		if scfg.oneswap != "auto":
-			return scfg.oneswap
 		bals = ask("balances")
 		for sec in bals:
 			s = bals[sec]
