@@ -61,14 +61,12 @@ class Slosh(Base):
 		bals = ask("balances")
 		for sec in bals:
 			s = bals[sec]
+			if ask("tooLow", s["USD"]):
+				return True
 			for sym in self.syms:
-				if sym == "USD":
-					if ask("tooLow", s[sym]):
-						return True
-				else:
-					usdval = ask("getUSD", ask("fullSym", sym), s[sym])
-					if usdval and ask("tooLow", usdval):
-						return False
+				usdval = ask("getUSD", ask("fullSym", sym), s[sym])
+				if usdval and ask("tooLow", usdval):
+					return False
 		if abs(bias) < scfg.randlim:
 			return "both"
 		if side == "buy":
