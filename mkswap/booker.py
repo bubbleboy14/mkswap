@@ -12,25 +12,33 @@ class Booker(Worker):
 		self.totes = {}
 		self.orders = {}
 		self.orderBook = {}
+		listen("unbook", self.unbook)
 		listen("bestOrder", self.bestOrder)
 		listen("updateOrderBook", self.updateOrderBook)
 
-	def bestOrder(self, symbol, side, shift=False):
+	def unbook(self, order):
+		order["price"] = self.shifted(order["symbol"], order["side"], order["price"])
+
+	def shifted(self, symbol, side, price):
 		oside = request2order[side]
-		bo = self.bests[symbol][oside]
-		self.log("bestOrder(%s, %s->%s)"%(symbol, side, oside), bo)
-		if shift:
-			inusd = symbol.endswith("USD")
-			inc = inusd and 0.01 or 0.00001
-			if side == "buy":
-				inc *= -1
-			obo = bo
-			ob = self.orderBook[symbol][oside]
+		inusd = symbol.endswith("USD")
+		inc = inusd and 0.01 or 0.00001
+		if side == "buy":
+			inc *= -1
+		obo = bo
+		ob = self.orderBook[symbol][oside]
+		if bo in ob:
 			while bo in ob:
 				bo += inc
 			bo = round(bo, inusd and 2 or 5)
 			self.notice("shifted %s %s (%s) from %s to %s"%(symbol, oside, side, obo, bo))
 		return bo
+
+	def bestOrder(self, symbol, side, shift=False):
+		oside = request2order[side]
+		bo = self.bests[symbol][oside]
+		self.log("bestOrder(%s, %s->%s)"%(symbol, side, oside), bo)
+		return shifted and self.shifted(symbol, side, bo) or bo
 
 	def pricePoints(self, symbol, side):
 		obook = self.orderBook[symbol][side]

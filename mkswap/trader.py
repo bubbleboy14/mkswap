@@ -33,9 +33,7 @@ class Trader(Worker):
 		amountUSD = amountUSD or config.trader.size
 		prices = ask("bestPrices", sym, side)
 		sym = sym.replace("/", "") # for ratio-derived prices
-		bookish = not config.trader.book
-		prices[bookish and "bookish" or "book"] = ask("bestOrder",
-			sym, side, shift=bookish)
+		prices["book"] = ask("bestOrder", sym, side)
 		amount = ask("fromUSD", sym, amountUSD)
 		self.log("bestTrades(%s, %s, %s->%s)"%(sym, side, amountUSD, amount))
 		for span in prices:
@@ -47,7 +45,7 @@ class Trader(Worker):
 
 	def recommend(self, rec):
 		self.log("recommend(%s)"%(rec,))
-		self.recommendations.append(ask("resize", rec))
+		self.recommendations.append(ask("resize", ask("unbook", rec)))
 
 	def shouldTrade(self, recommendation):
 		self.log("assessing recommendation:", recommendation)
