@@ -43,7 +43,7 @@ class Slosh(Base):
 	def oneswap(self, side, size=10):
 		vmult = config.strategy.slosh.vmult
 		price = ask("bestPrice", self.onesym, side)
-		botprice = ask("price", self.bot)
+		botprice = ask("price", self.bottom)
 		amount = size / (price * botprice)
 		emit("trade", {
 			"side": side,

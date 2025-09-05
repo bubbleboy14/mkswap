@@ -54,7 +54,7 @@ class Trader(Worker):
 		force = "force" in recommendation and recommendation.pop("force") or config.trader.force
 		wise = ask("wise", recommendation, strict)
 		if force == "auto":
-			force = wise
+			force = ask("wise", recommendation, True)
 		return wise and ask("approved", recommendation, force)
 
 	def trade(self, recommendation):
