@@ -44,8 +44,13 @@ class Booker(Worker):
 		side = event["side"]
 		isask = side == "ask"
 		price = float(event["price"])
-		self.orderBook[symbol][side][price] = float(event["remaining"])
-		self.orders[symbol][side] = price
+		remaining = float(event["remaining"])
+		obook = self.orderBook[symbol][side]
+		if remaining:
+			obook[price] = remaining
+			self.orders[symbol][side] = price
+		elif price in obook:
+			del obook[price]
 		prices = self.pricePoints(symbol, side)
 		if prices:
 			self.bests[symbol][side] = (isask and min or max)(prices)
