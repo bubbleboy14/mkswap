@@ -25,14 +25,14 @@ class Booker(Worker):
 		inc = inusd and 0.01 or 0.00001
 		if side == "buy":
 			inc *= -1
-		obo = bo
+		orig = price
 		ob = self.orderBook[symbol][oside]
-		if bo in ob:
-			while bo in ob:
-				bo += inc
-			bo = round(bo, inusd and 2 or 5)
-			self.notice("shifted %s %s (%s) from %s to %s"%(symbol, oside, side, obo, bo))
-		return bo
+		if price in ob:
+			while price in ob:
+				price += inc
+			price = round(price, inusd and 2 or 5)
+			self.notice("shifted %s %s (%s) from %s to %s"%(symbol, oside, side, orig, price))
+		return price
 
 	def bestOrder(self, symbol, side, shift=False):
 		oside = request2order[side]
