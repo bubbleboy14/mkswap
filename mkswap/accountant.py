@@ -58,6 +58,7 @@ class Accountant(Worker):
 		listen("fromUSD", self.fromUSD)
 		listen("getUSD", self.getUSD)
 		listen("resize", self.resize)
+		listen("round", self.round)
 
 	def getBalances(self):
 		self.log("getBalances!!!")
@@ -104,7 +105,7 @@ class Accountant(Worker):
 		return bal
 
 	def fromUSD(self, sym, amount):
-		return round(amount / self.price(self.fullSym(sym[:3])), 6)
+		return self.round(amount / self.price(self.fullSym(sym[:3])))
 
 	def fullSym(self, sym):
 		return sym + self._usd
@@ -247,13 +248,18 @@ class Accountant(Worker):
 		cprice = self.price(sym)
 		self.counts["nudges"] += 1
 		pdiff = (oprice - cprice) * config.accountant.nmult
-		trade["price"] = round(oprice + pdiff, predefs["sigfigs"].get(sym, 2))
+		trade["price"] = self.round(oprice + pdiff, sym)
 		self.log("nudge(%s -> %s)"%(oprice, trade["price"]), trade)
 
 	def tooBig(self, trade):
 		if not self.updateBalances(trade, "available", test=True):
 			self.log("trade is too big!", trade)
 			return True
+
+	def round(self, amount, sym="amount"):
+		if sym == "amount":
+			return round(amount, 6)
+		return round(amount, predefs["sigfigs"].get(sym, 2))
 
 	def resize(self, trade):
 		if self.tooBig(trade):
@@ -265,8 +271,8 @@ class Accountant(Worker):
 		if size < mins[sym]:
 			trade["amount"] = mins[sym]
 			self.log("order is too small! increased amount from", size, "to", trade["amount"])
-		trade["amount"] = round(trade["amount"], 6)
-		trade["price"] = round(trade["price"], predefs["sigfigs"].get(sym, 2))
+		trade["amount"] = self.round(trade["amount"])
+		trade["price"] = self.round(trade["price"], sym)
 		return trade
 
 	def realistic(self, trade, feeSide="taker", asScore=False, nudge=False, nudged=0):

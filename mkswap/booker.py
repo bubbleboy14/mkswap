@@ -1,4 +1,4 @@
-from rel.util import emit, listen
+from rel.util import ask, emit, listen
 from .base import Worker
 
 request2order = {
@@ -22,8 +22,7 @@ class Booker(Worker):
 
 	def shifted(self, symbol, side, price):
 		oside = request2order[side]
-		inusd = symbol.endswith("USD")
-		inc = inusd and 0.01 or 0.00001
+		inc = symbol.endswith("USD") and 0.01 or 0.00001
 		if side == "buy":
 			inc *= -1
 		orig = price
@@ -31,7 +30,7 @@ class Booker(Worker):
 		if price in ob:
 			while price in ob:
 				price += inc
-			price = round(price, inusd and 2 or 5)
+			price = ask("round", price, symbol)
 			self.notice("shifted %s %s (%s) from %s to %s"%(symbol, oside, side, orig, price))
 		return price
 
@@ -40,7 +39,7 @@ class Booker(Worker):
 		if average:
 			oside = "average"
 			bprices = bests.values()
-			bo = sum(bprices) / len(bprices)
+			bo = ask("round", sum(bprices) / len(bprices), symbol)
 		else:
 			if opposite:
 				side = side == "buy" and "sell" or "buy"
