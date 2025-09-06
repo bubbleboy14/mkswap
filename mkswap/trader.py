@@ -31,14 +31,19 @@ class Trader(Worker):
 
 	def bestTrades(self, sym, side, amountUSD=None, force=False, strict=False):
 		amountUSD = amountUSD or config.trader.size
-		prices = ask("bestPrices", sym, side)
+		quotes = ask("bestPrices", sym, side)
 		sym = sym.replace("/", "") # for ratio-derived prices
 		if config.trader.book:
-			prices["book"] = ask("bestOrder", sym, side, average=True)
-		amount = ask("fromUSD", sym, amountUSD / len(prices.keys()))
+			quotes["book"] = ask("bestOrder", sym, side, average=True)
+		amount = ask("fromUSD", sym, amountUSD / len(quotes.keys()))
 		self.log("bestTrades(%s, %s, %s->%s)"%(sym, side, amountUSD, amount))
-		for span in prices:
-			self.order(sym, side, amount, prices[span], force, strict)
+		prices = {}
+		for span, price in quotes.values():
+			if price not in prices:
+				prices[price] = []
+			prices[price].append(span)
+		for price, spans in prices.values():
+			self.order(sym, side, amount * len(spans), price, force, strict)
 		return {
 			"amount": amount,
 			"prices": prices
