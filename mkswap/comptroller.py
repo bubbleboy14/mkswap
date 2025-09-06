@@ -56,6 +56,19 @@ class Comptroller(Feeder):
 			self.log("proc() cancellation", reason)
 			if reason != "Requested":
 				self.cancels.append({ "msg": reason, "data": msg })
+				if reason == "MakerOrCancelWouldTake":
+					side = msg["side"]
+					sym = msg["symbol"]
+					price = ask("shifted", sym, side, msg["price"])
+					reord = {
+						"side": side,
+						"symbol": sym,
+						"force": True,
+						"price": price,
+						"amount": msg["original_amount"]
+					}
+					self.notice("reissuing %s %s @ %s"%(sym, side, price), reord)
+					emit("trade", reord)
 			self.cancelled(coi, reason)
 		elif etype == "closed":
 			self.log("proc(): trade closed", order)
