@@ -63,6 +63,7 @@ class Judge(Worker):
 					vptm = ask("metric", sym, "VPTmedium")
 					macdsig = ask("metric", sym, "macdsig")
 					macd = ask("metric", sym, "macd")
+					upshifting = ask("upshifting", sym)
 					macdup = macd > macdsig
 					vptup = vpts > vptm
 					vals = {
@@ -76,6 +77,7 @@ class Judge(Worker):
 						"VPTmedium": vptm,
 						"adxlim": adxlim,
 						"mfilim": mfibot,
+						"upshifting": upshifting,
 						"trade": trade
 					}
 					noticer = strict and self.notice or self.log
@@ -87,6 +89,8 @@ class Judge(Worker):
 						return "very"
 					elif (selling and not vptup) or (not selling and vptup):
 						self.log("approved (vpt) %s %s"%(sym, side), vals)
+					elif (selling and not upshifting) or (not selling and upshifting):
+						self.log("approved (upshifting) %s %s"%(sym, side), vals)
 					else:
 						return noticer("unwise %s %s"%(sym, side), vals)
 		return True
