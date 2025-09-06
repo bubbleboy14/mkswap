@@ -22,7 +22,7 @@ class Booker(Worker):
 
 	def shifted(self, symbol, side, price):
 		oside = request2order[side]
-		inc = symbol.endswith("USD") and 0.01 or 0.00001
+		inc = symbol.endswith("USD") and 0.02 or 0.00002
 		if side == "buy":
 			inc *= -1
 		orig = price
