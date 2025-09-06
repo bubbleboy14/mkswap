@@ -46,7 +46,7 @@ class Trader(Worker):
 
 	def recommend(self, rec):
 		self.log("recommend(%s)"%(rec,))
-		self.recommendations.append(ask("resize", ask("unbook", rec)))
+		self.recommendations.append(ask("resize", rec))
 
 	def shouldTrade(self, recommendation):
 		self.log("assessing recommendation:", recommendation)
@@ -55,7 +55,7 @@ class Trader(Worker):
 		wise = ask("wise", recommendation, strict)
 		if force == "auto":
 			force = ask("wise", recommendation, True) == "very"
-		return wise and ask("approved", recommendation, force)
+		return wise and ask("approved", ask("unbook", recommendation), force)
 
 	def trade(self, recommendation):
 		self.log("TRADING", recommendation, "\n\n\n")
