@@ -14,11 +14,15 @@ class Booker(Worker):
 		self.orderBook = {}
 		listen("unbook", self.unbook)
 		listen("bestOrder", self.bestOrder)
+		listen("upshifting", self.upshifting)
 		listen("updateOrderBook", self.updateOrderBook)
 
 	def unbook(self, order):
 		order["price"] = self.shifted(order["symbol"], order["side"], order["price"])
 		return order
+
+	def upshifting(self, symbol):
+		return sum(self.bests[symbol].values()) / 2 > ask("price", symbol)
 
 	def shifted(self, symbol, side, price):
 		oside = request2order[side]
