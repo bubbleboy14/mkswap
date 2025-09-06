@@ -39,7 +39,8 @@ class Booker(Worker):
 		if average:
 			oside = "average"
 			bprices = bests.values()
-			bo = ask("round", sum(bprices) / len(bprices), symbol)
+			cur = ask("price", symbol)
+			bo = ask("round", (cur + sum(bprices)) / 3, symbol)
 		else:
 			if opposite:
 				side = side == "buy" and "sell" or "buy"
