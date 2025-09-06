@@ -95,22 +95,21 @@ class Harvester(Worker):
 			if lowness:
 				lows.append(sym)
 				if not self.tooHigh(abal) and not self.tooHigh(tbal):
-					smalls[sym] = lowness / 4
+					smalls[sym] = lowness
 			else:
 				bigs.append(sym)
 				if isusd:
 					umax = ask("usdcap", config.harvester.usdmax)
 					highness = max(self.tooHigh(avbal, umax), self.tooHigh(abal + tbal, umax * 3))
-					highness = min(highness, avbal / 5)
+					highness = min(highness, avbal)
 		for sym in smalls:
 			self.refillCount += 1
-			self.refills.append(self.orderBalance(sym, round(smalls[sym] / len(bigs), 5), bigs))
+			self.refills.append(self.orderBalance(sym, smalls[sym], bigs))
 		if highness:
 			self.defills += 1
 			syms = list(smalls.keys()) or lows or list(filter(lambda s : s != "USD", bigs))
 			lowests = ask("bestBuys", syms)
-			self.refills.append(self.orderBalance("USD",
-				round(highness / len(lowests), 5), lowests, "sell"))
+			self.refills.append(self.orderBalance("USD", highness, lowests, "sell"))
 
 	def getRefills(self):
 		refs = self.refills
@@ -133,6 +132,7 @@ class Harvester(Worker):
 	def orderBalance(self, sym, diff, balancers, side="buy", force="auto", strict=True):
 		bals = {}
 		markets = ask("markets", sym, side)
+		diff = ask("round", diff / len(balancers))
 		sig = "%s %s %s %s"%(side, diff, sym, balancers)
 		self.log("orderBalance(%s)"%(sig,), markets)
 		for side in markets:

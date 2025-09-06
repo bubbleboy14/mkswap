@@ -35,7 +35,7 @@ class Trader(Worker):
 		sym = sym.replace("/", "") # for ratio-derived prices
 		if config.trader.book:
 			prices["book"] = ask("bestOrder", sym, side, average=True)
-		amount = ask("fromUSD", sym, amountUSD)
+		amount = ask("fromUSD", sym, amountUSD / len(prices.keys()))
 		self.log("bestTrades(%s, %s, %s->%s)"%(sym, side, amountUSD, amount))
 		for span in prices:
 			self.order(sym, side, amount, prices[span], force, strict)
