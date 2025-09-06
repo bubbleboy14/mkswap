@@ -59,12 +59,12 @@ class Comptroller(Feeder):
 				if reason == "MakerOrCancelWouldTake":
 					side = msg["side"]
 					sym = msg["symbol"]
-					price = ask("shifted", sym, side, msg["price"])
+					price = ask("shifted", sym, side, float(msg["price"]))
 					reord = {
 						"side": side,
 						"symbol": sym,
 						"force": True,
-						"price": float(price),
+						"price": price,
 						"amount": float(msg["original_amount"])
 					}
 					self.notice("reissuing %s %s @ %s"%(sym, side, price), reord)
