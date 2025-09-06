@@ -91,7 +91,7 @@ class Harvester(Worker):
 				if abal is None:
 					self.log("no balance for", fs)
 					continue
-			lowness = self.tooLow(abal) or self.tooLow(tbal, True) or self.tooLow(avbal, isusd)
+			lowness = max(self.tooLow(abal), self.tooLow(tbal, True), self.tooLow(avbal, isusd))
 			if lowness:
 				lows.append(sym)
 				if not self.tooHigh(abal) and not self.tooHigh(tbal):
@@ -100,7 +100,7 @@ class Harvester(Worker):
 				bigs.append(sym)
 				if isusd:
 					umax = ask("usdcap", config.harvester.usdmax)
-					highness = self.tooHigh(avbal, umax) or self.tooHigh(abal + tbal, umax * 3)
+					highness = max(self.tooHigh(avbal, umax), self.tooHigh(abal + tbal, umax * 3))
 					highness = min(highness, avbal / 5)
 		for sym in smalls:
 			self.refillCount += 1
