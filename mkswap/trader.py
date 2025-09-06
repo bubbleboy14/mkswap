@@ -55,7 +55,7 @@ class Trader(Worker):
 		wise = ask("wise", recommendation, strict)
 		if force == "auto":
 			force = ask("wise", recommendation, True) == "very"
-		return wise and ask("approved", ask("resize", ask("unbook", recommendation)), force)
+		return wise and ask("approved", recommendation, force)
 
 	def trade(self, recommendation):
 		self.log("TRADING", recommendation, "\n\n\n")
@@ -65,5 +65,6 @@ class Trader(Worker):
 	def tick(self):
 		# first rank in terms of payout
 		for recommendation in self.recommendations:
-			self.shouldTrade(recommendation) and self.trade(recommendation)
+			rec = ask("resize", ask("unbook", recommendation))
+			self.shouldTrade(rec) and self.trade(rec)
 		self.recommendations = []
