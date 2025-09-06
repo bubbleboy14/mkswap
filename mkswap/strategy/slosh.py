@@ -65,7 +65,7 @@ class Slosh(Base):
 		bals = ask("balances")
 		for sec in bals:
 			s = bals[sec]
-			if ask("tooLow", s["USD"]):
+			if ask("tooLow", s["USD"], half=True):
 				return True
 			usdval = ask("getUSD", sellfs, s[sellsym])
 			if usdval and ask("tooLow", usdval):

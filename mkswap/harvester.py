@@ -117,10 +117,12 @@ class Harvester(Worker):
 		self.refills = []
 		return refs
 
-	def tooLow(self, bal, double=False):
+	def tooLow(self, bal, double=False, half=False):
 		bot = config.harvester.bottom
 		if double:
 			bot *= 2
+		if half:
+			bot /= 2
 		return max(0, bot - bal)
 
 	def tooHigh(self, bal, bot=None):
