@@ -13,6 +13,7 @@ class Booker(Worker):
 		self.orders = {}
 		self.orderBook = {}
 		listen("unbook", self.unbook)
+		listen("shifted", self.shifted)
 		listen("bestOrder", self.bestOrder)
 		listen("upshifting", self.upshifting)
 		listen("updateOrderBook", self.updateOrderBook)
