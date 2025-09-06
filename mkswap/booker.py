@@ -35,11 +35,17 @@ class Booker(Worker):
 			self.notice("shifted %s %s (%s) from %s to %s"%(symbol, oside, side, orig, price))
 		return price
 
-	def bestOrder(self, symbol, side, shift=False, opposite=False):
-		if opposite:
-			side = side == "buy" and "sell" or "buy"
-		oside = request2order[side]
-		bo = self.bests[symbol][oside]
+	def bestOrder(self, symbol, side, average=False, opposite=False, shift=False):
+		bests = self.bests[symbol]
+		if average:
+			oside = "average"
+			bprices = bests.values()
+			bo = sum(bprices) / len(bprices)
+		else:
+			if opposite:
+				side = side == "buy" and "sell" or "buy"
+			oside = request2order[side]
+			bo = bests[oside]
 		self.log("bestOrder(%s, %s->%s)"%(symbol, side, oside), bo)
 		return shift and self.shifted(symbol, side, bo) or bo
 
