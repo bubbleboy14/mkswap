@@ -9,6 +9,7 @@ class Trader(Worker):
 		self.recommendations = []
 		self.live = live
 		self.trades = []
+		self.judgments = {}
 		self.agent = agencies[platform]()
 		listen("bestTrades", self.bestTrades)
 		listen("trade", self.recommend)
@@ -53,13 +54,25 @@ class Trader(Worker):
 		self.log("recommend(%s)"%(rec,))
 		self.recommendations.append(rec)
 
+	def wise(self, rec, strict=False):
+		side = rec["side"]
+		sym = rec["symbol"]
+		kind = strict and "strict" or "lax"
+		if kind not in self.judgments:
+			self.judgments[kind] = {}
+		if sym not in self.judgments[kind]:
+			self.judgments[kind][sym] = {}
+		if side not in self.judgments[kind][sym]:
+			self.judgments[kind][sym][side] = ask("wise", rec, strict)
+		return self.judgments[kind][sym][side]
+
 	def shouldTrade(self, recommendation):
 		self.log("assessing recommendation:", recommendation)
 		strict = "strict" in recommendation and recommendation.pop("strict")
 		force = "force" in recommendation and recommendation.pop("force") or config.trader.force
-		wise = ask("wise", recommendation, strict)
+		wise = self.wise(recommendation, strict)
 		if force == "auto":
-			force = ask("wise", recommendation, True) == "very"
+			force = self.wise(recommendation, True) == "very"
 		return wise and ask("approved", recommendation, force)
 
 	def trade(self, recommendation):
@@ -73,3 +86,4 @@ class Trader(Worker):
 			rec = ask("resize", ask("unbook", recommendation))
 			self.shouldTrade(rec) and self.trade(rec)
 		self.recommendations = []
+		self.judgments = {}
