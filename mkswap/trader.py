@@ -38,11 +38,11 @@ class Trader(Worker):
 		amount = ask("fromUSD", sym, amountUSD / len(quotes.keys()))
 		self.log("bestTrades(%s, %s, %s->%s)"%(sym, side, amountUSD, amount))
 		prices = {}
-		for span, price in quotes.values():
+		for span, price in quotes.items():
 			if price not in prices:
 				prices[price] = []
 			prices[price].append(span)
-		for price, spans in prices.values():
+		for price, spans in prices.items():
 			self.order(sym, side, amount * len(spans), price, force, strict)
 		return {
 			"amount": amount,
