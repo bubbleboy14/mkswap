@@ -88,9 +88,9 @@ class Judge(Worker):
 						noticer("wise (macd) %s %s"%(sym, side), vals)
 						return "very"
 					elif (selling and not vptup) or (not selling and vptup):
-						self.log("approved (vpt) %s %s"%(sym, side), vals)
+						noticer("approved (vpt) %s %s"%(sym, side), vals)
 					elif (selling and not upshifting) or (not selling and upshifting):
-						self.log("approved (upshifting) %s %s"%(sym, side), vals)
+						noticer("approved (upshifting) %s %s"%(sym, side), vals)
 					else:
 						return noticer("unwise %s %s"%(sym, side), vals)
 		return True
