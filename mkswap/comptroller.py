@@ -64,8 +64,8 @@ class Comptroller(Feeder):
 						"side": side,
 						"symbol": sym,
 						"force": True,
-						"price": price,
-						"amount": msg["original_amount"]
+						"price": float(price),
+						"amount": float(msg["original_amount"])
 					}
 					self.notice("reissuing %s %s @ %s"%(sym, side, price), reord)
 					emit("trade", reord)
