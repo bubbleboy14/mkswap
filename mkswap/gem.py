@@ -151,6 +151,7 @@ class Gem(Worker):
 
 	def trade(self, trade, cb=None):
 		self.inc("trades")
+		trade["options"] = ["maker-or-cancel"]
 		self.get("/v1/order/new", cb, trade, trade["client_order_id"])
 
 	def cancel(self, trade, cb=None):
