@@ -88,6 +88,8 @@ class Comptroller(Feeder):
 		remaining = float(msg["remaining_amount"])
 		sig = "%s %s %s @ %s (%s %s fee)"%(side, amount, sym, price, fee, feesym)
 		self.log("fill(%s)"%(sig,), order)
+		if fdata["liquidity"] == "Taker":
+			self.warn("Taker liquidity!", fdata)
 		order["amount"] = remaining
 		self.fills.append({
 			"msg": sig,
