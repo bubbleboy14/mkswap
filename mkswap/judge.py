@@ -78,14 +78,15 @@ class Judge(Worker):
 						"mfilim": mfibot,
 						"trade": trade
 					}
+					noticer = strict and self.notice or self.log
 					if (selling and mfi > mfitop) or (not selling and mfi < mfibot):
-						self.notice("wise (mfi) %s %s"%(sym, side), vals)
+						noticer("wise (mfi) %s %s"%(sym, side), vals)
 						return "very"
 					elif (selling and not macdup) or (not selling and macdup):
-						self.notice("wise (macd) %s %s"%(sym, side), vals)
+						noticer("wise (macd) %s %s"%(sym, side), vals)
 						return "very"
 					elif (selling and not vptup) or (not selling and vptup):
-						self.notice("wise (vpt) %s %s"%(sym, side), vals)
+						self.log("approved (vpt) %s %s"%(sym, side), vals)
 					else:
 						return self.notice("unwise %s %s"%(sym, side), vals)
 		return True
