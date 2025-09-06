@@ -88,5 +88,5 @@ class Judge(Worker):
 					elif (selling and not vptup) or (not selling and vptup):
 						self.log("approved (vpt) %s %s"%(sym, side), vals)
 					else:
-						return self.notice("unwise %s %s"%(sym, side), vals)
+						return noticer("unwise %s %s"%(sym, side), vals)
 		return True
