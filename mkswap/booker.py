@@ -24,7 +24,7 @@ class Booker(Worker):
 		return order
 
 	def upshifting(self, symbol):
-		return sum(self.bests[symbol].values()) / 2 > ask("price", symbol)
+		return self.drift(symbol) > 0
 
 	def shifted(self, symbol, side, price, inishift=False):
 		oside = request2order[side]
