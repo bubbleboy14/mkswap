@@ -6,6 +6,7 @@ from .accountant import Accountant
 from .strategist import strategies
 from .multifeed import MultiFeed
 from .harvester import Harvester
+from .adjuster import Adjuster
 from .actuary import Actuary
 from .manager import Manager
 from .trader import Trader
@@ -31,6 +32,7 @@ class Office(Worker):
 		self.judge = Judge(symbols)
 		self.ndx = NDX()
 		self.actuary = Actuary()
+		self.adjuster = Adjuster()
 		self.accountant = Accountant(platform, symbols)
 		self.trader = globalTrade and Trader(platform)
 		strat = strategies[strategy]
@@ -122,6 +124,7 @@ class Office(Worker):
 		com = self.comptroller
 		acc = self.accountant
 		har = self.harvester
+		adj = self.adjuster
 		act = self.actuary
 		boo = self.booker
 		ndx = self.ndx
@@ -139,6 +142,7 @@ class Office(Worker):
 			"hints": act.predictions,
 			"volumes": ndx.volumes(),
 			"accountant": acc.counts,
+			"adjuster": adj.counts,
 			"harvester": har.status(),
 			"refills": har.getRefills(),
 			"weighted": ndx.weighteds(),

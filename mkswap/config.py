@@ -14,9 +14,12 @@ config = Config({
 	},
 	"accountant": {
 		"split": 16,
-		"nmult": 1.0,
-		"nudge": "auto",
 		"capped": "auto"
+	},
+	"adjuster": {
+		"nudge": "auto",
+		"nmult": 1.0,
+		"leeway": 0.001
 	},
 	"backend": {
 		"mdv2": True,
@@ -44,7 +47,6 @@ config = Config({
 		"live": False,
 		"actives": 20,
 		"plimit": 0.1,
-		"leeway": 0.001,
 		"canceleach": True
 	},
 	"harvester": {
