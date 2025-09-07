@@ -7,7 +7,7 @@ class Judge(Worker):
 		self.syms = list(filter(lambda s : s.endswith("USD"), syms))
 		listen("wise", self.wise)
 		listen("usdcap", self.usdcap)
-		listen("bestBuys", self.bestBuys)
+		listen("bestBuy", self.bestBuy)
 
 	def mods(self):
 		mods = {}
@@ -22,16 +22,16 @@ class Judge(Worker):
 		mods["lowest"] = vals.pop(0)
 		return mods
 
-	def bestBuys(self, syms=None):
+	def score(self, sym):
+		return ask("strength", sym) + ask("drift", sym) * 100
+
+	def bestBuy(self, syms=None):
 		mods = self.mods()
-		lowest = mods["lowest"]
-		s2p = lambda s : mods[ask("fullSym", s)]
+		symscore = lambda fs : self.score(fs) - mods[fs]
+		fscore = lambda s : symscore(ask("fullSym", s))
 		syms = syms or [s[:3] for s in self.syms]
-		lowsyms = list(filter(lambda s : s2p(s) == lowest, syms))
-		if not lowsyms:
-			syms.sort(key=s2p)
-			lowsyms.append(syms.pop(0))
-		return lowsyms
+		syms.sort(key=fscore)
+		return syms[-1]
 
 	def usdcap(self, base=50):
 		mods = self.mods()
