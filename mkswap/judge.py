@@ -51,7 +51,7 @@ class Judge(Worker):
 		if adxlim:
 			side = trade["side"]
 			sym = trade["symbol"]
-			metrics = ask("metrics", sym)
+			mets = ask("metrics", sym)
 			if mets["ADX"] > adxlim:
 				selling = side == "sell"
 				goingup = mets["goingup"]
