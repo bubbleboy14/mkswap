@@ -4,7 +4,8 @@ from .config import config
 
 PERIODS = ["fast", "slow"]
 TERMS = ["small", "medium", "large", "jumbo"]
-SVALS = ["vpt", "OBVslope", "ADslope"]
+SVALS = ["vpt", "OBVslope", "ADslope"] # not currently used
+METRICS = ["ADX", "+DI", "-DI", "mfi", "macd", "macdsig", "VPTsmall", "VPTmedium"]
 
 class Actuary(Worker):
 	def __init__(self):
@@ -15,10 +16,11 @@ class Actuary(Worker):
 		self.wheners = {}
 		listen("range", self.range)
 		listen("metric", self.latest)
+		listen("metrics", self.metrics)
 		listen("tellMeWhen", self.tellMeWhen)
 
 	def range(self, symbol):
-		vals = [ask("metric", symbol, r) for r in TERMS]
+		vals = [self.latest(symbol, r) for r in TERMS]
 		robj = {
 			"short": vals[0],
 			"long": vals[-1]
@@ -250,11 +252,27 @@ class Actuary(Worker):
 	def latest(self, sym, prop):
 		return sym in self.candles and self.candles[sym][-1][prop] or 0
 
-	def score(self, sym):
+	def score_nah(self, sym):
 		score = self.ratios[sym].get("volatility", 0)
 		for prop in SVALS:
 			score += self.latest(sym, prop)
 		score += (self.latest(sym, "mfi") / 25) - 2
+		return score
+
+	def metrics(self, sym):
+		mets = {}
+		for met in METRICS:
+			mets[met] = self.latest(sym, met)
+		mets["goingup"] = mets["+DI"] > mets["-DI"]
+		return mets
+
+	def score(self, sym):
+		mets = self.metrics(sym)
+		score = mets["ADX"] / 100
+		mfi = mets["mfi"]
+		goingup = mets["goingup"]
+		if (goingup and mfi > 80) or (not goingup and mfi < 20):
+			score *= -1
 		return score
 
 	def scores(self):

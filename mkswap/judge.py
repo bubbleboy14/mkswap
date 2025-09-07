@@ -51,46 +51,29 @@ class Judge(Worker):
 		if adxlim:
 			side = trade["side"]
 			sym = trade["symbol"]
-			adx = ask("metric", sym, "ADX")
-			pdi = ask("metric", sym, "+DI")
-			mdi = ask("metric", sym, "-DI")
-			if adx > adxlim:
-				goingup = pdi > mdi
+			metrics = ask("metrics", sym)
+			if mets["ADX"] > adxlim:
 				selling = side == "sell"
+				goingup = mets["goingup"]
 				if (goingup and selling) or (not goingup and not selling):
-					mfi = ask("metric", sym, "mfi")
-					vpts = ask("metric", sym, "VPTsmall")
-					vptm = ask("metric", sym, "VPTmedium")
-					macdsig = ask("metric", sym, "macdsig")
-					macd = ask("metric", sym, "macd")
-					upshifting = ask("upshifting", sym)
-					macdup = macd > macdsig
-					vptup = vpts > vptm
-					vals = {
-						"ADX": adx,
-						"+DI": pdi,
-						"-DI": mdi,
-						"mfi": mfi,
-						"macd": macd,
-						"macdsig": macdsig,
-						"VPTsmall": vpts,
-						"VPTmedium": vptm,
-						"adxlim": adxlim,
-						"mfilim": mfibot,
-						"upshifting": upshifting,
-						"trade": trade
-					}
+					upshifting = mets["upshifting"] = ask("upshifting", sym)
+					macdup = mets["macdup"] = mets["macd"] > mets["macdsig"]
+					vptup = mets["vptup"] = mets["VPTsmall"] > mets["VTPmedium"]
+					mfi = mets["mfi"]
+					mets["trade"] = trade
+					mets["adxlim"] = adxlim
+					mets["mfilim"] = mfibot
 					noticer = strict and self.notice or self.log
 					if (selling and mfi > mfitop) or (not selling and mfi < mfibot):
-						noticer("wise (mfi) %s %s"%(sym, side), vals)
+						noticer("wise (mfi) %s %s"%(sym, side), mets)
 						return "very"
 					elif (selling and not macdup) or (not selling and macdup):
-						noticer("wise (macd) %s %s"%(sym, side), vals)
+						noticer("wise (macd) %s %s"%(sym, side), mets)
 						return "very"
 					elif (selling and not vptup) or (not selling and vptup):
-						noticer("approved (vpt) %s %s"%(sym, side), vals)
+						noticer("approved (vpt) %s %s"%(sym, side), mets)
 					elif (selling and not upshifting) or (not selling and upshifting):
-						noticer("approved (shifting) %s %s"%(sym, side), vals)
+						noticer("approved (shifting) %s %s"%(sym, side), mets)
 					else:
-						return noticer("unwise %s %s"%(sym, side), vals)
+						return noticer("unwise %s %s"%(sym, side), mets)
 		return True
