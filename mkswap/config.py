@@ -17,6 +17,7 @@ config = Config({
 		"capped": "auto"
 	},
 	"adjuster": {
+		"project": True,
 		"nudge": "auto",
 		"nmult": 1.0,
 		"leeway": 0.001

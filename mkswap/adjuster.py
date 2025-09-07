@@ -62,6 +62,11 @@ class Adjuster(Worker):
 		fee = ask("estimateFee", trade, feeSide)
 		if fee:
 			score -= fee
+		if config.adjuster.project: # TODO : bookshift?
+			strength = ask("strength", trade["symbol"])
+			if trade["side"] == "sell":
+				strength *= -1
+			score += strength / 100
 		if score <= 0 and gain > 0 and self.shouldNudge(nudge) and nudged < 10:
 			self.nudge(trade)
 			if not nudged:
@@ -78,7 +83,6 @@ class Adjuster(Worker):
 
 	def score(self, trade, feeSide="maker"):
 		trade["score"] = self.realistic(trade, feeSide, True)
-		# gain + actuaryscore + bookshift + ...
 		return trade["score"]
 
 	def tooBad(self, trade, feeSide="maker"):

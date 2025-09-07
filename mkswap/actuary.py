@@ -17,6 +17,7 @@ class Actuary(Worker):
 		listen("range", self.range)
 		listen("metric", self.latest)
 		listen("metrics", self.metrics)
+		listen("strength", self.strength)
 		listen("tellMeWhen", self.tellMeWhen)
 
 	def range(self, symbol):
@@ -266,7 +267,7 @@ class Actuary(Worker):
 		mets["goingup"] = mets["+DI"] > mets["-DI"]
 		return mets
 
-	def score(self, sym):
+	def strength(self, sym):
 		mets = self.metrics(sym)
 		vol = self.ratios[sym].get("volatility", 0)
 		score = mets["ADX"] / 100
@@ -282,7 +283,7 @@ class Actuary(Worker):
 	def scores(self):
 		scores = {}
 		for sym in self.candles:
-			scores[sym] = self.score(sym)
+			scores[sym] = self.strength(sym)
 		return scores
 
 	def oldCandles(self, limit=10, mod=0):
