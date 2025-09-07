@@ -145,7 +145,7 @@ class Comptroller(Feeder):
 			self.proc(msg)
 		self.refill()
 
-	def estimateFee(self, trade, feeSide="taker"):
+	def estimateFee(self, trade, feeSide="maker"):
 		if not self.fees:
 			return None
 		sym = trade["symbol"]
@@ -168,7 +168,7 @@ class Comptroller(Feeder):
 			gain *= ask("price", sym[3:], True)
 		return gain
 
-	def score(self, trade, feeSide="taker"):
+	def score(self, trade, feeSide="maker"):
 		trade["score"] = ask("realistic", trade, feeSide, True)
 		return trade["score"]
 

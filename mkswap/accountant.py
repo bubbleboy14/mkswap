@@ -275,7 +275,7 @@ class Accountant(Worker):
 		trade["price"] = self.round(trade["price"], sym)
 		return trade
 
-	def realistic(self, trade, feeSide="taker", asScore=False, nudge=False, nudged=0):
+	def realistic(self, trade, feeSide="maker", asScore=False, nudge=False, nudged=0):
 		if self.tooBig(trade):
 			return asScore and -1
 		score = gain = ask("estimateGain", trade)
