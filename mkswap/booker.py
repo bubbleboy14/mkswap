@@ -12,6 +12,7 @@ class Booker(Worker):
 		self.totes = {}
 		self.orders = {}
 		self.orderBook = {}
+		listen("drift", self.drift)
 		listen("unbook", self.unbook)
 		listen("shifted", self.shifted)
 		listen("bestOrder", self.bestOrder)
@@ -40,6 +41,11 @@ class Booker(Worker):
 			price = ask("round", price, symbol)
 			self.notice("shifted %s %s (%s) from %s to %s"%(symbol, oside, side, orig, price))
 		return price
+
+	def drift(self, symbol):
+		ave = sum(self.bests[symbol].values()) / 2
+		cur = ask("price", symbol)
+		return ave / cur - 1
 
 	def bestOrder(self, symbol, side, average=False, opposite=False, shift=False):
 		bests = self.bests[symbol]
