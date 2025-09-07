@@ -340,7 +340,7 @@ class Actuary(Worker):
 				sig = rdata["sigma"] = ask("sigma", rat, rhist)
 				if sig:
 					rdata["volatility"] = ask("volatility", rat, ask("ave", rhist), sig)
-					score = self.score(sym)
+					score = self.strength(sym)
 					if score > 0.5:
 						self.predictions[sym] = "buy"
 						emit("hint", sym, "buy", score)
