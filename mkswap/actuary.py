@@ -268,8 +268,8 @@ class Actuary(Worker):
 		return mets
 
 	def strength(self, sym):
+		vol = self.ratios.get(sym, {}).get("volatility", 0)
 		mets = self.metrics(sym)
-		vol = self.ratios[sym].get("volatility", 0)
 		score = mets["ADX"] / 100
 		mfi = mets["mfi"]
 		goingup = mets["goingup"]
