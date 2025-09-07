@@ -62,11 +62,15 @@ class Adjuster(Worker):
 		fee = ask("estimateFee", trade, feeSide)
 		if fee:
 			score -= fee
-		if config.adjuster.project: # TODO : bookshift?
-			strength = ask("strength", trade["symbol"])
+		if config.adjuster.project:
+			sym = trade["symbol"]
+			drift = ask("drift", sym)
+			strength = ask("strength", sym)
 			if trade["side"] == "sell":
 				strength *= -1
+				drift *= -1
 			score += strength / 100
+			score += drift * 10
 		if score <= 0 and gain > 0 and self.shouldNudge(nudge) and nudged < 10:
 			self.nudge(trade)
 			if not nudged:
