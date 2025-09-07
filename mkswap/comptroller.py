@@ -168,10 +168,6 @@ class Comptroller(Feeder):
 			gain *= ask("price", sym[3:], True)
 		return gain
 
-	def score(self, trade, feeSide="maker"):
-		trade["score"] = ask("realistic", trade, feeSide, True)
-		return trade["score"]
-
 	def pruneActives(self, limit=None, undupe=False):
 		cancels = []
 		skips = 0
@@ -200,12 +196,11 @@ class Comptroller(Feeder):
 							self.log("waiting for", sym, "prices")
 							skips += 1
 							continue
-					s = self.score(trade, "maker")
 					toofar = False
 					if limit:
 						ratio = float(tp) / curprice
 						toofar = abs(1 - ratio) > limit
-					prices[tp]["cancel"] = s < -config.comptroller.leeway or toofar
+					prices[tp]["cancel"] = toofar or ask("tooBad", trade)
 			else:
 				skips += 1
 		for price in prices:
@@ -237,7 +232,7 @@ class Comptroller(Feeder):
 		icount = len(self.backlog)
 		# backlog: rate, filter, and sort
 		for trade in self.backlog:
-			if self.score(trade) <= 0:
+			if ask("score", trade) <= 0:
 				emit("orderCancelled", trade, True)
 		self.backlog = list(filter(lambda t : t["score"] > 0, self.backlog))
 		blsremoved = icount - len(self.backlog)

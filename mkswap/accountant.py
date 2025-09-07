@@ -12,9 +12,6 @@ class Accountant(Worker):
 			"fees": 0,
 			"fills": 0,
 			"filled": 0,
-			"nudges": 0,
-			"nudged": 0,
-			"downsized": 0,
 			"active": 0,
 			"approved": 0,
 			"rejected": 0,
@@ -50,15 +47,13 @@ class Accountant(Worker):
 		listen("orderActive", self.orderActive)
 		listen("overActive", self.overActive)
 		listen("accountsReady", self.accountsReady)
+		listen("updateBalances", self.updateBalances)
 		listen("balances", self.fullBalances)
-		listen("realistic", self.realistic)
 		listen("available", self.available)
 		listen("approved", self.approved)
 		listen("fullSym", self.fullSym)
 		listen("fromUSD", self.fromUSD)
 		listen("getUSD", self.getUSD)
-		listen("resize", self.resize)
-		listen("round", self.round)
 
 	def getBalances(self):
 		self.log("getBalances!!!")
@@ -105,7 +100,7 @@ class Accountant(Worker):
 		return bal
 
 	def fromUSD(self, sym, amount):
-		return self.round(amount / self.price(self.fullSym(sym[:3])))
+		return ask("round", amount / self.price(self.fullSym(sym[:3])))
 
 	def fullSym(self, sym):
 		return sym + self._usd
@@ -237,60 +232,6 @@ class Accountant(Worker):
 		rat = self.counts["active"] / config.comptroller.actives
 		return max(0, rat - lim)
 
-	def shouldNudge(self, nudge):
-		if nudge == "auto":
-			return not self.overActive()
-		return nudge
-
-	def nudge(self, trade):
-		sym = trade["symbol"]
-		oprice = trade["price"]
-		cprice = self.price(sym)
-		self.counts["nudges"] += 1
-		pdiff = (oprice - cprice) * config.accountant.nmult
-		trade["price"] = self.round(oprice + pdiff, sym)
-		self.log("nudge(%s -> %s)"%(oprice, trade["price"]), trade)
-
-	def tooBig(self, trade):
-		if not self.updateBalances(trade, "available", test=True):
-			self.log("trade is too big!", trade)
-			return True
-
-	def round(self, amount, sym="amount"):
-		if sym == "amount":
-			return round(amount, 6)
-		return round(amount, predefs["sigfigs"].get(sym, 2))
-
-	def resize(self, trade):
-		if self.tooBig(trade):
-			self.counts["downsized"] += 1
-			self.updateBalances(trade, "available", test=True, repair=True)
-		mins = predefs["minimums"]
-		size = trade["amount"]
-		sym = trade["symbol"]
-		if size < mins[sym]:
-			trade["amount"] = mins[sym]
-			self.log("order is too small! increased amount from", size, "to", trade["amount"])
-		trade["amount"] = self.round(trade["amount"])
-		trade["price"] = self.round(trade["price"], sym)
-		return trade
-
-	def realistic(self, trade, feeSide="maker", asScore=False, nudge=False, nudged=0):
-		if self.tooBig(trade):
-			return asScore and -1
-		score = gain = ask("estimateGain", trade)
-		fee = ask("estimateFee", trade, feeSide)
-		if fee:
-			score -= fee
-		if score <= 0 and gain > 0 and self.shouldNudge(nudge) and nudged < 10:
-			self.nudge(trade)
-			if not nudged:
-				self.counts["nudged"] += 1
-			return self.realistic(trade, feeSide, asScore, nudge, nudged + 1)
-		if asScore:
-			return score
-		return score > -config.comptroller.leeway
-
 	def updateBalances(self, trade, balset="theoretical", revert=False, force=False, test=False, repair=False, available=False):
 		bz = self._balances[balset]
 		s = rs = float(trade.get("amount", 10))
@@ -339,11 +280,8 @@ class Accountant(Worker):
 	def approved(self, trade, force=False):
 		if trade["symbol"] not in self.syms:
 			self.syms.append(trade["symbol"])
-		if force:
-			looksgood = not self.tooBig(trade)
-		else:
-			looksgood = self.realistic(trade, nudge=config.accountant.nudge)
-		if looksgood and self.updateBalances(trade, force=force, available=True):
-			self.counts["approved"] += 1
-			self.log("trade approved!", trade)
-			return True
+		if ask("shouldWork", trade, force):
+			if self.updateBalances(trade, force=force, available=True):
+				self.counts["approved"] += 1
+				self.log("trade approved!", trade)
+				return True
