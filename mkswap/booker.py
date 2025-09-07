@@ -32,7 +32,7 @@ class Booker(Worker):
 			inc *= -1
 		orig = price
 		if inishift:
-			price += inc
+			price = ask("round", price + inc, symbol)
 		ob = self.orderBook[symbol][oside]
 		if price in ob:
 			while price in ob:
