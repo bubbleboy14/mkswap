@@ -7,8 +7,9 @@ from .comptroller import Comptroller
 from .accountant import Accountant
 from .strategist import strategies
 from .multifeed import MultiFeed
-from .manager import Manager
+from .adjuster import Adjuster
 from .actuary import Actuary
+from .manager import Manager
 from .booker import Booker
 from .judge import Judge
 from .ndx import NDX
