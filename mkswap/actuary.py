@@ -271,6 +271,8 @@ class Actuary(Worker):
 		score = mets["ADX"] / 100
 		mfi = mets["mfi"]
 		goingup = mets["goingup"]
+		if not goingup:
+			score *= -1
 		if (goingup and mfi > 80) or (not goingup and mfi < 20):
 			score *= -1
 		return score
