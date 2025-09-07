@@ -59,7 +59,7 @@ class Comptroller(Feeder):
 				if reason == "MakerOrCancelWouldTake":
 					side = msg["side"]
 					sym = msg["symbol"]
-					price = ask("shifted", sym, side, float(msg["price"]))
+					price = ask("shifted", sym, side, float(msg["price"]), inishift=True)
 					reord = {
 						"side": side,
 						"symbol": sym,

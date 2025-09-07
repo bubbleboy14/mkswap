@@ -77,7 +77,8 @@ class Adjuster(Worker):
 		return self.realistic(trade, nudge=config.adjuster.nudge)
 
 	def score(self, trade, feeSide="maker"):
-		trade["score"] = ask("realistic", trade, feeSide, True)
+		trade["score"] = self.realistic(trade, feeSide, True)
+		# gain + actuaryscore + bookshift + ...
 		return trade["score"]
 
 	def tooBad(self, trade, feeSide="maker"):

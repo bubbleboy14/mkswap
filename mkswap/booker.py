@@ -25,12 +25,14 @@ class Booker(Worker):
 	def upshifting(self, symbol):
 		return sum(self.bests[symbol].values()) / 2 > ask("price", symbol)
 
-	def shifted(self, symbol, side, price):
+	def shifted(self, symbol, side, price, inishift=False):
 		oside = request2order[side]
 		inc = symbol.endswith("USD") and 0.01 or 0.00001
 		if side == "buy":
 			inc *= -1
 		orig = price
+		if inishift:
+			price += inc
 		ob = self.orderBook[symbol][oside]
 		if price in ob:
 			while price in ob:

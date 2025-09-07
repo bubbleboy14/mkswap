@@ -90,7 +90,7 @@ class Judge(Worker):
 					elif (selling and not vptup) or (not selling and vptup):
 						noticer("approved (vpt) %s %s"%(sym, side), vals)
 					elif (selling and not upshifting) or (not selling and upshifting):
-						noticer("approved (upshifting) %s %s"%(sym, side), vals)
+						noticer("approved (shifting) %s %s"%(sym, side), vals)
 					else:
 						return noticer("unwise %s %s"%(sym, side), vals)
 		return True
