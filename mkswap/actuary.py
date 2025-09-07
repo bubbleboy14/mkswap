@@ -269,13 +269,14 @@ class Actuary(Worker):
 	def score(self, sym):
 		mets = self.metrics(sym)
 		vol = self.ratios[sym].get("volatility", 0)
-		score = vol / 10 + mets["ADX"] / 100
+		score = mets["ADX"] / 100
 		mfi = mets["mfi"]
 		goingup = mets["goingup"]
 		if not goingup:
 			score *= -1
 		if (goingup and mfi > 80) or (not goingup and mfi < 20):
 			score *= -1
+		score += vol / 10
 		return score
 
 	def scores(self):
