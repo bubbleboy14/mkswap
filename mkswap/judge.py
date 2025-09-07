@@ -58,7 +58,7 @@ class Judge(Worker):
 				if (goingup and selling) or (not goingup and not selling):
 					upshifting = mets["upshifting"] = ask("upshifting", sym)
 					macdup = mets["macdup"] = mets["macd"] > mets["macdsig"]
-					vptup = mets["vptup"] = mets["VPTsmall"] > mets["VTPmedium"]
+					vptup = mets["vptup"] = mets["VPTsmall"] > mets["VPTmedium"]
 					mfi = mets["mfi"]
 					mets["trade"] = trade
 					mets["adxlim"] = adxlim
