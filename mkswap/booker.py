@@ -47,6 +47,12 @@ class Booker(Worker):
 		cur = ask("price", symbol)
 		return ave / cur - 1
 
+	def drifts(self):
+		drifts = {}
+		for sym in self.bests:
+			drifts[sym] = self.drift(sym)
+		return drifts
+
 	def bestOrder(self, symbol, side, average=False, opposite=False, shift=False):
 		bests = self.bests[symbol]
 		if average:
