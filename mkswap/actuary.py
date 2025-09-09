@@ -18,6 +18,7 @@ class Actuary(Worker):
 		listen("metric", self.latest)
 		listen("metrics", self.metrics)
 		listen("strength", self.strength)
+		listen("overunders", self.overunders)
 		listen("tellMeWhen", self.tellMeWhen)
 
 	def range(self, symbol):
@@ -32,6 +33,17 @@ class Actuary(Worker):
 		robj["span"] = robj["high"] - robj["low"]
 		self.log("range(%s)"%(symbol,), robj)
 		return robj
+
+	def overunder(self, sym, cb):
+		mfi = lambda : "mfi: %s"%(self.latest(sym, "mfi"),)
+		under = lambda : cb("buy", sym, "undersold", mfi())
+		over = lambda : cb("sell", sym, "overheated", mfi())
+		self.tellMeWhen(sym, "trajectory", "overheated", over)
+		self.tellMeWhen(sym, "trajectory", "undersold", under)
+
+	def overunders(self, syms, cb):
+		for sym in syms:
+			self.overunder(sym, cb)
 
 	def tellMeWhen(self, symbol, metric, threshold, cb):
 		if symbol not in self.wheners:
@@ -61,12 +73,17 @@ class Actuary(Worker):
 			emit("fave", "%scsig"%(sym,), sig)
 			emit("fave", "%scvol"%(sym,), vol)
 			self.thresh(sym, "volatility", vol)
+		if "trajectory" in wcfg:
+			self.thresh(sym, "trajectory", cur["trajectory"])
 
 	def thresh(self, sym, prop, comp):
+		strcmp = type(comp) is str
 		pcfg = self.wheners[sym][prop]
+		numthresh = lambda t : (t < 0 and comp < t) or (t > 0 and comp > t)
+		trig = lambda t : (t == comp) if strcmp else numthresh(t)
 		for threshold in pcfg:
 			self.log("checking", sym, prop, "threshold", threshold, "against", comp)
-			if (threshold < 0 and comp < threshold) or (threshold > 0 and comp > threshold):
+			if trig(threshold):
 				for cb in pcfg[threshold]:
 					cb()
 
@@ -109,6 +126,24 @@ class Actuary(Worker):
 				self.compare(prev, candle, sym, "VPT")
 				self.crossCheck(sym, prev, candle, "+DI", "-DI", "ADX")
 				self.crossCheck(sym, prev, candle, "macd", "macdsig", "MACD")
+				self.setTrajectory(candle)
+
+	def setTrajectory(self, candle):
+		if candle["ADX"] > 25:
+			goingup = candle["+DI"] > candle["-DI"]
+			mfi = candle["mfi"]
+			if goingup:
+				if mfi > 80:
+					candle["trajectory"] = "overheated"
+				else:
+					candle["trajectory"] = "up"
+			else:
+				if mfi < 20:
+					candle["trajectory"] = "undersold"
+				else:
+					candle["trajectory"] = "down"
+		else:
+			candle["trajectory"] = "calm"
 
 	def crossCheck(self, sym, c1, c2, t1, t2, pref=None):
 		if c1[t1] < c1[t2] and c2[t1] > c2[t2]:

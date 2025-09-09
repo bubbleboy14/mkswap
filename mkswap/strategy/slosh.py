@@ -14,21 +14,22 @@ class Slosh(Base):
 		emit("observe", self.onesym)
 		emit("tellMeWhen", self.onesym, "volatility", scfg.vcutoff, self.hardsell)
 		emit("tellMeWhen", self.onesym, "volatility", -scfg.vcutoff, self.hardbuy)
+		emit("overunders", [self.onesym, self.top, self.bottom], self.hard)
 		Base.__init__(self, symbol)
 
 	def trade(self, order, reason="slosh", note=None):
-		if not note:
-			note = "volatility: %s"%(self.stats["volatility"],)
+		note = note or "volatility: %s"%(self.stats["volatility"],)
 		order["rationale"] = {
 			"reason": reason,
 			"notes": [note]
 		}
 		emit("trade", order)
 
-	def hard(self, side):
-		note = "volatility: %s"%(ask("latest", self.onesym, "volatility"),)
-		self.notice("hard%s!"%(side,), ask("bestTrades", self.onesym,
-			side, force=True, reason="hard slosh", note=note))
+	def hard(self, side, sym=None, reason="hardslosh", note=None):
+		sym = sym or self.onesym
+		note = note or "volatility: %s"%(ask("latest", sym, "volatility"),)
+		self.notice("%s %s %s"%(reason, side, sym), ask("bestTrades", sym,
+			side, force=True, reason=reason, note=note))
 
 	def hardsell(self):
 		self.hard("sell")
