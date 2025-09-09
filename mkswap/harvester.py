@@ -139,8 +139,8 @@ class Harvester(Worker):
 			for fullSym in markets[side]:
 				for balancer in balancers:
 					if balancer in fullSym:
-						bals[fullSym] = ask("bestTrades", fullSym,
-							side, diff, force=force, strict=strict)
+						bals[fullSym] = ask("bestTrades", fullSym, side, diff,
+							force=force, strict=strict, reason="balance", note=sig)
 		return {
 			"msg": "balance %s"%(sig,),
 			"data": bals

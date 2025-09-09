@@ -57,7 +57,7 @@ class Actuary(Worker):
 		if "volatility" in wcfg:
 			closers = list(map(lambda c : c["close"], rest))
 			sig = ask("sigma", curclose, closers)
-			vol = ask("volatility", curclose, ask("ave", closers), sig)
+			vol = cur["volatility"] = ask("volatility", curclose, ask("ave", closers), sig)
 			emit("fave", "%scsig"%(sym,), sig)
 			emit("fave", "%scvol"%(sym,), vol)
 			self.thresh(sym, "volatility", vol)

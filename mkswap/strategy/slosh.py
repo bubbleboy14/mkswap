@@ -16,23 +16,37 @@ class Slosh(Base):
 		emit("tellMeWhen", self.onesym, "volatility", -scfg.vcutoff, self.hardbuy)
 		Base.__init__(self, symbol)
 
+	def trade(self, order, reason="slosh", note=None):
+		if not note:
+			note = "volatility: %s"%(self.stats["volatility"],)
+		order["rationale"] = {
+			"reason": reason,
+			"notes": [note]
+		}
+		emit("trade", order)
+
+	def hard(self, side):
+		note = "volatility: %s"%(ask("latest", self.onesym, "volatility"),)
+		self.notice("hard%s!"%(side,), ask("bestTrades", self.onesym,
+			side, force=True, reason="hard slosh", note=note))
+
 	def hardsell(self):
-		self.notice("hardsell!", ask("bestTrades", self.onesym, "sell", force=True))
+		self.hard("sell")
 
 	def hardbuy(self):
-		self.notice("hardbuy!", ask("bestTrades", self.onesym, "buy", force=True))
+		self.hard("buy")
 
 	def buysell(self, buysym, sellsym, size=10):
 		buyprice = ask("bestPrice", buysym, "buy")
 		sellprice = ask("bestPrice", sellsym, "sell")
-		emit("trade", {
+		self.trade({
 			"side": "sell",
 			"force": "auto",
 			"symbol": sellsym,
 			"price": sellprice,
 			"amount": size / sellprice
 		})
-		emit("trade", {
+		self.trade({
 			"side": "buy",
 			"force": "auto",
 			"symbol": buysym,
@@ -45,7 +59,7 @@ class Slosh(Base):
 		price = ask("bestPrice", self.onesym, side)
 		botprice = ask("price", self.bottom)
 		amount = size / (price * botprice)
-		emit("trade", {
+		self.trade({
 			"side": side,
 			"price": price,
 			"force": "auto",

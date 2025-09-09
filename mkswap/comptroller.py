@@ -57,15 +57,22 @@ class Comptroller(Feeder):
 			if reason != "Requested":
 				self.cancels.append({ "msg": reason, "data": msg })
 				if reason == "MakerOrCancelWouldTake":
-					side = msg["side"]
+					orat = order["rationale"]
+					ono = orat["notes"]
 					sym = msg["symbol"]
+					side = msg["side"]
 					price = ask("shifted", sym, side, float(msg["price"]), inishift=True)
+					ono.append("reissued at %s"%(price,))
 					reord = {
 						"side": side,
 						"symbol": sym,
 						"force": True,
 						"price": price,
-						"amount": float(msg["original_amount"])
+						"amount": float(msg["original_amount"]),
+						"rationale": {
+							"reason": orat["reason"],
+							"notes": ono
+						}
 					}
 					self.notice("reissuing %s %s @ %s"%(sym, side, price), reord)
 					emit("trade", reord)
@@ -118,6 +125,7 @@ class Comptroller(Feeder):
 			"remaining": remaining,
 			"order_id": order["order_id"],
 			"oprice": float(order["price"]),
+			"rationale": order["rationale"],
 			"client_order_id": order["client_order_id"],
 			"score": order.get("score", 0) # sensible fallback right?
 		})
@@ -131,7 +139,11 @@ class Comptroller(Feeder):
 			"order_id": msg["order_id"],
 			"symbol": msg["symbol"].upper(),
 			"amount": msg["remaining_amount"],
-			"client_order_id": msg["client_order_id"]
+			"client_order_id": msg["client_order_id"],
+			"rationale": {
+				"reason": "unknown",
+				"notes": ["reactivated by comptroller"]
+			}
 		}
 		self.log("reactivate()", order)
 		emit("approved", order, True)
