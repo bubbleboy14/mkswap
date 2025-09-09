@@ -1,4 +1,4 @@
-from rel.util import ask, listen
+from rel.util import ask, emit, listen
 from .base import Worker
 from .config import config
 
@@ -64,16 +64,17 @@ class Judge(Worker):
 					mets["adxlim"] = adxlim
 					mets["mfilim"] = mfibot
 					noticer = strict and self.notice or self.log
+					note = lambda n : emit("note", trade, n) or noticer(n, mets)
 					if (selling and mfi > mfitop) or (not selling and mfi < mfibot):
-						noticer("wise (mfi) %s %s"%(sym, side), mets)
+						note("wise (mfi) %s %s"%(sym, side))
 						return "very"
 					elif (selling and not macdup) or (not selling and macdup):
-						noticer("wise (macd) %s %s"%(sym, side), mets)
+						note("wise (macd) %s %s"%(sym, side))
 						return "very"
 					elif (selling and not vptup) or (not selling and vptup):
-						noticer("approved (vpt) %s %s"%(sym, side), mets)
+						note("approved (vpt) %s %s"%(sym, side))
 					elif (selling and not upshifting) or (not selling and upshifting):
-						noticer("approved (shifting) %s %s"%(sym, side), mets)
+						note("approved (shifting) %s %s"%(sym, side))
 					else:
 						return noticer("unwise %s %s"%(sym, side), mets)
 		return True
