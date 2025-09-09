@@ -100,6 +100,7 @@ class Comptroller(Feeder):
 	def fill(self, order, msg):
 		side = msg["side"]
 		fdata = msg["fill"]
+		rat = order["rationale"]
 		fee = float(fdata["fee"])
 		sym = msg["symbol"].upper()
 		price = float(fdata["price"])
@@ -113,7 +114,10 @@ class Comptroller(Feeder):
 		order["amount"] = remaining
 		self.fills.append({
 			"msg": sig,
-			"data": msg
+			"data": {
+				"rationale": rat,
+				"details": msg
+			}
 		})
 		emit("orderFilled", {
 			"feesym": feesym,
@@ -122,10 +126,10 @@ class Comptroller(Feeder):
 			"symbol": sym,
 			"price": price,
 			"amount": amount,
+			"rationale": rat,
 			"remaining": remaining,
 			"order_id": order["order_id"],
 			"oprice": float(order["price"]),
-			"rationale": order["rationale"],
 			"client_order_id": order["client_order_id"],
 			"score": order.get("score", 0) # sensible fallback right?
 		})
