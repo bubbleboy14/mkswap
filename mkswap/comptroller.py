@@ -66,7 +66,6 @@ class Comptroller(Feeder):
 					reord = {
 						"side": side,
 						"symbol": sym,
-						"force": True,
 						"price": price,
 						"amount": float(msg["original_amount"]),
 						"rationale": {
