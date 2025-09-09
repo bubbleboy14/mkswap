@@ -20,7 +20,11 @@ class Booker(Worker):
 		listen("updateOrderBook", self.updateOrderBook)
 
 	def unbook(self, order):
-		order["price"] = self.shifted(order["symbol"], order["side"], order["price"])
+		newprice = self.shifted(order["symbol"], order["side"], order["price"])
+		if newprice != order["price"]:
+			note = "unbook shifted price from %s to %s"%(order["price"], newprice)
+			order["rationale"]["notes"].append(note)
+			order["price"] = newprice
 		return order
 
 	def upshifting(self, symbol):
