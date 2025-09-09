@@ -22,8 +22,7 @@ class Booker(Worker):
 	def unbook(self, order):
 		newprice = self.shifted(order["symbol"], order["side"], order["price"])
 		if newprice != order["price"]:
-			note = "unbook shifted price from %s to %s"%(order["price"], newprice)
-			order["rationale"]["notes"].append(note)
+			emit("note", order, "shifted price %s -> %s"%(order["price"], newprice))
 			order["price"] = newprice
 		return order
 
