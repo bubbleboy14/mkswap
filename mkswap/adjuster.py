@@ -16,6 +16,10 @@ class Adjuster(Worker):
 		listen("resize", self.resize)
 		listen("round", self.round)
 		listen("score", self.score)
+		listen("note", self.note)
+
+	def note(self, trade, note):
+		trade["rationale"]["notes"].append(note)
 
 	def shouldNudge(self, nudge):
 		if nudge == "auto":
@@ -42,17 +46,16 @@ class Adjuster(Worker):
 			return True
 
 	def resize(self, trade):
-		rnotes = trade["rationale"]["notes"]
 		if self.tooBig(trade):
 			self.counts["downsized"] += 1
 			emit("updateBalances", trade, "available", test=True, repair=True)
-			rnotes.append("downsized to %s"%(trade["amount"],))
+			self.note(trade, "downsized to %s"%(trade["amount"],))
 		mins = predefs["minimums"]
 		size = trade["amount"]
 		sym = trade["symbol"]
 		if size < mins[sym]:
 			trade["amount"] = mins[sym]
-			rnotes.append("upsized to %s"%(trade["amount"],))
+			self.note(trade, "upsized to %s"%(trade["amount"],))
 			self.log("order is too small! increased amount from", size, "to", trade["amount"])
 		trade["amount"] = self.round(trade["amount"])
 		trade["price"] = self.round(trade["price"], sym)
