@@ -63,18 +63,21 @@ class Judge(Worker):
 					mets["trade"] = trade
 					mets["adxlim"] = adxlim
 					mets["mfilim"] = mfibot
+					reason = trade["rationale"]["reason"]
+					sig = "%s (%s) %s"%(sym, reason, side)
 					noticer = strict and self.notice or self.log
 					note = lambda n : emit("note", trade, n) or noticer(n, mets)
+					signote = lambda n : note("%s %s"%(n, sig))
 					if (selling and mfi > mfitop) or (not selling and mfi < mfibot):
-						note("wise (mfi) %s %s"%(sym, side))
+						signote("wise (mfi)")
 						return "very"
 					elif (selling and not macdup) or (not selling and macdup):
-						note("wise (macd) %s %s"%(sym, side))
+						signote("wise (macd)")
 						return "very"
 					elif (selling and not vptup) or (not selling and vptup):
-						note("approved (vpt) %s %s"%(sym, side))
+						signote("approved (vpt)")
 					elif (selling and not upshifting) or (not selling and upshifting):
-						note("approved (shifting) %s %s"%(sym, side))
+						signote("approved (shifting)")
 					else:
-						return noticer("unwise %s %s"%(sym, side), mets)
+						return noticer("unwise %s"%(sig,), mets)
 		return True
