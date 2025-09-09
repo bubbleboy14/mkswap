@@ -125,6 +125,7 @@ class Comptroller(Feeder):
 			"remaining": remaining,
 			"order_id": order["order_id"],
 			"oprice": float(order["price"]),
+			"rationale": order["rationale"],
 			"client_order_id": order["client_order_id"],
 			"score": order.get("score", 0) # sensible fallback right?
 		})
