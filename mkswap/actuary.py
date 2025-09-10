@@ -18,7 +18,6 @@ class Actuary(Worker):
 		listen("metric", self.latest)
 		listen("metrics", self.metrics)
 		listen("strength", self.strength)
-		listen("overunders", self.overunders)
 		listen("tellMeWhen", self.tellMeWhen)
 
 	def range(self, symbol):
@@ -34,14 +33,14 @@ class Actuary(Worker):
 		self.log("range(%s)"%(symbol,), robj)
 		return robj
 
-	def overunder(self, sym, cb):
+	def overunder(self, sym, cb): # not currently used
 		mfi = lambda : "mfi: %s"%(self.latest(sym, "mfi"),)
 		under = lambda : cb("buy", sym, "undersold", mfi())
 		over = lambda : cb("sell", sym, "overheated", mfi())
 		self.tellMeWhen(sym, "trajectory", "overheated", over)
 		self.tellMeWhen(sym, "trajectory", "undersold", under)
 
-	def overunders(self, syms, cb):
+	def overunders(self, syms, cb): # not currently used
 		for sym in syms:
 			self.overunder(sym, cb)
 
