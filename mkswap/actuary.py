@@ -120,8 +120,8 @@ class Actuary(Worker):
 		self.updateMACD(candle, sym)
 		if prev:
 			self.updateADX(prev, candle, sym)
-			self.setTrajectory(candle)
 			if check:
+				self.setTrajectory(candle)
 				self.compare(prev, candle, sym)
 				self.compare(prev, candle, sym, "VPT")
 				self.crossCheck(sym, prev, candle, "+DI", "-DI", "ADX")
