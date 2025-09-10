@@ -1,4 +1,4 @@
-from rel.util import ask, emit
+from rel.util import ask, emit, listen
 from .base import Base
 from ..config import config
 
