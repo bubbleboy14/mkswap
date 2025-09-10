@@ -120,12 +120,12 @@ class Actuary(Worker):
 		self.updateMACD(candle, sym)
 		if prev:
 			self.updateADX(prev, candle, sym)
+			self.setTrajectory(candle)
 			if check:
 				self.compare(prev, candle, sym)
 				self.compare(prev, candle, sym, "VPT")
 				self.crossCheck(sym, prev, candle, "+DI", "-DI", "ADX")
 				self.crossCheck(sym, prev, candle, "macd", "macdsig", "MACD")
-				self.setTrajectory(candle)
 
 	def setTrajectory(self, candle):
 		if candle["ADX"] > 25:
