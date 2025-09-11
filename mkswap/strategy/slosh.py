@@ -14,6 +14,7 @@ class Slosh(Base):
 		emit("observe", self.onesym)
 		emit("tellMeWhen", self.onesym, "volatility", scfg.vcutoff, self.hardsell)
 		emit("tellMeWhen", self.onesym, "volatility", -scfg.vcutoff, self.hardbuy)
+		emit("overunders", [self.onesym, self.top, self.bottom], self.trades)
 		listen("cross", self.cross)
 		Base.__init__(self, symbol)
 
@@ -29,7 +30,7 @@ class Slosh(Base):
 			return self.log("waiting for extremes...")
 		note = "%s %s %s cross while %s (mfi=%s)"%(sym, variety,
 			dimension, traj, ask("latest", sym, "mfi"))
-		self.hard(side, sym, traj, note, "auto")
+		self.trades(side, sym, traj, note, "auto")
 
 	def trade(self, order, reason="slosh", note=None):
 		note = note or "volatility: %s"%(self.stats["volatility"],)
@@ -39,17 +40,17 @@ class Slosh(Base):
 		}
 		emit("trade", order)
 
-	def hard(self, side, sym=None, reason="hardslosh", note=None, force=True):
+	def trades(self, side, sym=None, reason="hardslosh", note=None, force=False):
 		sym = sym or self.onesym
 		note = note or "volatility: %s"%(ask("latest", sym, "volatility"),)
 		self.notice("%s %s %s"%(reason, side, sym), ask("bestTrades", sym,
 			side, force=force, reason=reason, note=note))
 
 	def hardsell(self):
-		self.hard("sell")
+		self.trades("sell", force=True)
 
 	def hardbuy(self):
-		self.hard("buy")
+		self.trades("buy", force=True)
 
 	def buysell(self, buysym, sellsym, size=10):
 		buyprice = ask("bestPrice", buysym, "buy")
