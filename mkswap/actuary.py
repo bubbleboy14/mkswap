@@ -286,8 +286,9 @@ class Actuary(Worker):
 			can["obv"] = obv
 			can["OBVslope"] = slope
 
-	def latest(self, sym, prop):
-		return sym in self.candles and self.candles[sym][-1][prop] or 0
+	def latest(self, sym, prop, default=0):
+		can = sym in self.candles and self.candles[sym][-1]
+		return can and can.get(prop) or default
 
 	def score_nah(self, sym):
 		score = self.ratios[sym].get("volatility", 0)

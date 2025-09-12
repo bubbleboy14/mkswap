@@ -29,7 +29,7 @@ class Slosh(Base):
 		else:
 			return self.log("waiting for extremes...")
 		note = "%s %s %s cross while %s (mfi=%s)"%(sym, variety,
-			dimension, traj, ask("latest", sym, "mfi"))
+			dimension, traj, ask("metric", sym, "mfi"))
 		self.trades(side, sym, traj, note, "auto")
 
 	def trade(self, order, reason="slosh", note=None):
@@ -42,7 +42,7 @@ class Slosh(Base):
 
 	def trades(self, side, sym=None, reason="hardslosh", note=None, force=False):
 		sym = sym or self.onesym
-		note = note or "volatility: %s"%(ask("latest", sym, "volatility"),)
+		note = note or "volatility: %s"%(ask("metric", sym, "volatility"),)
 		self.notice("%s %s %s"%(reason, side, sym), ask("bestTrades", sym,
 			side, force=force, reason=reason, note=note))
 
