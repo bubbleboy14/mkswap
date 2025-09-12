@@ -39,6 +39,7 @@ class Slosh(Base):
 			"notes": [note]
 		}
 		emit("trade", order)
+		self.notice("%s %s %s"%(reason, order["side"], order["symbol"]), order)
 
 	def trades(self, side, sym=None, reason="hardslosh", note=None, force=False):
 		sym = sym or self.onesym
