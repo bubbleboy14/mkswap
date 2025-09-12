@@ -92,12 +92,14 @@ class Balancer(Worker):
 		trades = []
 		for sym, amount in self.scheduled.items():
 			traj = ask("latest", sym, "trajectory")
+			if not traj:
+				return self.log("waiting for", sym, "trajectory")
 			side = "buy"
 			if amount < 0:
 				amount *= -1
 				side = "sell"
 			buydown = side == "buy" and (traj == "down" or traj == "overheated")
-			sellup = side == "sell" and traj == "up" or traj == "undersold"
+			sellup = side == "sell" and (traj == "up" or traj == "undersold")
 			if buydown or sellup:
 				self.log("%s market is %s - waiting"%(sym, traj))
 			else:
