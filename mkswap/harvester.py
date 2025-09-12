@@ -1,5 +1,5 @@
 import rel
-from rel.util import ask
+from rel.util import ask, emit
 from .base import Worker
 from .gem import gem
 from .config import config
@@ -10,15 +10,12 @@ net2sym = {
 }
 
 class Harvester(Worker):
-	def __init__(self, office):
+	def __init__(self):
 		self.hauls = 0
 		self.harvest = 0
-		self.office = office
-		self.pricer = office.price
 		network = config.harvester.network
 		self.symbol = net2sym[network]
 		self.bigSym = self.symbol.upper()
-		self.accountant = office.accountant
 		self.fullSym = ask("fullSym", self.bigSym)
 		gem.accounts(network, self.setStorehouse)
 		rel.timeout(config.harvester.int, self.measure)
@@ -58,7 +55,7 @@ class Harvester(Worker):
 		self.log("skimmed #%s:"%(self.hauls,), resp["message"])
 
 	def skim(self, bals):
-		price = self.pricer(self.fullSym)
+		price = ask("price", self.fullSym)
 		amount = round(config.harvester.batch / price, 5)
 		bal = float(bals["actual"][self.bigSym].split(" ").pop(0))
 		if amount > bal:
@@ -72,5 +69,5 @@ class Harvester(Worker):
 		memo = "skim #%s"%(self.hauls,)
 		self.log(memo, ":", amount, self.symbol, "- now @",
 			self.harvest, "($%s)"%(round(self.harvest * price, 2),))
-		self.accountant.skim(self.bigSym, amount)
+		emit("skim", self.bigSym, amount)
 		gem.withdraw(self.symbol, amount, self.storehouse, memo, self.skimmed)

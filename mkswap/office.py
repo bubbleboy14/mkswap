@@ -49,8 +49,8 @@ class Office(Worker):
 				self.strategist or strat(symbol), self.trader)
 		self.log("initialized %s managers"%(len(symbols),))
 		stish and setStaging(True)
-		self.comptroller = Comptroller(self.price)
-		self.harvester = Harvester(self)
+		self.comptroller = Comptroller()
+		self.harvester = Harvester()
 		self.booker = Booker()
 		rel.timeout(1, self.tick)
 
