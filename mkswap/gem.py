@@ -136,7 +136,14 @@ class Gem(Worker):
 		self.log("added to", len(self.pending), "long queue:",
 			req.name, "attempt:", req.attempt, "paused:", self.paused)
 
+	def sanitize(self, params):
+		if "rationale" in params:
+			params = params.copy()
+			del params["rationale"]
+		return params
+
 	def get(self, path, cb=None, params={}, client_order_id=None):
+		params = self.sanitize(params)
 		self.log("get(%s)"%(path,), client_order_id, params)
 		self.add(Req(path, params, cb, client_order_id))
 
