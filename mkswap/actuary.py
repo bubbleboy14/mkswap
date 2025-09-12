@@ -126,9 +126,9 @@ class Actuary(Worker):
 				self.compare(prev, candle, sym, "VPT")
 				self.crossCheck(sym, prev, candle, "+DI", "-DI", "ADX")
 				self.crossCheck(sym, prev, candle, "macd", "macdsig", "MACD")
-				self.setTrajectory(candle)
+				self.setTrajectory(candle, sym)
 
-	def setTrajectory(self, candle):
+	def setTrajectory(self, candle, sym):
 		if candle["ADX"] > 25:
 			goingup = candle["+DI"] > candle["-DI"]
 			mfi = candle["mfi"]
@@ -144,6 +144,7 @@ class Actuary(Worker):
 					candle["trajectory"] = "down"
 		else:
 			candle["trajectory"] = "calm"
+		self.notice("%s %s"%(sym, candle["trajectory"]))
 
 	def crossCheck(self, sym, c1, c2, t1, t2, pref=None):
 		if c1[t1] < c1[t2] and c2[t1] > c2[t2]:
