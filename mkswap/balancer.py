@@ -7,19 +7,23 @@ class Balancer(Worker):
 	def __init__(self):
 		self.defills = 0
 		self.refills = []
+		self.scheduled = {}
 		self.refillCount = 0
 		listen("tooLow", self.tooLow)
 		rel.timeout(config.balancer.int, self.measure)
 
 	def status(self):
-		return {
+		status = {
 			"refills": self.refillCount,
 			"defills": self.defills
 		}
+		status.update(self.scheduled)
+		return status
 
 	def measure(self):
 		if config.balancer.balance and ask("accountsReady"):
 			self.balance(ask("balances", mode="tri"))
+			self.orderBalances()
 		return True
 
 	def balance(self, balances):
@@ -58,12 +62,12 @@ class Balancer(Worker):
 					highness = min(highness, avbal * 0.9)
 		for sym in smalls:
 			self.refillCount += 1
-			self.refills.append(self.orderBalance(sym, smalls[sym], bigs))
+			self.scheduleBalance(sym, smalls[sym], bigs)
 		if highness:
 			self.defills += 1
 			syms = list(smalls.keys()) or lows or list(filter(lambda s : s != "USD", bigs))
 			lowests = [ask("bestBuy", syms)]
-			self.refills.append(self.orderBalance("USD", highness, lowests, "sell"))
+			self.scheduleBalance("USD", highness, lowests, "sell")
 
 	def getRefills(self):
 		refs = self.refills
@@ -83,19 +87,39 @@ class Balancer(Worker):
 			bot = config.balancer.bottom * 2
 		return max(0, bal - bot)
 
-	def orderBalance(self, sym, diff, balancers, side="buy", force="auto", strict=True):
+	def orderBalances(self, force="auto", strict=True):
 		bals = {}
+		trades = []
+		for sym, amount in self.scheduled.items():
+			traj = ask("latest", sym, "trajectory")
+			side = "buy"
+			if amount < 0:
+				amount *= -1
+				side = "sell"
+			buydown = side == "buy" and (traj == "down" or traj == "overheated")
+			sellup = side == "sell" and traj == "up" or traj == "undersold"
+			if buydown or sellup:
+				self.log("%s market is %s - waiting"%(sym, traj))
+			else:
+				sig = "%s %s %s (%s)"%(side, amount, sym, traj)
+				self.log(sig)
+				trades.append(sig)
+				bals[sym] = ask("bestTrades", sym, side, amount,
+					force=force, strict=strict, reason="balance", note=traj)
+				del self.scheduled[sym]
+		bals and self.refills.append({
+			"msg": "balance: %s"%("; ".join(trades),),
+			"data": bals
+		})
+
+	def scheduleBalance(self, sym, diff, balancers, side="buy"):
 		markets = ask("markets", sym, side)
 		diff = ask("round", diff / len(balancers))
-		sig = "%s %s %s %s"%(side, diff, sym, balancers)
-		self.log("orderBalance(%s)"%(sig,), markets)
+		sig = "%s %s %s with %s"%(side, diff, sym, balancers)
+		self.log("scheduleBalance(%s)"%(sig,), markets)
 		for side in markets:
 			for fullSym in markets[side]:
 				for balancer in balancers:
 					if balancer in fullSym:
-						bals[fullSym] = ask("bestTrades", fullSym, side, diff,
-							force=force, strict=strict, reason="balance", note=sig)
-		return {
-			"msg": "balance %s"%(sig,),
-			"data": bals
-		}
+						self.scheduled[fullSym] = (side == "buy") and diff or -diff
+		self.notice("schedule %s"%(sig,), self.scheduled)
