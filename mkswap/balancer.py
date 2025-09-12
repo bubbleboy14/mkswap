@@ -5,18 +5,18 @@ from .config import config
 
 class Balancer(Worker):
 	def __init__(self):
-		self.defills = 0
 		self.refills = []
 		self.scheduled = {}
-		self.refillCount = 0
+		self.counts = {
+			"refills": 0,
+			"defills": 0,
+			"balances": 0
+		}
 		listen("tooLow", self.tooLow)
 		rel.timeout(config.balancer.int, self.measure)
 
 	def status(self):
-		status = {
-			"refills": self.refillCount,
-			"defills": self.defills
-		}
+		status = self.counts.copy()
 		status.update(self.scheduled)
 		return status
 
@@ -61,10 +61,10 @@ class Balancer(Worker):
 					highness = max(self.tooHigh(avbal, umax), self.tooHigh(abal + tbal, umax * 3))
 					highness = min(highness, avbal * 0.9)
 		for sym in smalls:
-			self.refillCount += 1
+			self.counts["refills"] += 1
 			self.scheduleBalance(sym, smalls[sym], bigs)
 		if highness:
-			self.defills += 1
+			self.counts["defills"] += 1
 			syms = list(smalls.keys()) or lows or list(filter(lambda s : s != "USD", bigs))
 			lowests = [ask("bestBuy", syms)]
 			self.scheduleBalance("USD", highness, lowests, "sell")
@@ -107,10 +107,12 @@ class Balancer(Worker):
 				bals[sym] = ask("bestTrades", sym, side, amount,
 					force=force, strict=strict, reason="balance", note=traj)
 				del self.scheduled[sym]
-		bals and self.refills.append({
-			"msg": "balance: %s"%("; ".join(trades),),
-			"data": bals
-		})
+		if bals:
+			self.counts["balances"] += 1
+			self.refills.append({
+				"msg": "balance: %s"%("; ".join(trades),),
+				"data": bals
+			})
 
 	def scheduleBalance(self, sym, diff, balancers, side="buy"):
 		markets = ask("markets", sym, side)
