@@ -106,8 +106,9 @@ class Balancer(Worker):
 				trades.append(sig)
 				bals[sym] = ask("bestTrades", sym, side, amount,
 					force=force, strict=strict, reason="balance", note=traj)
-				del self.scheduled[sym]
 		if bals:
+			for sym in bals:
+				del self.scheduled[sym]
 			self.counts["balances"] += 1
 			self.refills.append({
 				"msg": "balance: %s"%("; ".join(trades),),
