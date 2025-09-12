@@ -91,9 +91,7 @@ class Balancer(Worker):
 		bals = {}
 		trades = []
 		for sym, amount in self.scheduled.items():
-			traj = ask("latest", sym, "trajectory")
-			if not traj:
-				return self.log("waiting for", sym, "trajectory")
+			traj = ask("metric", sym, "trajectory")
 			side = "buy"
 			if amount < 0:
 				amount *= -1

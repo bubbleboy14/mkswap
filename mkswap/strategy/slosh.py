@@ -21,7 +21,7 @@ class Slosh(Base):
 	def cross(self, sym, variety, reason, dimension="price"):
 		self.log("cross(%s, %s, %s) %s"%(sym, dimension, variety, reason))
 		isup = variety == "golden"
-		traj = ask("latest", sym, "trajectory")
+		traj = ask("metric", sym, "trajectory")
 		if isup and traj == "undersold":
 			side = "buy"
 		elif not isup and traj == "overheated":
