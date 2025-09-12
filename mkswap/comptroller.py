@@ -8,13 +8,12 @@ orderNumber = random.randint(0, 10000)
 SKIP_INITIAL = False
 
 class Comptroller(Feeder):
-	def __init__(self, pricer):
+	def __init__(self):
 		self.actives = {}
 		self.backlog = []
 		self.cancels = []
 		self.fills = []
 		self.fees = None
-		self.pricer = pricer
 		self.platform = "gemorders"
 		listen("rejected", self.rejected)
 		listen("priceChange", self.prune)
@@ -175,7 +174,7 @@ class Comptroller(Feeder):
 		sym = trade["symbol"]
 		side = trade["side"]
 		price = float(trade["price"])
-		curprice = self.pricer(sym)
+		curprice = ask("price", sym)
 		gain = (price - curprice) * float(trade["amount"])
 		if side == "buy":
 			gain *= -1
@@ -201,7 +200,7 @@ class Comptroller(Feeder):
 						"orders": [tnum]
 					}
 					sym = trade["symbol"]
-					curprice = self.pricer(sym)
+					curprice = ask("price", sym)
 					if not curprice:
 						self.log("waiting for", sym, "prices")
 						skips += 1

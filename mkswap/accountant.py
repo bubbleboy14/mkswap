@@ -54,6 +54,7 @@ class Accountant(Worker):
 		listen("fullSym", self.fullSym)
 		listen("fromUSD", self.fromUSD)
 		listen("getUSD", self.getUSD)
+		listen("skim", self.skim)
 
 	def getBalances(self):
 		self.log("getBalances!!!")

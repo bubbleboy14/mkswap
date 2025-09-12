@@ -50,12 +50,16 @@ config = Config({
 		"plimit": 0.1,
 		"canceleach": True
 	},
-	"harvester": {
-		"batch": 10,
+	"balancer": {
+		"int": 30,
 		"bottom": 10,
 		"usdmax": 50,
+		"balance": True
+	},
+	"harvester": {
+		"int": 10,
+		"batch": 10,
 		"skim": False,
-		"balance": True,
 		"network": "bitcoin"
 	},
 	"ndx": {
