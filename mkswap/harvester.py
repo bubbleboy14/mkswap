@@ -1,5 +1,5 @@
 import rel
-from rel.util import ask, emit, listen
+from rel.util import ask
 from .base import Worker
 from .gem import gem
 from .config import config
@@ -13,27 +13,20 @@ class Harvester(Worker):
 	def __init__(self, office):
 		self.hauls = 0
 		self.harvest = 0
-		self.defills = 0
-		self.refills = []
-		self.refillCount = 0
 		self.office = office
 		self.pricer = office.price
 		network = config.harvester.network
 		self.symbol = net2sym[network]
 		self.bigSym = self.symbol.upper()
 		self.accountant = office.accountant
-		self.fullSym = self.accountant.fullSym(self.bigSym)
+		self.fullSym = ask("fullSym", self.bigSym)
 		gem.accounts(network, self.setStorehouse)
-		listen("tooLow", self.tooLow)
-		rel.timeout(10, self.measure)
-		self.log("starting to measure")
+		rel.timeout(config.harvester.int, self.measure)
 
 	def status(self):
 		return {
 			"hauls": self.hauls,
-			"harvest": self.harvest,
-			"refills": self.refillCount,
-			"defills": self.defills
+			"harvest": self.harvest
 		}
 
 	def setStorehouse(self, resp):
@@ -45,106 +38,21 @@ class Harvester(Worker):
 
 	def measure(self):
 		hcfg = config.harvester
-		if hcfg.skim or hcfg.balance:
-			if not ask("accountsReady"):
-				self.log("measure() waiting for accounts")
-				return True
-			bals = self.accountant.balances(self.pricer, "tri", True)
-			self.log("measure(%s)"%(bals,))
-			msg = "measure() complete"
-			hcfg.balance and self.balance(bals)
-			if hcfg.skim and self.office.hasMan(self.fullSym):
-				price = self.pricer(self.fullSym)
-				actual = bals["actual"]["diff"]
-				msg = "%s: %s diff;"%(msg, actual)
-				if price:
-					target = hcfg.batch + self.harvest * price
-					msg = "%s %s target"%(msg, target)
-					if actual > target:
-						self.log("full - skim!")
-						self.skim(bals)
-				else:
-					msg = "%s no price, no target!"%(msg,)
+		if hcfg.skim and ask("accountsReady") and ask("hasMan", self.fullSym):
+			bals = ask("balances", mode="tri")
+			price = ask("price", self.fullSym)
+			diff = bals["actual"]["diff"]
+			msg = "measure() complete: %s diff;"%(diff,)
+			if price:
+				target = hcfg.batch + self.harvest * price
+				msg = "%s %s target"%(msg, target)
+				if diff > target:
+					self.log("full - skim!")
+					self.skim(bals)
+			else:
+				msg = "%s no price, no target!"%(msg,)
 			self.log(msg)
 		return True
-
-	def balance(self, balances):
-		abals = balances["actual"]
-		avbals = balances["available"]
-		tbals = balances["theoretical"]
-		smalls = {}
-		bigs = []
-		lows = []
-		highness = 0
-		for sym in abals:
-			isusd = sym == "USD"
-			avbal = avbals[sym]
-			abal = abals[sym]
-			tbal = tbals[sym]
-			if not isusd:
-				if sym == "diff":
-					continue
-				fs = self.accountant.fullSym(sym)
-				avbal = ask("getUSD", fs, avbal)
-				abal = ask("getUSD", fs, abal)
-				tbal = ask("getUSD", fs, tbal)
-				if abal is None:
-					self.log("no balance for", fs)
-					continue
-			lowness = max(self.tooLow(abal), self.tooLow(tbal, True), self.tooLow(avbal, isusd))
-			if lowness:
-				lows.append(sym)
-				if not self.tooHigh(abal) and not self.tooHigh(tbal):
-					smalls[sym] = lowness
-			else:
-				bigs.append(sym)
-				if isusd:
-					umax = ask("usdcap", config.harvester.usdmax)
-					highness = max(self.tooHigh(avbal, umax), self.tooHigh(abal + tbal, umax * 3))
-					highness = min(highness, avbal * 0.9)
-		for sym in smalls:
-			self.refillCount += 1
-			self.refills.append(self.orderBalance(sym, smalls[sym], bigs))
-		if highness:
-			self.defills += 1
-			syms = list(smalls.keys()) or lows or list(filter(lambda s : s != "USD", bigs))
-			lowests = [ask("bestBuy", syms)]
-			self.refills.append(self.orderBalance("USD", highness, lowests, "sell"))
-
-	def getRefills(self):
-		refs = self.refills
-		self.refills = []
-		return refs
-
-	def tooLow(self, bal, double=False, half=False):
-		bot = config.harvester.bottom
-		if double:
-			bot *= 2
-		if half:
-			bot /= 2
-		return max(0, bot - bal)
-
-	def tooHigh(self, bal, bot=None):
-		if bot == None:
-			bot = config.harvester.bottom * 2
-		return max(0, bal - bot)
-
-	def orderBalance(self, sym, diff, balancers, side="buy", force="auto", strict=True):
-		bals = {}
-		markets = ask("markets", sym, side)
-		diff = ask("round", diff / len(balancers))
-		sig = "%s %s %s %s"%(side, diff, sym, balancers)
-		self.log("orderBalance(%s)"%(sig,), markets)
-		for side in markets:
-			for fullSym in markets[side]:
-				for balancer in balancers:
-					if balancer in fullSym:
-						bals[fullSym] = ask("bestTrades", fullSym, side, diff,
-							force=force, strict=strict, reason="balance", note=sig)
-		return {
-			"msg": "balance %s"%(sig,),
-			"data": bals
-		}
 
 	def skimmed(self, resp):
 		self.log("skimmed #%s:"%(self.hauls,), resp["message"])

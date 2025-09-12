@@ -7,6 +7,7 @@ from .comptroller import Comptroller
 from .accountant import Accountant
 from .strategist import strategies
 from .multifeed import MultiFeed
+from .balancer import Balancer
 from .adjuster import Adjuster
 from .actuary import Actuary
 from .manager import Manager

@@ -6,6 +6,7 @@ from .accountant import Accountant
 from .strategist import strategies
 from .multifeed import MultiFeed
 from .harvester import Harvester
+from .balancer import Balancer
 from .adjuster import Adjuster
 from .actuary import Actuary
 from .manager import Manager
@@ -29,10 +30,12 @@ class Office(Worker):
 		listen("warning", self.warning)
 		listen("notice", self.notice)
 		listen("cross", self.cross)
+		listen("hasMan", self.hasMan)
 		self.judge = Judge(symbols)
 		self.ndx = NDX()
 		self.actuary = Actuary()
 		self.adjuster = Adjuster()
+		self.balancer = Balancer()
 		self.accountant = Accountant(platform, symbols)
 		self.trader = globalTrade and Trader(platform)
 		strat = strategies[strategy]
@@ -124,6 +127,7 @@ class Office(Worker):
 		com = self.comptroller
 		acc = self.accountant
 		har = self.harvester
+		bal = self.balancer
 		adj = self.adjuster
 		act = self.actuary
 		boo = self.booker
@@ -144,8 +148,9 @@ class Office(Worker):
 			"volumes": ndx.volumes(),
 			"accountant": acc.counts,
 			"adjuster": adj.counts,
+			"balancer": bal.status(),
 			"harvester": har.status(),
-			"refills": har.getRefills(),
+			"refills": bal.getRefills(),
 			"weighted": ndx.weighteds(),
 			"cancels": com.getCancels(),
 			"candles": act.freshCandles(),
