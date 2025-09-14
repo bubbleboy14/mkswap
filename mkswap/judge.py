@@ -9,34 +9,34 @@ class Judge(Worker):
 		listen("usdcap", self.usdcap)
 		listen("bestBuy", self.bestBuy)
 
-	def mods(self):
-		mods = {}
+	def positions(self):
+		positions = {}
 		for sym in self.syms:
 			r = ask("range", sym)
 			short = r["short"]
 			span = r["span"]
 			low = r["low"]
-			mods[sym] = span and ((short - low) / span - 0.5) or 0
-		vals = list(mods.values())
+			positions[sym] = span and ((short - low) / span - 0.5) or 0
+		vals = list(positions.values())
 		vals.sort()
-		mods["lowest"] = vals.pop(0)
-		return mods
+		positions["lowest"] = vals.pop(0)
+		return positions
 
 	def score(self, sym):
 		return ask("strength", sym) + ask("drift", sym) * 100
 
 	def bestBuy(self, syms=None):
-		mods = self.mods()
-		symscore = lambda fs : self.score(fs) - mods[fs]
+		positions = self.positions()
+		symscore = lambda fs : self.score(fs) - positions[fs]
 		fscore = lambda s : symscore(ask("fullSym", s))
 		syms = syms or [s[:3] for s in self.syms]
 		syms.sort(key=fscore)
 		return syms[-1]
 
 	def usdcap(self, base=50):
-		mods = self.mods()
-		cap = base + base * mods["lowest"]
-		self.log("usdcap", cap, mods)
+		positions = self.positions()
+		cap = base + base * positions["lowest"]
+		self.log("usdcap", cap, positions)
 		return cap
 
 	def wise(self, trade, strict=False):
