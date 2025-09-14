@@ -17,6 +17,11 @@ class Base(Worker):
 		self.stats[name] = value
 		return value
 
+	def inc(self, name):
+		if name not in self.stats:
+			self.stats[name] = 0
+		self.stats[name] += 1
+
 	def tick(self, history=None):
 		pass
 

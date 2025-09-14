@@ -33,6 +33,7 @@ class Slosh(Base):
 		self.trades(side, sym, traj, note, "auto")
 
 	def trade(self, order, reason="slosh", note=None):
+		self.inc(reason)
 		note = note or "volatility: %s"%(self.stats["volatility"],)
 		order["rationale"] = {
 			"reason": reason,
@@ -42,6 +43,7 @@ class Slosh(Base):
 		self.notice("%s %s %s"%(reason, order["side"], order["symbol"]), order)
 
 	def trades(self, side, sym=None, reason="hardslosh", note=None, force=False):
+		self.inc(reason)
 		sym = sym or self.onesym
 		note = note or "volatility: %s"%(ask("metric", sym, "volatility"),)
 		self.notice("%s %s %s"%(reason, side, sym), ask("bestTrades", sym,
