@@ -6,8 +6,8 @@ class Judge(Worker):
 	def __init__(self, syms=["ETHUSD", "BTCUSD"]):
 		self.syms = list(filter(lambda s : s.endswith("USD"), syms))
 		listen("wise", self.wise)
-		listen("usdcap", self.usdcap)
 		listen("bestBuy", self.bestBuy)
+		listen("positions", self.positions)
 
 	def positions(self):
 		positions = {}
@@ -32,12 +32,6 @@ class Judge(Worker):
 		syms = syms or [s[:3] for s in self.syms]
 		syms.sort(key=fscore)
 		return syms[-1]
-
-	def usdcap(self, base=50):
-		positions = self.positions()
-		cap = base + base * positions["lowest"]
-		self.log("usdcap", cap, positions)
-		return cap
 
 	def wise(self, trade, strict=False):
 		if strict:

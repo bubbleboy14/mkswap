@@ -20,6 +20,14 @@ class Balancer(Worker):
 		status.update(self.scheduled)
 		return status
 
+	def usdcap(self, base=None):
+		positions = ask("positions")
+		base = base or config.balancer.usdmax
+		cap = base + base * positions["lowest"]
+		self.log("usdcap", cap, positions)
+		self.counts["usdcap"] = cap
+		return cap
+
 	def measure(self):
 		if config.balancer.balance and ask("accountsReady"):
 			self.balance(ask("balances", mode="tri"))
@@ -57,7 +65,7 @@ class Balancer(Worker):
 			else:
 				bigs.append(sym)
 				if isusd:
-					umax = ask("usdcap", config.balancer.usdmax)
+					umax = self.usdcap()
 					highness = max(self.tooHigh(avbal, umax), self.tooHigh(abal + tbal, umax * 3))
 					highness = min(highness, avbal * 0.9)
 		for sym in smalls:
