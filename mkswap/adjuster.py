@@ -33,6 +33,7 @@ class Adjuster(Worker):
 		self.counts["nudges"] += 1
 		pdiff = (oprice - cprice) * config.adjuster.nmult
 		trade["price"] = self.round(oprice + pdiff, sym)
+		emit("unbook", trade)
 		self.log("nudge(%s -> %s)"%(oprice, trade["price"]), trade)
 
 	def round(self, amount, sym="amount"):
