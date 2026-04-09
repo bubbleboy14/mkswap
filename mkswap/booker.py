@@ -48,7 +48,7 @@ class Booker(Worker):
 	def drift(self, symbol):
 		ave = sum(self.bests[symbol].values()) / 2
 		cur = ask("price", symbol)
-		return ave / cur - 1
+		return ave / cur - 1 if cur else 0
 
 	def drifts(self):
 		drifts = {}
